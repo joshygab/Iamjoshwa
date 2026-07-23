@@ -8,7 +8,7 @@ La Fase 1 entrega el sitio público responsive: inicio, fechas, evento individua
 
 La Fase 2 conecta Supabase y entrega:
 
-- Autenticación por Magic Link y roles `fan`, `editor` y `admin`.
+- Autenticación por correo y contraseña con roles `fan`, `editor` y `admin`.
 - RLS, funciones seguras, auditoría y migraciones reproducibles.
 - Storage con `public-media`, `private-documents` y `user-avatars`.
 - CMS protegido en `/admin`.
@@ -22,8 +22,8 @@ La Fase 2 conecta Supabase y entrega:
 
 La Fase 3 añade:
 
-- Registro e inicio de sesión por Magic Link.
-- Acceso sin contraseña mediante enlace enviado al correo.
+- Registro e inicio de sesión por correo y contraseña.
+- Preparado para desactivar confirmación obligatoria de email en Supabase.
 - Onboarding, perfil y preferencias por proyecto, género, ciudad y tipo de aviso.
 - Consentimientos de comunicación con historial y estado vigente.
 - Baja segura por email mediante enlace firmado y confirmación explícita.
@@ -79,7 +79,7 @@ SUPABASE_DB_PASSWORD=
 
 Las tres últimas variables son exclusivamente de servidor. Nunca deben usar `NEXT_PUBLIC_` ni subirse al repositorio.
 
-Aplica las migraciones de `supabase/migrations` con una vista previa antes de ejecutar `supabase db push`. El primer usuario se registra por Magic Link y recibe el rol inicial `fan`; no existe una ruta pública para autoasignarse permisos administrativos.
+Aplica las migraciones de `supabase/migrations` con una vista previa antes de ejecutar `supabase db push`. El primer usuario se registra con correo y contraseña y recibe el rol inicial `fan`; no existe una ruta pública para autoasignarse permisos administrativos.
 
 ## Booking y correo
 
