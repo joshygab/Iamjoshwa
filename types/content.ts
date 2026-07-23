@@ -1,0 +1,12 @@
+export type Universe="iamjoshwa"|"afterluv";
+export type EventStatus="Próximamente"|"Registro abierto"|"Preventa"|"Últimos boletos"|"Sold out"|"Lista de espera"|"Cancelado"|"Reprogramado"|"Finalizado";
+export type ExternalLink={label:string;url:string};
+export interface EventItem{id:string;slug:string;universe:Universe;name:string;date:string;doors:string;setTime:string;venue:string;address:string;city:string;country:string;lineup:string[];genres:string[];age:string;priceLabel:string;ticketUrl?:string;mapUrl?:string;description:string;status:EventStatus;featured?:boolean;demo:boolean;flyerUrl?:string;promoCode?:string;faq?:{question:string;answer:string}[];afterContent?:{title:string;body:string;setUrl?:string}}
+export interface SetItem{id:string;universe:Universe;title:string;category:string;date:string;location:string;duration:string;genres:string[];bpm:string;energy:number;externalUrl?:string;featured?:boolean;demo:boolean;description?:string;coverUrl?:string;provider?:"soundcloud"|"youtube"|"mixcloud"|"external";embedUrl?:string;tracklist?:{time:string;title:string}[];exclusive?:boolean}
+export interface ReleaseItem{id:string;universe:Universe;title:string;type:string;releaseAt:string;story:string;presaveUrl?:string;listenUrl?:string;demo:boolean;coverUrl?:string;previewUrl?:string;credits?:string[];platforms?:ExternalLink[];visualizerUrl?:string}
+export interface ArtistProfileItem{project:Universe;displayName:string;tagline:string;subtitle:string;shortBio:string;longBio:string;baseCity:string;genres:string[];heroDesktopUrl?:string;heroMobileUrl?:string}
+export interface PageSectionItem{id:string;project:Universe|null;blockType:string;variant:string;content:Record<string,unknown>;position:number}
+export interface MediaGalleryItem{id:string;project:Universe|null;title:string;caption:string;type:string;url:string;alt:string;occurredAt?:string|null;demo?:boolean}
+export interface TimelineItem{id:string;project:Universe|null;title:string;body:string;occurredAt?:string|null;url?:string;alt?:string;demo?:boolean}
+export interface EpkSectionItem{id:string;project:Universe|null;sectionKey:string;content:Record<string,unknown>;position:number}
+export interface RewardItem{id:string;project:Universe|null;slug:string;name:string;description:string;pointsCost:number;inventory:number|null;expiresAt?:string|null;imageUrl?:string}

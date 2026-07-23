@@ -1,0 +1,2 @@
+import {PageHero} from "@/components/page-hero";import {MediaGallery} from "@/components/public-cms-content";import {contentRepository} from "@/lib/data";
+export default async function MediaPage(){const items=await contentRepository.getMedia();return <><PageHero kicker="MEDIA" title="Luces, cuerpos, memoria." description="Press photos, aftermovies y momentos oficiales en vivo."/><MediaGallery items={items}/></>}

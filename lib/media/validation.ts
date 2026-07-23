@@ -1,0 +1,3 @@
+export const allowedMimeTypes=new Set(["image/jpeg","image/png","image/webp","image/avif","image/svg+xml","video/mp4","video/webm","audio/mpeg","audio/wav","application/pdf"]);
+export const maxBytes:Record<string,number>={image:20*1024*1024,video:100*1024*1024,audio:50*1024*1024,application:25*1024*1024};
+export function validateMediaFile(file:File,isAdmin=false){if(!allowedMimeTypes.has(file.type))return"Tipo de archivo no permitido.";if(file.type==="image/svg+xml"&&!isAdmin)return"SVG solo está disponible para administradores.";const group=file.type.split("/")[0];if(file.size>(maxBytes[group]||10*1024*1024))return"El archivo supera el límite configurado.";if(!/^[\w\-. ()áéíóúÁÉÍÓÚñÑ]+$/.test(file.name))return"El nombre contiene caracteres no permitidos.";return null}

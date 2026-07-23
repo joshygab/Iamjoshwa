@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="page-loading" role="status" aria-live="polite"><span className="loading-mark">IJ</span><div className="skeleton-line"/><div className="skeleton-line short"/><span className="sr-only">Cargando contenido</span></div>}

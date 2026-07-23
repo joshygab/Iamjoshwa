@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server";
+export async function GET(request:Request,{params}:{params:Promise<{code:string}>}){const code=(await params).code.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,20);const response=NextResponse.redirect(new URL("/acceso",request.url));if(code)response.cookies.set("iamjoshwa_ref",code,{httpOnly:true,sameSite:"lax",secure:process.env.NODE_ENV==="production",maxAge:60*60*24*30,path:"/"});return response}

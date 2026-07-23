@@ -1,0 +1,2 @@
+import{EventList}from"@/components/event-list";import{PageHero}from"@/components/page-hero";import{contentRepository}from"@/lib/data";
+const renderTimestamp=Date.now();export const metadata={title:"Fechas"};export default async function EventsPage(){const items=await contentRepository.getEvents();return <><PageHero kicker="LIVE SIGNAL" title="La próxima noche empieza aquí." description="Fechas oficiales, boletos, mapas e historial por universo."/><section className="section"><EventList items={items} now={renderTimestamp}/></section></>}

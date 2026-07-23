@@ -1,0 +1,3 @@
+import{describe,expect,it}from"vitest";import{validateMediaFile}from"@/lib/media/validation";
+const file=(name:string,type:string,size=1000)=>new File([new Uint8Array(size)],name,{type});
+describe("validateMediaFile",()=>{it("acepta una imagen segura",()=>expect(validateMediaFile(file("press-photo.webp","image/webp"))).toBeNull());it("rechaza ejecutables",()=>expect(validateMediaFile(file("payload.exe","application/x-msdownload"))).toMatch(/no permitido/));it("restringe SVG a administradores",()=>expect(validateMediaFile(file("logo.svg","image/svg+xml"),false)).toMatch(/administradores/));it("acepta SVG para admin",()=>expect(validateMediaFile(file("logo.svg","image/svg+xml"),true)).toBeNull())});

@@ -1,0 +1,2 @@
+import "server-only"; import type{NotificationProvider}from"./provider"; import{DisabledWhatsAppProvider}from"./provider";
+export function getWhatsAppProvider():NotificationProvider{const provider=process.env.WHATSAPP_PROVIDER||"disabled";if(provider==="disabled")return new DisabledWhatsAppProvider();throw new Error(`El proveedor ${provider} requiere implementar y validar sus credenciales antes de activarlo.`)}
