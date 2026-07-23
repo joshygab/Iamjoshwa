@@ -55,12 +55,12 @@ export async function POST(request: Request) {
     mime_type: file.type, extension: ext, byte_size: payload.byteLength,
     width, height, focal_x: width ? 0.5 : null, focal_y: height ? 0.5 : null,
     uploaded_by: user.id,
-  }).select("id").single();
+  }).select("*").single();
   if (metadata.error) {
     await db.storage.from("public-media").remove([path]);
     return NextResponse.json({ error: metadata.error.message }, { status: 400 });
   }
-  return NextResponse.json({ ok: true, id: metadata.data.id }, { status: 201 });
+  return NextResponse.json({ ok: true, asset:{...metadata.data,public_url:db.storage.from("public-media").getPublicUrl(path).data.publicUrl} }, { status: 201 });
 }
 
 function sanitizeSvg(bytes: Uint8Array) {
