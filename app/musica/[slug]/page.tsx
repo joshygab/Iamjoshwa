@@ -78,6 +78,38 @@ export default async function SetDetailPage({ params }: Props) {
         </div>
       </section>
 
+      <section className="section set-player-lab">
+        <div>
+          <span className="section-kicker">FULL PLAYER</span>
+          <h2>Escucha oficial, sin autoplay.</h2>
+          <p>
+            El player se carga solo cuando existe una plataforma oficial configurada. La reproducción
+            siempre depende de una acción del usuario.
+          </p>
+        </div>
+        {set.embedUrl ? (
+          <iframe
+            src={set.embedUrl}
+            title={`Player oficial de ${set.title}`}
+            loading="lazy"
+            allow="encrypted-media; fullscreen; picture-in-picture"
+          />
+        ) : (
+          <div className="admin-empty public-empty">
+            <h2>Player pendiente.</h2>
+            <p>Agrega un link de SoundCloud, YouTube o Mixcloud desde el admin para activar esta zona.</p>
+          </div>
+        )}
+        <aside className="set-reward-card">
+          <span>JOSH PASS READY</span>
+          <h2>Puntos por escuchar.</h2>
+          <p>
+            La acción de abrir un set ya queda preparada para registrar actividad segura cuando el fan
+            inicia sesión. El frontend nunca otorga puntos directamente.
+          </p>
+        </aside>
+      </section>
+
       <section className="section set-tracklist-section">
         <div>
           <span className="section-kicker">TRACKLIST</span>

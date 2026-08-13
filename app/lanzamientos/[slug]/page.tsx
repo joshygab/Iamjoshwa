@@ -109,6 +109,42 @@ export default async function ReleaseDetailPage({ params }: Props) {
           ) : null}
         </div>
       </section>
+
+      <section className="section release-story-lab">
+        <article>
+          <span>BEHIND THE TRACK</span>
+          <h2>Historia, intención y momento.</h2>
+          <p>
+            {release.story ||
+              "Cuando publiques la historia desde el admin, esta zona se convierte en el contexto editorial del lanzamiento."}
+          </p>
+        </article>
+        <article>
+          <span>OFFICIAL LINKS</span>
+          <h2>Plataformas verificadas.</h2>
+          {release.platforms?.length ? (
+            <div className="platform-grid release-lab-platforms">
+              {release.platforms.map((link) => (
+                <TrackedLink key={`lab-${link.label}`} href={link.url} target="_blank" rel="noreferrer" action="platform_click" entityType="releases" entityId={release.id} label={link.label}>
+                  <span>{link.label}</span>
+                  <ExternalLink />
+                </TrackedLink>
+              ))}
+            </div>
+          ) : (
+            <p>Agrega Spotify, Apple Music, YouTube, SoundCloud, Beatport u otras plataformas desde Admin → Lanzamientos.</p>
+          )}
+        </article>
+        <article>
+          <span>FAN JOURNEY</span>
+          <h2>{future ? "Pre-save primero." : "Escucha y comparte."}</h2>
+          <p>
+            {future
+              ? "Antes del estreno, el CTA principal empuja al pre-save. Al llegar la fecha cambia automáticamente a escuchar ahora."
+              : "Después del estreno, los links oficiales quedan listos para clicks, métricas y campañas futuras."}
+          </p>
+        </article>
+      </section>
     </article>
   );
 }
