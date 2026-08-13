@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ExternalLink, Play, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -56,6 +57,9 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
               {item.credits?.length ? <p className="muted">{item.credits.join(" · ")}</p> : null}
 
               <div className="inline-actions">
+                <Link className="button secondary" href={`/lanzamientos/${item.slug}`}>
+                  Ver ficha
+                </Link>
                 {primaryHref ? (
                   <a className="button primary" href={primaryHref} onClick={() => future && void presave(item)} target="_blank" rel="noreferrer">
                     {future ? "Haz pre-save" : "Escuchar ahora"} <Play />

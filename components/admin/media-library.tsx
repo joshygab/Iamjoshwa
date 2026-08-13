@@ -23,16 +23,18 @@ export type MediaAsset = {
 export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset[]; isAdmin: boolean; onChange: React.Dispatch<React.SetStateAction<MediaAsset[]>> }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("image");
+  const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<MediaAsset | null>(null);
 
   const filtered = useMemo(
     () =>
       assets.filter((item) => {
         const matchesType = type === "all" || item.mime_type.startsWith(`${type}/`);
+        const matchesArchive = showArchived ? Boolean(item.archived_at) : !item.archived_at;
         const searchable = `${item.display_name} ${item.title || ""} ${(item.tags || []).join(" ")}`.toLowerCase();
-        return matchesType && searchable.includes(query.toLowerCase());
+        return matchesType && matchesArchive && searchable.includes(query.toLowerCase());
       }),
-    [assets, query, type],
+    [assets, query, type, showArchived],
   );
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
@@ -82,7 +84,18 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ display_name: asset.display_name, archived: true }),
     });
-    if (response.ok) onChange((current) => current.filter((item) => item.id !== asset.id));
+    const data = await response.json();
+    if (response.ok) onChange((current) => current.map((item) => (item.id === asset.id ? { ...item, ...data.asset, public_url: item.public_url } : item)));
+  }
+
+  async function restore(asset: MediaAsset) {
+    const response = await fetch(`/api/admin/media/${asset.id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ display_name: asset.display_name, archived: false }),
+    });
+    const data = await response.json();
+    if (response.ok) onChange((current) => current.map((item) => (item.id === asset.id ? { ...item, ...data.asset, public_url: item.public_url } : item)));
   }
 
   async function remove(asset: MediaAsset) {
@@ -104,6 +117,7 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
           <option value="audio">Audio</option>
           <option value="application">Documentos</option>
         </select>
+        <button className="button secondary" onClick={() => setShowArchived((value) => !value)}>{showArchived ? "Ver activos" : "Ver archivados"}</button>
       </div>
 
       <section className="media-grid professional-media-grid">
@@ -121,14 +135,14 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
             )}
             <div className="media-card-title">
               <strong>{asset.display_name}</strong>
-              <span>{asset.in_gallery ? "En galería" : "Solo biblioteca"}</span>
+              <span>{asset.archived_at ? "Archivado" : asset.in_gallery ? "En galería" : "Solo biblioteca"}</span>
             </div>
             <small>{Math.round(asset.byte_size / 1024)} KB · {asset.width && asset.height ? `${asset.width}x${asset.height}` : asset.mime_type}</small>
             <div className="media-actions">
               <button onClick={() => setEditing(asset)}>Editar</button>
-              {asset.mime_type.startsWith("image/") && <button onClick={() => publish(asset)} disabled={asset.in_gallery}>{asset.in_gallery ? "Publicado" : "Mostrar en galería"}</button>}
+              {asset.mime_type.startsWith("image/") && !asset.archived_at && <button onClick={() => publish(asset)} disabled={asset.in_gallery}>{asset.in_gallery ? "Publicado" : "Mostrar en galería"}</button>}
               <button onClick={() => navigator.clipboard.writeText(asset.public_url)}>Copiar URL</button>
-              <button onClick={() => archive(asset)}>Archivar</button>
+              {asset.archived_at ? <button onClick={() => restore(asset)}>Restaurar</button> : <button onClick={() => archive(asset)}>Archivar</button>}
               {isAdmin && <button className="danger" onClick={() => remove(asset)}>Eliminar</button>}
             </div>
           </article>
@@ -160,7 +174,7 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
             )}
             <div className="inline-actions">
               <button className="button primary">Guardar</button>
-              <button type="button" className="button secondary" onClick={() => publish(editing)} disabled={editing.in_gallery}>{editing.in_gallery ? "Ya está en galería" : "Mostrar en galería"}</button>
+              <button type="button" className="button secondary" onClick={() => publish(editing)} disabled={editing.in_gallery || Boolean(editing.archived_at)}>{editing.archived_at ? "Restaura para publicar" : editing.in_gallery ? "Ya está en galería" : "Mostrar en galería"}</button>
             </div>
           </form>
         </aside>

@@ -1,0 +1,17 @@
+{
+  "name": "IAMJOSHWA",
+  "short_name": "IAMJOSHWA",
+  "description": "Sitio oficial de IAMJOSHWA y AFTERLUV.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#070609",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
