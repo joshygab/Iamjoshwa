@@ -10,5 +10,19 @@ export default async function OnboardingPage() {
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
   if (profile?.onboarding_completed) redirect("/perfil");
 
-  return <OnboardingWizard action={completeOnboarding} genres={genres} profile={{ displayName: profile?.display_name || "", alias: profile?.public_alias || "" }} />;
+  return (
+    <OnboardingWizard
+      action={completeOnboarding}
+      genres={genres}
+      profile={{
+        displayName: profile?.display_name || "",
+        alias: profile?.public_alias || "",
+        city: profile?.city || "",
+        country: profile?.country || "",
+        favoriteProject: profile?.favorite_project === "afterluv" ? "afterluv" : "iamjoshwa",
+        favoriteGenres: profile?.favorite_genres || [],
+        memberNumber: profile?.member_number ? String(profile.member_number).padStart(6, "0") : "000124",
+      }}
+    />
+  );
 }

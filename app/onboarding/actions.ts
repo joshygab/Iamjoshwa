@@ -1,5 +1,4 @@
 "use server";
-import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/require-role";
 import { onboardingSchema, profileFormData } from "@/lib/validation/profile";
 import { sendWelcomeEmail } from "@/lib/email/resend";
@@ -11,5 +10,5 @@ export async function completeOnboarding(formData:FormData){
   await supabase.from("notification_consents").insert({user_id:user.id,channel:"email",granted:input.communications,source:"onboarding"});
   await supabase.rpc("claim_profile_completion_points");
   if(input.communications&&user.email)try{await sendWelcomeEmail({userId:user.id,email:user.email,name:input.alias||input.name})}catch(error){console.error("welcome_email_failed",error)}
-  redirect("/perfil");
+  return { ok: true };
 }

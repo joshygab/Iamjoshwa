@@ -98,7 +98,7 @@ export default async function ProfilePage() {
       </div>
 
       <section className="pass-console">
-        <div className="pass-card profile-pass premium-wallet-card">
+        <div className="pass-card profile-pass premium-wallet-card" data-project={favoriteProject}>
           <div className="pass-card-shine" />
           <div className="pass-card-top">
             {avatarUrl ? (
@@ -111,9 +111,18 @@ export default async function ProfilePage() {
           <strong>
             {memberNumber}
             <br />
-            {level.toUpperCase()}
+              {level.toUpperCase()}
           </strong>
           <small>{displayName} · {city}</small>
+          <div className="profile-pass-meta">
+            <span>{favoriteProject === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA SIGNAL"}</span>
+            <code>#{memberNumber}</code>
+          </div>
+          <div className="pass-mini-badges">
+            {(unlockedBadges.length ? unlockedBadges.slice(0, 3).map((item) => relationName(item.badges)) : ["Listener", "Inner Circle", "Vault Ready"]).map((badge) => (
+              <span key={badge}>{badge}</span>
+            ))}
+          </div>
         </div>
 
         <div className="pass-status-panel">
@@ -141,6 +150,23 @@ export default async function ProfilePage() {
               <span style={{ width: `${progress}%` }} />
             </div>
           </article>
+          <div className="pass-first-actions">
+            <Link href="/musica">
+              <Music2 />
+              <strong>Escucha un set</strong>
+              <span>Gana puntos cuando la acción esté verificada.</span>
+            </Link>
+            <Link href="/fechas">
+              <Ticket />
+              <strong>Confirma asistencia</strong>
+              <span>Activa check-ins y badges por evento.</span>
+            </Link>
+            <Link href="/the-vault">
+              <LockKeyhole />
+              <strong>Desbloquea Vault</strong>
+              <span>Recompensas, drops privados y contenido limitado.</span>
+            </Link>
+          </div>
         </div>
       </section>
 

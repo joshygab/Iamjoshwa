@@ -325,3 +325,603 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
 @media(max-width:900px){.admin-analytics-strip,.vault-audio-pipeline,.set-next-grid{grid-template-columns:1fr}.audio-wave-player{grid-template-columns:1fr}.audio-wave-play{width:58px;height:58px}.audio-wave-head{grid-template-columns:1fr}.audio-wave-bars{height:58px}}
 @media(max-width:720px){.global-now-playing{bottom:112px}.premium-bottom-nav{height:72px}.audio-wave-bars{gap:3px}.audio-wave-bars span{min-width:2px}.set-next-card:hover,.audio-wave-play:hover{transform:none}.native-set-player .audio-wave-player{border-radius:18px;padding:12px}}
 @media(prefers-reduced-motion:reduce){.audio-wave-play,.audio-wave-bars span,.set-next-card{transition:none}.audio-wave-play:hover,.set-next-card:hover{transform:none}}
+
+/* Block 9: Premium onboarding + IAMJOSHWA Pass 2.0 */
+.onboarding-club-shell {
+  width: min(1240px, 100%);
+  min-height: 760px;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
+  align-items: stretch;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 38px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.08), transparent 20rem),
+    radial-gradient(circle at 88% 12%, var(--glow), transparent 28rem),
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.016));
+  box-shadow: 0 46px 170px rgba(0,0,0,.52), inset 0 1px rgba(255,255,255,.08);
+  backdrop-filter: blur(24px) saturate(1.12);
+  overflow: hidden;
+  padding: clamp(20px, 4vw, 42px);
+}
+
+.onboarding-club-shell[data-project="afterluv"] {
+  --accent: #ff2b4f;
+  --accent2: #f5f5f5;
+  --glow: rgba(255,43,79,.3);
+}
+
+.onboarding-pass-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 30px;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+    rgba(0,0,0,.24);
+  background-size: 54px 54px;
+  padding: clamp(20px, 4vw, 42px);
+  overflow: hidden;
+}
+
+.onboarding-pass-stage:after {
+  content: "";
+  position: absolute;
+  inset: auto 10% 8% 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+  box-shadow: 0 0 42px var(--glow);
+}
+
+.live-pass-card {
+  position: relative;
+  isolation: isolate;
+  width: min(360px, 100%);
+  aspect-ratio: .72;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255,255,255,.22), transparent 20%),
+    radial-gradient(circle at 90% 10%, rgba(155,83,255,.6), transparent 32%),
+    linear-gradient(145deg, #292431, #050505 64%, #121217);
+  box-shadow: 0 42px 140px rgba(0,0,0,.56), 0 0 88px rgba(155,83,255,.22);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transform: perspective(1000px) rotateY(-8deg) rotateX(2deg) translate3d(0,0,0);
+  transition: transform .32s ease, box-shadow .32s ease, border-color .32s ease;
+  will-change: transform;
+}
+
+.live-pass-card[data-project="afterluv"] {
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255,255,255,.22), transparent 20%),
+    radial-gradient(circle at 88% 8%, rgba(255,43,79,.72), transparent 34%),
+    linear-gradient(145deg, #2d161b, #050505 66%, #14070a);
+  box-shadow: 0 42px 140px rgba(0,0,0,.56), 0 0 92px rgba(255,43,79,.26);
+}
+
+.live-pass-card:hover {
+  transform: perspective(1000px) rotateY(-2deg) rotateX(0deg) translateY(-4px);
+  border-color: rgba(255,255,255,.38);
+}
+
+.live-pass-card[data-active="true"] {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+  animation: passActivatedFloat 3.2s ease-in-out infinite;
+}
+
+.live-pass-glow {
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background: conic-gradient(from 120deg, transparent, rgba(255,255,255,.16), var(--glow), transparent);
+  opacity: .7;
+  transform: translate3d(0,0,0);
+}
+
+.live-pass-top,
+.live-pass-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.live-pass-top span,
+.live-pass-bottom small,
+.pass-live-hints span,
+.activation-stats span {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.live-pass-top small,
+.live-pass-identity span,
+.activation-copy p {
+  color: rgba(255,255,255,.68);
+}
+
+.live-pass-identity strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font: 800 clamp(42px, 6vw, 76px)/.82 var(--font-display);
+  letter-spacing: -.07em;
+  margin-bottom: 10px;
+}
+
+.live-pass-bottom strong,
+.live-pass-number {
+  font-weight: 800;
+  color: white;
+  letter-spacing: -.02em;
+}
+
+.live-pass-qr {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  padding: 10px;
+}
+
+.live-pass-qr span {
+  border-radius: 6px;
+  background: #050505;
+}
+
+.pass-live-hints {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pass-live-hints p {
+  margin: 0;
+  max-width: 220px;
+  text-align: right;
+}
+
+.onboarding-flow-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+.onboarding-flow-panel .onboarding-progress-head h1 {
+  max-width: 820px;
+}
+
+.onboarding-flow-panel .onboarding-progress-head p {
+  max-width: 720px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+
+.onboarding-flow-panel .premium-step {
+  display: block;
+  grid-template-columns: none;
+  animation: stepIn .28s ease;
+}
+
+.onboarding-flow-panel .premium-step[hidden] {
+  display: none;
+}
+
+.welcome-panel,
+.identity-fields,
+.borderless-fieldset,
+.channel-grid {
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 26px;
+  background: rgba(0,0,0,.2);
+  padding: clamp(20px, 3vw, 30px);
+}
+
+.welcome-panel {
+  min-height: 360px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 16px;
+  background:
+    radial-gradient(circle at 86% 12%, var(--glow), transparent 22rem),
+    rgba(0,0,0,.22);
+}
+
+.welcome-panel svg {
+  width: 34px;
+  height: 34px;
+  color: var(--accent);
+}
+
+.welcome-panel h2,
+.activation-copy h1 {
+  font: 800 clamp(44px, 7vw, 96px)/.84 var(--font-display);
+  letter-spacing: -.07em;
+  margin: 0;
+}
+
+.welcome-panel p {
+  max-width: 620px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.identity-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.premium-universe-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.premium-universe-grid label > span {
+  min-height: 300px;
+}
+
+.premium-universe-grid em {
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.borderless-fieldset {
+  border-style: solid;
+}
+
+.preference-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.preference-card-grid label {
+  cursor: pointer;
+}
+
+.preference-card-grid label > span {
+  min-height: 118px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  background: rgba(255,255,255,.035);
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.preference-card-grid strong {
+  color: white;
+  font-size: 15px;
+}
+
+.preference-card-grid small {
+  color: var(--muted);
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.preference-card-grid input:checked + span {
+  border-color: color-mix(in srgb, var(--accent) 56%, white 16%);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: 0 16px 54px var(--glow);
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.channel-card {
+  min-height: 170px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,.035);
+  padding: 18px;
+  display: grid;
+  align-content: space-between;
+}
+
+.channel-card span {
+  display: grid;
+  gap: 12px;
+}
+
+.channel-card svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+}
+
+.channel-card strong {
+  color: white;
+  font: 800 28px/1 var(--font-display);
+  letter-spacing: -.04em;
+}
+
+.channel-card small {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 10px;
+}
+
+.channel-card.active {
+  border-color: color-mix(in srgb, var(--accent) 55%, white 16%);
+  box-shadow: 0 18px 60px var(--glow);
+}
+
+.channel-card.disabled {
+  opacity: .52;
+  filter: saturate(.6);
+}
+
+.activation-card-shell {
+  position: relative;
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: clamp(28px, 6vw, 90px);
+  align-items: center;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 38px;
+  padding: clamp(24px, 5vw, 58px);
+  background: radial-gradient(circle at 80% 10%, var(--glow), transparent 30rem), linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.016));
+  overflow: hidden;
+  box-shadow: 0 48px 160px rgba(0,0,0,.54);
+}
+
+.activation-card-shell[data-project="afterluv"] {
+  --accent: #ff2b4f;
+  --glow: rgba(255,43,79,.3);
+}
+
+.activation-burst {
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(from 180deg, transparent, var(--glow), transparent, rgba(255,255,255,.14), transparent);
+  opacity: .55;
+  animation: activationSpin 12s linear infinite;
+}
+
+.activation-copy {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  justify-items: start;
+}
+
+.activation-copy p {
+  max-width: 650px;
+  line-height: 1.65;
+}
+
+.activation-stats {
+  display: grid;
+  gap: 6px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  background: rgba(0,0,0,.24);
+  padding: 16px;
+}
+
+.activation-stats strong {
+  color: white;
+  font: 800 30px/1 var(--font-display);
+  letter-spacing: -.04em;
+}
+
+.activation-stats small {
+  color: var(--muted);
+}
+
+.profile-pass[data-project="afterluv"],
+.premium-wallet-card[data-project="afterluv"] {
+  background: radial-gradient(circle at 18% 18%,rgba(255,255,255,.22),transparent 20%),radial-gradient(circle at 86% 18%,rgba(255,43,79,.58),transparent 33%),linear-gradient(135deg,#2d161b,#070709 64%,#16080c);
+}
+
+.profile-pass-meta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 22px;
+}
+
+.profile-pass-meta code {
+  color: white;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,.24);
+}
+
+.pass-mini-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pass-mini-badges span {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  padding: 7px 10px;
+  color: rgba(255,255,255,.78);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.pass-first-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pass-first-actions a {
+  min-height: 118px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 22px;
+  background: rgba(0,0,0,.22);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.pass-first-actions a:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.26);
+  background: rgba(255,255,255,.06);
+}
+
+.pass-first-actions svg {
+  color: var(--accent);
+  width: 24px;
+  height: 24px;
+}
+
+.pass-first-actions span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@keyframes passActivatedFloat {
+  0%, 100% { transform: perspective(1000px) rotateY(0deg) translateY(0); }
+  50% { transform: perspective(1000px) rotateY(3deg) translateY(-8px); }
+}
+
+@keyframes activationSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media(max-width:1080px) {
+  .onboarding-club-shell,
+  .activation-card-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-pass-stage {
+    min-height: 480px;
+  }
+
+  .pass-live-hints {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin-top: 18px;
+  }
+
+  .pass-first-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media(max-width:720px) {
+  .onboarding-club-shell,
+  .activation-card-shell {
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .onboarding-pass-stage {
+    min-height: 430px;
+    border-radius: 22px;
+  }
+
+  .live-pass-card {
+    border-radius: 26px;
+    transform: none;
+  }
+
+  .live-pass-card:hover {
+    transform: none;
+  }
+
+  .identity-fields,
+  .premium-universe-grid,
+  .preference-card-grid,
+  .channel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-universe-grid label > span {
+    min-height: 210px;
+  }
+
+  .welcome-panel,
+  .identity-fields,
+  .borderless-fieldset,
+  .channel-grid {
+    border-radius: 20px;
+  }
+
+  .activation-copy .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pass-live-hints {
+    display: grid;
+    text-align: center;
+  }
+
+  .pass-live-hints p {
+    text-align: center;
+    max-width: none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .live-pass-card,
+  .live-pass-card:hover,
+  .preference-card-grid label > span,
+  .pass-first-actions a {
+    transition: none;
+    transform: none;
+  }
+
+  .live-pass-card[data-active="true"],
+  .activation-burst {
+    animation: none;
+  }
+
+  .pass-first-actions a:hover {
+    transform: none;
+  }
+}
