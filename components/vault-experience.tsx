@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Download, Gift, LockKeyhole, Radio, ShieldCheck, Sparkles, Timer, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, Download, Gift, LockKeyhole, Radio, ShieldCheck, Sparkles, Timer, Trophy, UserPlus, Zap } from "lucide-react";
 import { useUniverse } from "./universe-provider";
 import type { RewardItem } from "@/types/content";
 
@@ -11,6 +11,13 @@ const vaultTypes = [
   { title: "Edits & Mashups", body: "Versiones para club y momentos especiales. Sin publicar contenido no autorizado.", icon: Zap },
   { title: "Extended Cuts", body: "Versiones largas, intros, tools y descargas limitadas desde recompensas.", icon: Download },
   { title: "Private Sets", body: "Sets exclusivos desbloqueables con puntos verificados o campañas.", icon: LockKeyhole },
+];
+
+const accessFlow = [
+  { title: "Crea tu Pass", body: "Una cuenta para IAMJOSHWA y AFTERLUV.", icon: UserPlus },
+  { title: "Gana puntos", body: "Escuchas, pre-saves, check-ins y referidos reales.", icon: Zap },
+  { title: "Sube de nivel", body: "Listener, Inner Circle, Raver, Afterlover, Day One y Legend.", icon: Trophy },
+  { title: "Acceso concedido", body: "Canjea drops publicados y autorizados desde el CMS.", icon: LockKeyhole },
 ];
 
 export function VaultExperience({ rewards, balance, signedIn }: { rewards: RewardItem[]; balance: number | null; signedIn: boolean }) {
@@ -59,6 +66,34 @@ export function VaultExperience({ rewards, balance, signedIn }: { rewards: Rewar
             </article>
           );
         })}
+      </section>
+
+      <section className="vault-pass-journey">
+        <div>
+          <BadgeCheck />
+          <span className="section-kicker">JOSH PASS JOURNEY</span>
+          <h2>El Vault se desbloquea con actividad real.</h2>
+          <p>
+            The Vault no es una carpeta pública escondida. Es una experiencia de membresía:
+            el fan escucha, asiste, comparte, acumula puntos y canjea contenido cuando tú lo publiques.
+          </p>
+          <Link className="button secondary" href={signedIn ? "/perfil" : "/acceso?next=%2Fperfil"}>
+            {signedIn ? "Ver mi Pass" : "Crear Pass"} <ArrowRight />
+          </Link>
+        </div>
+        <div className="vault-journey-steps">
+          {accessFlow.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <article key={step.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <Icon />
+                <strong>{step.title}</strong>
+                <p>{step.body}</p>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       <section className="vault-drop-section">

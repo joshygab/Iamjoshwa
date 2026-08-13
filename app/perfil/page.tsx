@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { CalendarDays, Gift, QrCode, ShieldCheck, Sparkles, Trophy, Zap } from "lucide-react";
+import { CalendarDays, Gift, LockKeyhole, Music2, QrCode, ShieldCheck, Sparkles, Ticket, Trophy, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { DeleteAccountButton } from "@/components/delete-account-button";
+import { contentRepository } from "@/lib/data";
 import { saveAvatar, savePreferences } from "./actions";
 
 const genres = ["House", "Tech House", "Afro House", "Latin House", "Disco", "Nu Disco", "Hard Bounce", "Hard Trance", "Hard Techno", "Euro Dance"];
@@ -17,6 +18,7 @@ const fallbackLevels = [
   { name: "Day One", min: 1600 },
   { name: "Legend", min: 3000 },
 ];
+const requestTime = Date.now();
 
 export const metadata = { title: "Mi perfil" };
 
@@ -46,6 +48,11 @@ export default async function ProfilePage() {
       db.from("notification_consents").select("granted").eq("user_id", user.id).eq("channel", "email").order("created_at", { ascending: false }).limit(1),
       db.from("points_ledger").select("id,points,reason,source_type,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(8),
     ]);
+  const [events, releases, rewards] = await Promise.all([
+    contentRepository.getEvents(),
+    contentRepository.getReleases(),
+    contentRepository.getRewards(),
+  ]);
 
   const total = Number(points?.points || status?.points || 0);
   const fallbackCurrent = fallbackLevels.toReversed().find((item) => total >= item.min) || fallbackLevels[0];
@@ -65,6 +72,12 @@ export default async function ProfilePage() {
   const qr = await QRCode.toDataURL(inviteUrl, { width: 300, margin: 1, color: { dark: "#050505", light: "#ffffff" } });
   const unlockedBadges = badges || [];
   const lockedSlots = Math.max(0, 6 - unlockedBadges.length);
+  const favoriteProject = profile?.favorite_project === "afterluv" ? "afterluv" : "iamjoshwa";
+  const nextEvent = events
+    .filter((event) => event.universe === favoriteProject && new Date(event.date).getTime() >= requestTime)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+  const latestDrop = releases.filter((release) => release.universe === favoriteProject)[0];
+  const vaultDrop = rewards.find((reward) => !reward.project || reward.project === favoriteProject);
 
   return (
     <section className="dashboard-page premium-pass-page">
@@ -129,6 +142,36 @@ export default async function ProfilePage() {
             </div>
           </article>
         </div>
+      </section>
+
+      <section className="pass-live-command">
+        <article>
+          <Music2 />
+          <span>LATEST DROP</span>
+          <h2>{latestDrop?.title || "Sin lanzamiento activo"}</h2>
+          <p>{latestDrop?.story || "Cuando publiques un lanzamiento para tu universo favorito aparecerá aquí."}</p>
+          <Link className="button secondary" href={latestDrop ? `/lanzamientos/${latestDrop.slug}` : "/lanzamientos"}>
+            Ver música
+          </Link>
+        </article>
+        <article>
+          <Ticket />
+          <span>NEXT SHOW</span>
+          <h2>{nextEvent?.name || "Sin fecha activa"}</h2>
+          <p>{nextEvent ? `${nextEvent.city} · ${formatDate(nextEvent.date)}` : "Cuando publiques una fecha aparecerá aquí como acceso rápido del Pass."}</p>
+          <Link className="button secondary" href={nextEvent ? `/fechas/${nextEvent.slug}` : "/fechas"}>
+            Ver shows
+          </Link>
+        </article>
+        <article>
+          <LockKeyhole />
+          <span>THE VAULT</span>
+          <h2>{vaultDrop?.name || "Vault listo"}</h2>
+          <p>{vaultDrop ? `${vaultDrop.pointsCost} puntos · ${vaultDrop.description}` : "Crea drops o recompensas desde admin para activar accesos privados."}</p>
+          <Link className="button primary" href="/the-vault">
+            Abrir Vault
+          </Link>
+        </article>
       </section>
 
       <section className="pass-command-grid">
