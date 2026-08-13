@@ -54,7 +54,22 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
               <span>{item.type}</span>
               <h2>{item.title}</h2>
               <p>{item.story || "Historia del lanzamiento pendiente de publicar."}</p>
-              {future ? <Countdown date={item.releaseAt} /> : <p className="release-live"><Sparkles /> Ya disponible en plataformas.</p>}
+              {future ? (
+                <Countdown
+                  targetDate={item.releaseAt}
+                  type={item.universe === "afterluv" ? "afterluv" : "release"}
+                  label={item.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "DROPS IN"}
+                  title={item.title}
+                  compact
+                  source="release_library"
+                  contentId={item.id}
+                  contentType="release"
+                  completedLabel="OUT NOW"
+                  completedTitle={item.title}
+                  completedHref={item.listenUrl || item.platforms?.[0]?.url}
+                  completedCta="Listen"
+                />
+              ) : <p className="release-live"><Sparkles /> Ya disponible en plataformas.</p>}
               {item.credits?.length ? <p className="muted">{item.credits.join(" · ")}</p> : null}
 
               <div className="inline-actions">

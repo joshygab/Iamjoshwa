@@ -84,7 +84,23 @@ export default async function ReleaseDetailPage({ params }: Props) {
             <span><CalendarDays /> {new Date(release.releaseAt).toLocaleString("es-MX")}</span>
             <span><Music2 /> {future ? "Pre-save activo" : "Disponible ahora"}</span>
           </div>
-          {future ? <Countdown date={release.releaseAt} /> : <p className="release-live"><Sparkles /> Ya disponible en plataformas oficiales.</p>}
+          {future ? (
+            <Countdown
+              targetDate={release.releaseAt}
+              type={release.universe === "afterluv" ? "afterluv" : "release"}
+              label={release.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "DROPS IN"}
+              title={release.title}
+              subtitle={release.type}
+              source="release_detail"
+              contentId={release.id}
+              contentType="release"
+              completedLabel="OUT NOW"
+              completedTitle={release.title}
+              completedSubtitle="El lanzamiento ya llegó a su fecha de publicación."
+              completedHref={release.listenUrl || release.platforms?.[0]?.url}
+              completedCta="Listen"
+            />
+          ) : <p className="release-live"><Sparkles /> Ya disponible en plataformas oficiales.</p>}
           <div className="inline-actions">
             {primaryUrl ? (
               <TrackedLink className="button primary" href={primaryUrl} target="_blank" rel="noreferrer" action={future ? "presave_click" : "release_listen_click"} entityType="releases" entityId={release.id} label={release.title}>

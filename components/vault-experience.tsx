@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Download, Gift, LockKeyhole, Radio, ShieldCheck, Sparkles, Timer, Trophy, UserPlus, Zap } from "lucide-react";
+import { Countdown } from "./countdown";
 import { useUniverse } from "./universe-provider";
+import { dateToTime } from "@/lib/dates";
 import type { RewardItem, SetItem } from "@/types/content";
 
 const vaultTypes = [
@@ -20,7 +22,7 @@ const accessFlow = [
   { title: "Acceso concedido", body: "Canjea drops publicados y autorizados desde el CMS.", icon: LockKeyhole },
 ];
 
-export function VaultExperience({ rewards, sets = [], balance, signedIn }: { rewards: RewardItem[]; sets?: SetItem[]; balance: number | null; signedIn: boolean }) {
+export function VaultExperience({ rewards, sets = [], balance, signedIn, now }: { rewards: RewardItem[]; sets?: SetItem[]; balance: number | null; signedIn: boolean; now: number }) {
   const { universe } = useUniverse();
   const visibleRewards = rewards.filter((item) => !item.project || item.project === universe);
   const audioReadySets = sets.filter((item) => item.universe === universe && item.audioUrl).slice(0, 3);
@@ -129,22 +131,35 @@ export function VaultExperience({ rewards, sets = [], balance, signedIn }: { rew
         </div>
         {visibleRewards.length ? (
           <div className="vault-drop-grid">
-            {visibleRewards.map((item) => (
-              <article className="vault-drop-card" key={item.id}>
-                <div className="vault-drop-art">
-                  {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill sizes="(max-width: 760px) 100vw, 33vw" /> : <span>{item.project?.toUpperCase() || "VAULT"}</span>}
-                  <small>{item.inventory === null ? "DIGITAL" : `${item.inventory} DISPONIBLES`}</small>
-                </div>
-                <div>
-                  <span>{item.pointsCost} puntos</span>
-                  <h3>{item.name}</h3>
-                  <p>{item.description}</p>
-                  <Link className="button secondary" href={signedIn ? "/recompensas" : "/acceso?next=%2Frecompensas"}>
-                    {signedIn ? "Abrir recompensas" : "Iniciar sesión"} <ArrowRight />
-                  </Link>
-                </div>
-              </article>
-            ))}
+            {visibleRewards.map((item) => {
+              const unlockTime = dateToTime(item.unlockAt);
+              const expiresTime = dateToTime(item.expiresAt);
+              const locked = Boolean(unlockTime && unlockTime > now);
+              const expired = Boolean(expiresTime && expiresTime <= now);
+              return (
+                <article className={`vault-drop-card ${locked ? "is-locked" : ""} ${expired ? "is-expired" : ""}`} key={item.id}>
+                  <div className="vault-drop-art">
+                    {item.imageUrl ? <Image src={item.imageUrl} alt={item.name} fill sizes="(max-width: 760px) 100vw, 33vw" /> : <span>{item.project?.toUpperCase() || "VAULT"}</span>}
+                    <small>{expired ? "EXPIRED" : locked ? "LOCKED" : item.inventory === null ? "DIGITAL" : `${item.inventory} DISPONIBLES`}</small>
+                  </div>
+                  <div>
+                    <span>{item.pointsCost} puntos</span>
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                    {locked && item.unlockAt ? (
+                      <Countdown targetDate={item.unlockAt} type="vault" label="UNLOCKS IN" title={item.name} compact source="vault" contentId={item.id} contentType="vault" completedLabel="AVAILABLE NOW" completedTitle={item.name} />
+                    ) : expiresTime && !expired ? (
+                      <Countdown targetDate={item.expiresAt} type="vault" label="EXPIRES IN" title="AVAILABLE NOW" compact source="vault" contentId={item.id} contentType="vault" completedLabel="EXPIRED" completedTitle={item.name} />
+                    ) : expired ? (
+                      <p className="vault-expired-label">EXPIRED</p>
+                    ) : null}
+                    <Link className="button secondary" aria-disabled={locked || expired} href={locked || expired ? "/the-vault" : signedIn ? "/recompensas" : "/acceso?next=%2Frecompensas"}>
+                      {expired ? "Drop expirado" : locked ? "Aún bloqueado" : signedIn ? "Abrir recompensas" : "Iniciar sesión"} <ArrowRight />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         ) : (
           <div className="vault-empty-state">

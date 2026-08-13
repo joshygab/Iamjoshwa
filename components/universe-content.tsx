@@ -6,11 +6,13 @@ import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Headphones, LockKeyhole, Play, Radio, Sparkles, Ticket } from "lucide-react";
 import { Countdown } from "./countdown";
+import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
+import { dateToTime } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/env";
-import type { ArtistProfileItem, EventItem, PageSectionItem, ReleaseItem, SetItem, Universe } from "@/types/content";
+import type { ArtistProfileItem, EventItem, PageSectionItem, ReleaseItem, RewardItem, SetItem, Universe } from "@/types/content";
 
 const fallback: Record<Universe, ArtistProfileItem> = {
   iamjoshwa: {
@@ -39,6 +41,7 @@ type Props = {
   events: EventItem[];
   sets: SetItem[];
   releases: ReleaseItem[];
+  rewards?: RewardItem[];
   artists?: ArtistProfileItem[];
   sections?: PageSectionItem[];
   now: number;
@@ -52,6 +55,17 @@ type PersonalSignal = {
   wantsReleases: boolean;
 };
 
+type SignalCandidate = {
+  id: string;
+  href: string;
+  type: CountdownType;
+  label: string;
+  title: string;
+  subtitle: string;
+  targetDate: string;
+  time: number;
+};
+
 const missions = [
   ["01", "Listen to your first set", "Activa el player global y empieza tu historial musical.", "/musica"],
   ["02", "Complete your Pass", "Alias, ciudad, géneros y preferencias listas.", "/perfil"],
@@ -59,7 +73,7 @@ const missions = [
   ["04", "Book / Share", "Promotores encuentran EPK, contacto y booking en segundos.", "/booking"],
 ] as const;
 
-export function HomeContent({ events, sets, releases, artists = [], sections = [], now }: Props) {
+export function HomeContent({ events, sets, releases, rewards = [], artists = [], sections = [], now }: Props) {
   const { universe, setUniverse } = useUniverse();
   const { play } = usePlayer();
   const [signal, setSignal] = useState<PersonalSignal | null>(null);
@@ -70,9 +84,25 @@ export function HomeContent({ events, sets, releases, artists = [], sections = [
   const scopedEvents = useMemo(() => events.filter((item) => item.universe === universe).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [events, universe]);
   const scopedSets = useMemo(() => sets.filter((item) => item.universe === universe), [sets, universe]);
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
+  const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
   const event = scopedEvents.find((item) => new Date(item.date).getTime() >= now) || scopedEvents[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
+  const nextSignal = useMemo(() => {
+    const candidates: SignalCandidate[] = [
+      ...scopedEvents.map((item) => ({ id: item.id, href: `/fechas/${item.slug}`, type: universe === "afterluv" ? "afterluv" : "show", label: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "NEXT SHOW", title: item.name, subtitle: `${item.city} · ${item.venue}`, targetDate: item.date, time: dateToTime(item.date) || 0 } satisfies SignalCandidate)),
+      ...scopedReleases.map((item) => ({ id: item.id, href: `/lanzamientos/${item.slug}`, type: item.universe === "afterluv" ? "afterluv" : "release", label: item.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "NEXT RELEASE", title: item.title, subtitle: item.type, targetDate: item.releaseAt, time: dateToTime(item.releaseAt) || 0 } satisfies SignalCandidate)),
+      ...scopedRewards.flatMap((item) => {
+        const rewardSignals: SignalCandidate[] = [];
+        if (item.unlockAt) rewardSignals.push({ id: item.id, href: "/the-vault", type: "vault", label: "VAULT UNLOCK", title: item.name, subtitle: "Unlocks in", targetDate: item.unlockAt, time: dateToTime(item.unlockAt) || 0 });
+        if (item.expiresAt) rewardSignals.push({ id: item.id, href: "/the-vault", type: "vault", label: "VAULT EXPIRATION", title: item.name, subtitle: "Expires in", targetDate: item.expiresAt, time: dateToTime(item.expiresAt) || 0 });
+        return rewardSignals;
+      }),
+    ];
+    return candidates
+      .filter((item) => item.time > now)
+      .sort((a, b) => a.time - b.time)[0];
+  }, [now, scopedEvents, scopedReleases, scopedRewards, universe]);
 
   const title = String(hero.title || artist.displayName);
   const tagline = String(hero.subtitle || artist.tagline);
@@ -178,6 +208,32 @@ export function HomeContent({ events, sets, releases, artists = [], sections = [
         </div>
       </section>
 
+      {nextSignal ? (
+        <section className="section next-signal-panel reveal">
+          <div>
+            <p className="section-kicker">NEXT SIGNAL</p>
+            <h2>{nextSignal.title}</h2>
+            <p>{nextSignal.subtitle}</p>
+          </div>
+          <div>
+            <Countdown
+              targetDate={nextSignal.targetDate}
+              type={nextSignal.type}
+              label={nextSignal.label}
+              compact
+              source="home_next_signal"
+              contentId={nextSignal.id}
+              contentType={nextSignal.type}
+              completedLabel="SIGNAL UPDATED"
+              completedTitle="Buscando la siguiente señal"
+            />
+            <Link className="button secondary" href={nextSignal.href}>
+              Open signal <ArrowRight />
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       {signal ? (
         <section className="section personalized-feed reveal">
           <div>
@@ -205,7 +261,16 @@ export function HomeContent({ events, sets, releases, artists = [], sections = [
               <p className="section-kicker">NEXT SIGNAL · {event.status}</p>
               <h2>{event.name}</h2>
               <p>{event.city} · {event.venue}</p>
-              <Countdown date={event.date} />
+              <Countdown
+                targetDate={event.date}
+                type={event.universe === "afterluv" ? "afterluv" : "show"}
+                label={event.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "NEXT SHOW"}
+                title={`${event.city} · ${event.venue}`}
+                compact
+                source="home_next_event"
+                contentId={event.id}
+                contentType="show"
+              />
               <div className="inline-actions">
                 <Link className="button primary" href={`/fechas/${event.slug}`}>Open show</Link>
                 {event.ticketUrl ? <a className="button secondary" href={event.ticketUrl} target="_blank" rel="noreferrer">Tickets</a> : null}

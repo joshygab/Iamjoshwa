@@ -96,7 +96,18 @@ export default async function EventDetail({ params }: Props) {
           <p className="section-kicker">{event.universe.toUpperCase()} PRESENTS</p>
           <h1>{event.name}</h1>
           <p className="event-lead">{event.description}</p>
-          <Countdown date={event.date} />
+          <Countdown
+            targetDate={event.date}
+            type={event.universe === "afterluv" ? "afterluv" : "show"}
+            label={event.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "NEXT SHOW"}
+            title={`${event.city} · ${event.venue}`}
+            subtitle={event.status}
+            source="event_detail"
+            contentId={event.id}
+            contentType="show"
+            completedLabel="SIGNAL ACTIVE"
+            completedTitle={event.name}
+          />
           <dl>
             <div><dt>Fecha</dt><dd>{new Date(event.date).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "America/Mexico_City" })}</dd></div>
             <div><dt>Venue</dt><dd>{event.venue}<br />{event.address}</dd></div>

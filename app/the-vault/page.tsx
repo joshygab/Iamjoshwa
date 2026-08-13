@@ -4,6 +4,8 @@ import { contentRepository } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 
+const requestTime = Date.now();
+
 export const generateMetadata = () => pageMetadata({
   path: "/the-vault",
   title: "The Vault",
@@ -25,7 +27,7 @@ export default async function VaultPage() {
     <>
       <PageHero kicker="THE VAULT" title="El archivo privado de la señal." description="Drops limitados, demos autorizados, edits, mashups, versiones extendidas y sets privados desbloqueables con IAMJOSHWA Pass." />
       <section className="section vault-section">
-        <VaultExperience rewards={rewards} sets={sets} balance={points.data?.points ?? null} signedIn={Boolean(user)} />
+        <VaultExperience rewards={rewards} sets={sets} balance={points.data?.points ?? null} signedIn={Boolean(user)} now={requestTime} />
       </section>
     </>
   );
