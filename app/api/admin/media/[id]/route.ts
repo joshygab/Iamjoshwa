@@ -12,7 +12,7 @@ db.from("media_items").select("asset_id",{count:"exact",head:true}).eq("asset_id
 db.from("artist_profiles").select("id",{count:"exact",head:true}).or(`logo_asset_id.eq.${id},alternate_logo_asset_id.eq.${id},hero_desktop_asset_id.eq.${id},hero_mobile_asset_id.eq.${id}`),
 db.from("events").select("id",{count:"exact",head:true}).eq("flyer_asset_id",id).neq("publication_status","archived"),
 db.from("releases").select("id",{count:"exact",head:true}).or(`cover_asset_id.eq.${id},preview_asset_id.eq.${id}`).neq("publication_status","archived"),
-db.from("sets").select("id",{count:"exact",head:true}).eq("cover_asset_id",id).neq("publication_status","archived"),
+db.from("sets").select("id",{count:"exact",head:true}).or(`cover_asset_id.eq.${id},audio_asset_id.eq.${id}`).neq("publication_status","archived"),
 db.from("artist_timeline").select("id",{count:"exact",head:true}).eq("asset_id",id).neq("publication_status","archived"),
 db.from("rewards").select("id",{count:"exact",head:true}).eq("image_asset_id",id).neq("publication_status","archived"),
 db.from("seo_metadata").select("id",{count:"exact",head:true}).eq("share_asset_id",id),

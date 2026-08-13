@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Download, Gift, LockKeyhole, Radio, ShieldCheck, Sparkles, Timer, Trophy, UserPlus, Zap } from "lucide-react";
 import { useUniverse } from "./universe-provider";
-import type { RewardItem } from "@/types/content";
+import type { RewardItem, SetItem } from "@/types/content";
 
 const vaultTypes = [
   { title: "Demos", body: "Ideas en proceso, bocetos y versiones tempranas cuando estén autorizadas.", icon: Radio },
@@ -20,9 +20,10 @@ const accessFlow = [
   { title: "Acceso concedido", body: "Canjea drops publicados y autorizados desde el CMS.", icon: LockKeyhole },
 ];
 
-export function VaultExperience({ rewards, balance, signedIn }: { rewards: RewardItem[]; balance: number | null; signedIn: boolean }) {
+export function VaultExperience({ rewards, sets = [], balance, signedIn }: { rewards: RewardItem[]; sets?: SetItem[]; balance: number | null; signedIn: boolean }) {
   const { universe } = useUniverse();
   const visibleRewards = rewards.filter((item) => !item.project || item.project === universe);
+  const audioReadySets = sets.filter((item) => item.universe === universe && item.audioUrl).slice(0, 3);
 
   return (
     <div className="vault-experience">
@@ -93,6 +94,28 @@ export function VaultExperience({ rewards, balance, signedIn }: { rewards: Rewar
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="vault-audio-pipeline">
+        <div>
+          <Radio />
+          <span className="section-kicker">AUDIO PIPELINE</span>
+          <h2>Sets públicos, drops privados y futuras descargas en una sola arquitectura.</h2>
+          <p>Los MP3/WAV que subas en Media Studio ya pueden alimentar el reproductor público. El siguiente paso natural es convertir ciertos audios en drops canjeables desde recompensas.</p>
+        </div>
+        <div>
+          {audioReadySets.length ? audioReadySets.map((item) => (
+            <Link href={`/musica/${item.slug}`} key={item.id}>
+              <strong>{item.title}</strong>
+              <span>{item.category} · audio propio activo</span>
+            </Link>
+          )) : (
+            <article>
+              <strong>Audio pendiente</strong>
+              <span>Cuando asignes MP3/WAV a tus sets, aparecerán aquí como señales listas para crecer hacia The Vault.</span>
+            </article>
+          )}
         </div>
       </section>
 

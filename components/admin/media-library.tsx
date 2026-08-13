@@ -16,6 +16,7 @@ export type MediaAsset = {
   archived_at: string | null;
   width: number | null;
   height: number | null;
+  duration_seconds?: number | null;
   focal_x: number | null;
   focal_y: number | null;
   in_gallery?: boolean;
@@ -185,6 +186,11 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
                 aria-label={`Editar ${asset.display_name}`}
                 style={{ backgroundImage: `url(${asset.public_url})`, backgroundPosition: `${(asset.focal_x ?? 0.5) * 100}% ${(asset.focal_y ?? 0.5) * 100}%` }}
               />
+            ) : asset.mime_type.startsWith("audio/") ? (
+              <div className="media-audio-preview">
+                <span>AUDIO</span>
+                <audio controls preload="metadata" src={asset.public_url} />
+              </div>
             ) : (
               <div className="media-placeholder">{asset.mime_type.split("/")[0].toUpperCase()}</div>
             )}
@@ -192,7 +198,7 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
               <strong>{asset.display_name}</strong>
               <span>{asset.archived_at ? "Archivado" : asset.usage_count ? `${asset.usage_count} usos` : asset.in_gallery ? "En galería" : "Sin uso detectado"}</span>
             </div>
-            <small>{Math.round(asset.byte_size / 1024)} KB · {asset.width && asset.height ? `${asset.width}x${asset.height}` : asset.mime_type}</small>
+            <small>{Math.round(asset.byte_size / 1024)} KB · {asset.duration_seconds ? `${Math.round(asset.duration_seconds / 60)} min` : asset.width && asset.height ? `${asset.width}x${asset.height}` : asset.mime_type}</small>
             {asset.usage_labels?.length ? (
               <div className="media-usage-list">
                 {asset.usage_labels.slice(0, 3).map((label) => <span key={label}>{label}</span>)}
@@ -220,9 +226,18 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
         <aside className="admin-drawer" role="dialog" aria-modal="true" aria-label="Editar archivo">
           <form className="settings-card media-modal" onSubmit={save}>
             <button type="button" className="drawer-close" onClick={() => setEditing(null)}>Cerrar</button>
-            <h2>Editar imagen</h2>
-            <p className="form-note">Ajusta nombre, texto alternativo y punto focal. El punto focal mejora el recorte en hero, flyers y cards.</p>
-            <div className="media-preview large" style={{ backgroundImage: `url(${editing.public_url})`, backgroundPosition: `${(editing.focal_x ?? 0.5) * 100}% ${(editing.focal_y ?? 0.5) * 100}%` }} />
+            <h2>Editar archivo</h2>
+            <p className="form-note">Ajusta nombre, descripción y etiquetas. En imágenes también puedes definir punto focal para mejorar recortes.</p>
+            {editing.mime_type.startsWith("image/") ? (
+              <div className="media-preview large" style={{ backgroundImage: `url(${editing.public_url})`, backgroundPosition: `${(editing.focal_x ?? 0.5) * 100}% ${(editing.focal_y ?? 0.5) * 100}%` }} />
+            ) : editing.mime_type.startsWith("audio/") ? (
+              <div className="media-audio-preview large">
+                <span>{editing.mime_type === "audio/wav" ? "WAV" : "MP3"}</span>
+                <audio controls preload="metadata" src={editing.public_url} />
+              </div>
+            ) : (
+              <div className="media-placeholder large">{editing.mime_type.split("/")[0].toUpperCase()}</div>
+            )}
             <div className="media-usage-panel">
               <span>Uso detectado</span>
               {editing.usage_labels?.length ? editing.usage_labels.map((label) => <p key={label}>{label}</p>) : <p>Sin referencias detectadas. Puedes archivarlo si ya no lo necesitas.</p>}

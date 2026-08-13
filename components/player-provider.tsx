@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -16,7 +16,7 @@ import type { SetItem } from "@/types/content";
 
 type Playing = Pick<
   SetItem,
-  "id" | "slug" | "title" | "category" | "coverUrl" | "embedUrl" | "externalUrl" | "provider"
+  "id" | "slug" | "title" | "category" | "coverUrl" | "audioUrl" | "audioMimeType" | "embedUrl" | "externalUrl" | "provider"
 >;
 
 type Value = {
@@ -26,6 +26,7 @@ type Value = {
   volume: number;
   play: (item: Playing) => void;
   toggle: () => void;
+  setActive: (active: boolean) => void;
   close: () => void;
   setExpanded: (expanded: boolean) => void;
   setVolume: (volume: number) => void;
@@ -55,7 +56,7 @@ function readStoredSnapshot(): PlayerSnapshot {
     const parsed = JSON.parse(snapshot) as Partial<PlayerSnapshot>;
     return {
       playing: parsed.playing ?? null,
-      active: Boolean(parsed.active),
+      active: false,
       expanded: Boolean(parsed.expanded),
       volume: typeof parsed.volume === "number" ? parsed.volume : defaultSnapshot.volume,
     };
@@ -91,6 +92,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }));
       },
       toggle: () => setSnapshot((current) => ({ ...current, active: !current.active })),
+      setActive: (nextActive) => setSnapshot((current) => ({ ...current, active: nextActive })),
       close: () => {
         setSnapshot((current) => ({
           ...current,
@@ -125,14 +127,47 @@ export function usePlayer() {
 }
 
 function CompactPlayer() {
-  const { playing, active, expanded, volume, close, setExpanded, setVolume, toggle } =
+  const { playing, active, expanded, volume, close, setActive, setExpanded, setVolume, toggle } =
     usePlayer();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume / 100;
+  }, [volume, playing?.audioUrl]);
+
+  useEffect(() => {
+    if (!playing?.audioUrl || !audioRef.current) return;
+    if (active) {
+      void audioRef.current.play().catch(() => setActive(false));
+    } else {
+      audioRef.current.pause();
+    }
+  }, [active, playing?.audioUrl, setActive]);
 
   if (!playing) return null;
 
   const fullPlayerHref = playing.slug ? `/musica/${playing.slug}` : playing.externalUrl || "/musica";
   const providerLabel = playing.provider ? playing.provider.toUpperCase() : "OFICIAL";
   const canExpand = Boolean(playing.embedUrl);
+  const hasNativeAudio = Boolean(playing.audioUrl);
+  const progress = duration > 0 ? current / duration : 0;
+
+  function handlePrimary() {
+    if (!hasNativeAudio) return toggle();
+    if (audioRef.current && !active) void audioRef.current.play().catch(() => setActive(false));
+    else audioRef.current?.pause();
+    setActive(!active);
+  }
+
+  function seek(event: React.MouseEvent<HTMLDivElement>) {
+    if (!audioRef.current || !duration) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const next = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+    audioRef.current.currentTime = next * duration;
+    setCurrent(audioRef.current.currentTime);
+  }
 
   return (
     <aside
@@ -154,22 +189,23 @@ function CompactPlayer() {
           <small>{playing.category}</small>
         </div>
 
-        <div className="compact-player-signal" aria-hidden="true">
-          {Array.from({ length: 24 }).map((_, index) => (
-            <span key={index} style={{ "--wave-index": index } as React.CSSProperties} />
+        <div className={`compact-player-signal ${hasNativeAudio ? "is-seekable" : ""}`} aria-label="Waveform del set" onClick={hasNativeAudio ? seek : undefined}>
+          {Array.from({ length: 28 }).map((_, index) => (
+            <span key={index} className={hasNativeAudio && index / 28 <= progress ? "is-active" : undefined} style={{ "--wave-index": index } as React.CSSProperties} />
           ))}
         </div>
 
         <div className="now-playing-progress" aria-label="Progreso visual de sesión">
-          <span />
+          <span style={hasNativeAudio ? { transform: `scaleX(${Math.max(0.03, progress)})` } : undefined} />
         </div>
+        {hasNativeAudio ? <small className="compact-player-time">{formatTime(current)} / {duration ? formatTime(duration) : "--:--"}</small> : null}
       </div>
 
       <div className="compact-player-controls">
         <button
           type="button"
           className="compact-player-primary"
-          onClick={toggle}
+          onClick={handlePrimary}
           aria-label={active ? "Pausar visualización" : "Reanudar visualización"}
         >
           {active ? <Pause /> : <Play />}
@@ -206,6 +242,24 @@ function CompactPlayer() {
         </button>
       </div>
 
+      {playing.audioUrl ? (
+        <audio
+          ref={audioRef}
+          className="compact-player-native-audio"
+          preload="metadata"
+          onLoadedMetadata={(event) => {
+            setCurrent(0);
+            setDuration(event.currentTarget.duration || 0);
+          }}
+          onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
+          onPlay={() => setActive(true)}
+          onPause={() => setActive(false)}
+          onEnded={() => setActive(false)}
+        >
+          <source src={playing.audioUrl} type={playing.audioMimeType || "audio/mpeg"} />
+        </audio>
+      ) : null}
+
       {expanded && playing.embedUrl ? (
         <iframe
           src={playing.embedUrl}
@@ -216,4 +270,11 @@ function CompactPlayer() {
       ) : null}
     </aside>
   );
+}
+
+function formatTime(value: number) {
+  if (!Number.isFinite(value)) return "--:--";
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value % 60);
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }

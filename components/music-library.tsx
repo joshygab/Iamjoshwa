@@ -90,7 +90,7 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
               ) : (
                 <button className="button primary" onClick={() => void openSet(item)}>
                   <Headphones />
-                  Abrir reproductor
+                  {item.audioUrl ? "Reproducir audio" : "Abrir reproductor"}
                 </button>
               )}
               {item.externalUrl && !item.demo ? (

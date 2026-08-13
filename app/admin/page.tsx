@@ -2,6 +2,8 @@ import Link from "next/link";
 import {
   AlertTriangle,
   Archive,
+  AudioWaveform,
+  BarChart3,
   CalendarPlus,
   CheckCircle2,
   HardDrive,
@@ -34,8 +36,13 @@ export default async function AdminDashboard() {
     releaseLinkRows,
     eventsMissingFlyer,
     setsMissingCover,
+    setsMissingAudio,
     releasesMissingCover,
     artistsMissingMobile,
+    setOpens,
+    platformClicks,
+    presaveClicks,
+    ticketClicks,
   ] = await Promise.all([
     supabase.from("events").select("id,name,starts_at,event_status").gte("starts_at", now).not("event_status", "in", "(cancelled,completed)").order("starts_at").limit(1),
     supabase.from("releases").select("id,name,releases_at").gte("releases_at", now).order("releases_at").limit(1),
@@ -53,8 +60,13 @@ export default async function AdminDashboard() {
     supabase.from("releases").select("id,name,publication_status,release_links(id)").eq("publication_status", "published").limit(50),
     supabase.from("events").select("id", { count: "exact", head: true }).eq("publication_status", "published").is("flyer_asset_id", null),
     supabase.from("sets").select("id", { count: "exact", head: true }).eq("publication_status", "published").is("cover_asset_id", null),
+    supabase.from("sets").select("id", { count: "exact", head: true }).eq("publication_status", "published").eq("access_level", "public").is("audio_asset_id", null).is("soundcloud_url", null).is("youtube_url", null).is("mixcloud_url", null).is("external_url", null),
     supabase.from("releases").select("id", { count: "exact", head: true }).eq("publication_status", "published").is("cover_asset_id", null),
     supabase.from("artist_profiles").select("id", { count: "exact", head: true }).eq("status", "published").is("hero_mobile_asset_id", null),
+    supabase.from("points_ledger").select("id", { count: "exact", head: true }).eq("source_type", "open_set"),
+    supabase.from("audit_logs").select("id", { count: "exact", head: true }).in("action", ["public_platform_click", "public_set_platform_click", "public_release_listen_click"]),
+    supabase.from("audit_logs").select("id", { count: "exact", head: true }).eq("action", "public_presave_click"),
+    supabase.from("audit_logs").select("id", { count: "exact", head: true }).eq("action", "public_ticket_click"),
   ]);
 
   const usageRows = await supabase.from("media_usage").select("asset_id").in("asset_id", (unusedMediaRows.data || []).map((item) => item.id));
@@ -70,20 +82,21 @@ export default async function AdminDashboard() {
 
   const releaseMissingLinks = (releaseLinkRows.data || []).filter((item) => !Array.isArray(item.release_links) || item.release_links.length === 0).length;
   const scheduleErrors = (schedules.data || []).filter((item) => item.error).length;
-  const blockingAlerts = releaseMissingLinks + (eventsMissingFlyer.count || 0) + (setsMissingCover.count || 0) + (releasesMissingCover.count || 0) + (artistsMissingMobile.count || 0) + scheduleErrors;
+  const blockingAlerts = releaseMissingLinks + (eventsMissingFlyer.count || 0) + (setsMissingCover.count || 0) + (setsMissingAudio.count || 0) + (releasesMissingCover.count || 0) + (artistsMissingMobile.count || 0) + scheduleErrors;
   const maintenanceAlerts = unusedMedia;
   const alerts = blockingAlerts + maintenanceAlerts;
   const checklist = [
     ["Lanzamientos publicados sin links", releaseMissingLinks, "/admin/lanzamientos"],
     ["Eventos publicados sin flyer", eventsMissingFlyer.count || 0, "/admin/eventos"],
     ["Sets publicados sin portada", setsMissingCover.count || 0, "/admin/sets"],
+    ["Sets públicos sin audio/player", setsMissingAudio.count || 0, "/admin/sets"],
     ["Lanzamientos sin portada", releasesMissingCover.count || 0, "/admin/lanzamientos"],
     ["Heroes sin imagen móvil", artistsMissingMobile.count || 0, "/admin/configuracion"],
     ["Publicaciones programadas con error", scheduleErrors, "/admin/portada"],
     ["Archivos sin uso detectado", unusedMedia, "/admin/media"],
   ];
   const quick = [
-    ["Subir fotos", "/admin/media", <Upload key="upload" />, "Carga portadas, flyers, logos y fotos."],
+    ["Subir media", "/admin/media", <Upload key="upload" />, "Carga audio, portadas, flyers, logos y fotos."],
     ["Cambiar portada", "/admin/configuracion", <Palette key="palette" />, "Edita hero, identidad visual y biografías."],
     ["Nuevo evento", "/admin/eventos/nuevo", <CalendarPlus key="calendar" />, "Crea fecha, flyer y link de boletos."],
     ["Nuevo set", "/admin/sets/nuevo", <Music2 key="music" />, "Publica portada, player y tracklist."],
@@ -99,7 +112,7 @@ export default async function AdminDashboard() {
           <h1>Admin IAMJOSHWA</h1>
           <p>Todo lo que cambies aquí alimenta la página pública sin tocar código. Este panel ahora te avisa qué falta para publicar con calidad profesional.</p>
         </div>
-        <Link className="button primary" href="/admin/media"><Upload />Subir fotos</Link>
+        <Link className="button primary" href="/admin/media"><Upload />Subir media</Link>
       </header>
 
       <section className="admin-quick-actions">
@@ -121,6 +134,25 @@ export default async function AdminDashboard() {
         <article><span>MEDIA MB</span><strong>{mediaSizeMb}</strong></article>
         <article><span>BORRADORES HOME</span><strong>{drafts.count || 0}</strong></article>
         <article><span>ALERTAS</span><strong>{alerts}</strong></article>
+        <article><span>SETS ABIERTOS</span><strong>{setOpens.count || 0}</strong></article>
+        <article><span>CLICKS PLATAFORMA</span><strong>{platformClicks.count || 0}</strong></article>
+        <article><span>PRE-SAVES</span><strong>{presaveClicks.count || 0}</strong></article>
+        <article><span>CLICKS BOLETOS</span><strong>{ticketClicks.count || 0}</strong></article>
+      </section>
+
+      <section className="admin-analytics-strip">
+        <article>
+          <AudioWaveform />
+          <span>Music analytics</span>
+          <strong>{setOpens.count || 0}</strong>
+          <small>aperturas de sets registradas con usuarios logueados</small>
+        </article>
+        <article>
+          <BarChart3 />
+          <span>Conversiones</span>
+          <strong>{(platformClicks.count || 0) + (presaveClicks.count || 0) + (ticketClicks.count || 0)}</strong>
+          <small>clicks medidos en plataformas, pre-saves y boletos</small>
+        </article>
       </section>
 
       <section className={`admin-health-card ${blockingAlerts ? "needs-work" : "is-ready"}`}>

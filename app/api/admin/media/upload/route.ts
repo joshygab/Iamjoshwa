@@ -31,6 +31,7 @@ export async function POST(request: Request) {
 
   let width: number | null = null;
   let height: number | null = null;
+  let durationSeconds: number | null = null;
   if (file.type.startsWith("image/")) {
     try {
       const metadata = await sharp(payload, { limitInputPixels: 100_000_000 }).metadata();
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No fue posible leer la imagen" }, { status: 400 });
     }
   }
+  if (file.type === "audio/wav" || file.type === "audio/wave" || file.type === "audio/x-wav") durationSeconds = wavDuration(bytes);
 
   const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
   const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
     display_name: displayName, title: displayName,
     alt_text: file.type.startsWith("image/") ? displayName : null,
     mime_type: file.type, extension: ext, byte_size: payload.byteLength,
-    width, height, focal_x: width ? 0.5 : null, focal_y: height ? 0.5 : null,
+    width, height, duration_seconds: durationSeconds, focal_x: width ? 0.5 : null, focal_y: height ? 0.5 : null,
     uploaded_by: user.id,
   }).select("*").single();
   if (metadata.error) {
@@ -80,12 +82,33 @@ function signatureMatches(bytes: Uint8Array, mime: string) {
   if (mime === "image/svg+xml") return new TextDecoder().decode(bytes.slice(0, 500)).includes("<svg");
   if (mime === "video/mp4") return text(bytes, 4, 8) === "ftyp";
   if (mime === "video/webm") return bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3;
-  if (mime === "audio/mpeg") return text(bytes, 0, 3) === "ID3" || bytes[0] === 0xff;
-  if (mime === "audio/wav") return text(bytes, 0, 4) === "RIFF" && text(bytes, 8, 12) === "WAVE";
+  if (mime === "audio/mpeg" || mime === "audio/mp3") return text(bytes, 0, 3) === "ID3" || bytes[0] === 0xff;
+  if (mime === "audio/wav" || mime === "audio/wave" || mime === "audio/x-wav") return text(bytes, 0, 4) === "RIFF" && text(bytes, 8, 12) === "WAVE";
   if (mime === "image/avif") return text(bytes, 4, 12).includes("ftyp");
   return false;
 }
 
 function text(bytes: Uint8Array, start: number, end: number) {
   return new TextDecoder().decode(bytes.slice(start, end));
+}
+
+function wavDuration(bytes: Uint8Array) {
+  try {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let byteRate = 0;
+    let dataSize = 0;
+    for (let offset = 12; offset + 8 < bytes.length; ) {
+      const id = text(bytes, offset, offset + 4);
+      const size = view.getUint32(offset + 4, true);
+      if (id === "fmt ") byteRate = view.getUint32(offset + 12, true);
+      if (id === "data") {
+        dataSize = size;
+        break;
+      }
+      offset += 8 + size + (size % 2);
+    }
+    return byteRate && dataSize ? Math.round(dataSize / byteRate) : null;
+  } catch {
+    return null;
+  }
 }

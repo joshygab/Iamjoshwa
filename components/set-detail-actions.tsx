@@ -28,7 +28,7 @@ export function SetDetailActions({ item, shareUrl }: { item: SetItem; shareUrl: 
         <button className="button secondary" disabled>Exclusivo</button>
       ) : (
         <button className="button primary" onClick={() => void openSet()}>
-          <Headphones /> Abrir reproductor
+          <Headphones /> {item.audioUrl ? "Reproducir set" : "Abrir reproductor"}
         </button>
       )}
       {item.externalUrl && !item.demo ? (

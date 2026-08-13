@@ -18,7 +18,7 @@ export default async function MediaAdmin() {
   ] = await Promise.all([
     supabase
       .from("media_assets")
-      .select("id,bucket,display_name,title,description,alt_text,tags,mime_type,byte_size,storage_path,archived_at,width,height,focal_x,focal_y")
+      .select("id,bucket,display_name,title,description,alt_text,tags,mime_type,byte_size,storage_path,archived_at,width,height,duration_seconds,focal_x,focal_y")
       .order("created_at", { ascending: false })
       .limit(500),
     supabase.from("media_usage").select("asset_id,entity_type,field_name"),
@@ -26,7 +26,7 @@ export default async function MediaAdmin() {
     supabase.from("artist_profiles").select("logo_asset_id,alternate_logo_asset_id,hero_desktop_asset_id,hero_mobile_asset_id,display_name"),
     supabase.from("events").select("flyer_asset_id,name,publication_status").neq("publication_status", "archived"),
     supabase.from("releases").select("cover_asset_id,preview_asset_id,name,publication_status").neq("publication_status", "archived"),
-    supabase.from("sets").select("cover_asset_id,title,publication_status").neq("publication_status", "archived"),
+    supabase.from("sets").select("cover_asset_id,audio_asset_id,title,publication_status").neq("publication_status", "archived"),
     supabase.from("artist_timeline").select("asset_id,title,publication_status").neq("publication_status", "archived"),
     supabase.from("rewards").select("image_asset_id,name,publication_status").neq("publication_status", "archived"),
     supabase.from("seo_metadata").select("share_asset_id,path"),
@@ -54,7 +54,10 @@ export default async function MediaAdmin() {
     addUsage(item.cover_asset_id, `Cover · ${item.name}`);
     addUsage(item.preview_asset_id, `Preview · ${item.name}`);
   }
-  for (const item of sets || []) addUsage(item.cover_asset_id, `Cover set · ${item.title}`);
+  for (const item of sets || []) {
+    addUsage(item.cover_asset_id, `Cover set · ${item.title}`);
+    addUsage(item.audio_asset_id, `Audio set · ${item.title}`);
+  }
   for (const item of timeline || []) addUsage(item.asset_id, `Historia · ${item.title}`);
   for (const item of rewards || []) addUsage(item.image_asset_id, `Recompensa · ${item.name}`);
   for (const item of seo || []) addUsage(item.share_asset_id, `SEO · ${item.path}`);
@@ -81,10 +84,11 @@ export default async function MediaAdmin() {
     <>
       <header className="admin-hero media-admin-hero">
         <div>
-          <span className="section-kicker">FOTOS Y ARCHIVOS</span>
-          <h1>Biblioteca visual</h1>
+          <span className="section-kicker">MEDIA STUDIO</span>
+          <h1>Biblioteca multimedia</h1>
           <p>
-            Sube tus fotos una vez y reutilízalas en portada, eventos, sets, lanzamientos, EPK y perfil.
+            Sube fotos, videos, PDFs y audio MP3/WAV una vez. Luego reutilízalos en portada, eventos,
+            sets, lanzamientos, EPK, perfil y reproductores.
             Ahora puedes ver dónde se usa cada archivo antes de archivarlo o eliminarlo.
           </p>
         </div>

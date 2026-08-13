@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, Gauge, MapPin, Music2, Radio } from "lucide-react";
 import { SetDetailActions } from "@/components/set-detail-actions";
+import { SetAudioPlayer } from "@/components/set-audio-player";
 import { contentRepository } from "@/lib/data";
 import { absoluteUrl, defaultOgImage, jsonLd, safeDescription } from "@/lib/seo";
 
@@ -41,8 +42,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SetDetailPage({ params }: Props) {
   const { slug } = await params;
-  const set = await contentRepository.getSetBySlug(slug);
+  const sets = await contentRepository.getSets();
+  const set = sets.find((item) => item.slug === slug) || null;
   if (!set) notFound();
+  const related = sets.filter((item) => item.slug !== set.slug && item.universe === set.universe).slice(0, 3);
   const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/musica/${set.slug}`;
   const structured = {
     "@context": "https://schema.org",
@@ -92,11 +95,20 @@ export default async function SetDetailPage({ params }: Props) {
           <span className="section-kicker">FULL PLAYER</span>
           <h2>Escucha oficial, sin autoplay.</h2>
           <p>
-            El player se carga solo cuando existe una plataforma oficial configurada. La reproducción
+            El player se carga solo cuando existe un archivo MP3/WAV o una plataforma oficial configurada. La reproducción
             siempre depende de una acción del usuario.
           </p>
         </div>
-        {set.embedUrl ? (
+        {set.audioUrl ? (
+          <div className="native-set-player">
+            <div>
+              <span>{set.audioMimeType === "audio/wav" ? "WAV MASTER" : "MP3 STREAM"}</span>
+              <strong>{set.title}</strong>
+              <small>{set.category} · {set.duration || "duración pendiente"}</small>
+            </div>
+            <SetAudioPlayer item={set} />
+          </div>
+        ) : set.embedUrl ? (
           <iframe
             src={set.embedUrl}
             title={`Player oficial de ${set.title}`}
@@ -106,7 +118,7 @@ export default async function SetDetailPage({ params }: Props) {
         ) : (
           <div className="admin-empty public-empty">
             <h2>Player pendiente.</h2>
-            <p>Agrega un link de SoundCloud, YouTube o Mixcloud desde el admin para activar esta zona.</p>
+            <p>Sube un MP3/WAV en Media Studio o agrega un link de SoundCloud, YouTube o Mixcloud desde el admin.</p>
           </div>
         )}
         <aside className="set-reward-card">
@@ -137,6 +149,31 @@ export default async function SetDetailPage({ params }: Props) {
           <div className="admin-empty public-empty">
             <h2>Tracklist pendiente.</h2>
             <p>Cuando agregues tracks desde el admin aparecerán aquí.</p>
+          </div>
+        )}
+      </section>
+
+      <section className="section set-next-section">
+        <div className="section-heading">
+          <div>
+            <span className="section-kicker">NEXT IN ROTATION</span>
+            <h2>Más sesiones para seguir dentro del universo.</h2>
+          </div>
+        </div>
+        {related.length ? (
+          <div className="set-next-grid">
+            {related.map((item) => (
+              <Link href={`/musica/${item.slug}`} className="set-next-card" key={item.id}>
+                <span>{item.category}</span>
+                <strong>{item.title}</strong>
+                <small>{item.audioUrl ? "Audio propio" : item.provider ? item.provider.toUpperCase() : "Player pendiente"} · {item.duration || "duración pendiente"}</small>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="admin-empty public-empty">
+            <h2>Más sets aparecerán aquí.</h2>
+            <p>Cuando publiques más sesiones del mismo universo, la ficha recomendará automáticamente qué escuchar después.</p>
           </div>
         )}
       </section>
