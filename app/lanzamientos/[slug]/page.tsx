@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, CalendarDays, ExternalLink, Music2, Share2, Sparkles } from "lucide-react";
 import { Countdown } from "@/components/countdown";
+import { TrackedLink } from "@/components/tracked-link";
 import { contentRepository } from "@/lib/data";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -38,6 +39,7 @@ export default async function ReleaseDetailPage({ params }: Props) {
   if (!release) notFound();
   const future = new Date(release.releaseAt) > new Date();
   const primaryUrl = future ? release.presaveUrl : release.listenUrl || release.platforms?.[0]?.url;
+  const visualizer = release.visualizerUrl || youtubeEmbed(release.platforms?.find((link) => /youtube|youtu\.be/i.test(`${link.label} ${link.url}`))?.url);
   const structured = {
     "@context": "https://schema.org",
     "@type": "MusicRecording",
@@ -73,9 +75,9 @@ export default async function ReleaseDetailPage({ params }: Props) {
           {future ? <Countdown date={release.releaseAt} /> : <p className="release-live"><Sparkles /> Ya disponible en plataformas oficiales.</p>}
           <div className="inline-actions">
             {primaryUrl ? (
-              <a className="button primary" href={primaryUrl} target="_blank" rel="noreferrer">
+              <TrackedLink className="button primary" href={primaryUrl} target="_blank" rel="noreferrer" action={future ? "presave_click" : "release_listen_click"} entityType="releases" entityId={release.id} label={release.title}>
                 {future ? "Haz pre-save" : "Escuchar ahora"} <ExternalLink />
-              </a>
+              </TrackedLink>
             ) : (
               <button className="button primary" disabled>{future ? "Pre-save pendiente" : "Links pendientes"}</button>
             )}
@@ -86,12 +88,18 @@ export default async function ReleaseDetailPage({ params }: Props) {
           {release.platforms?.length ? (
             <div className="platform-grid release-detail-platforms">
               {release.platforms.map((link) => (
-                <a key={link.label} href={link.url} target="_blank" rel="noreferrer">
+                <TrackedLink key={link.label} href={link.url} target="_blank" rel="noreferrer" action="platform_click" entityType="releases" entityId={release.id} label={link.label}>
                   <span>{link.label}</span>
                   <ExternalLink />
-                </a>
+                </TrackedLink>
               ))}
             </div>
+          ) : null}
+          {visualizer ? (
+            <section className="release-visualizer">
+              <span>VISUALIZER</span>
+              <iframe src={visualizer} title={`Visualizer de ${release.title}`} allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen loading="lazy" />
+            </section>
           ) : null}
           {release.credits?.length ? (
             <section className="release-credits">
@@ -103,4 +111,15 @@ export default async function ReleaseDetailPage({ params }: Props) {
       </section>
     </article>
   );
+}
+
+function youtubeEmbed(url?: string) {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    const id = parsed.hostname.includes("youtu.be") ? parsed.pathname.slice(1) : parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).pop();
+    return id ? `https://www.youtube.com/embed/${id}` : undefined;
+  } catch {
+    return undefined;
+  }
 }

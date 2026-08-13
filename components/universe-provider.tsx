@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
 import type { Universe } from "@/types/content";
 
 type ContextValue = { universe: Universe; setUniverse: (value: Universe) => void };
@@ -18,8 +18,14 @@ function getServerSnapshot(): Universe { return "iamjoshwa"; }
 
 export function UniverseProvider({ children }: { children: React.ReactNode }) {
   const universe = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const setUniverse = (value: Universe) => { localStorage.setItem("iamjoshwa-universe", value); window.dispatchEvent(new Event(universeEvent)); };
-  const value = useMemo(() => ({ universe, setUniverse }), [universe]);
+  const setUniverse = useCallback((value: Universe) => {
+    if (value === universe) return;
+    document.documentElement.classList.add("universe-swap");
+    window.setTimeout(() => document.documentElement.classList.remove("universe-swap"), 620);
+    localStorage.setItem("iamjoshwa-universe", value);
+    window.dispatchEvent(new Event(universeEvent));
+  }, [universe]);
+  const value = useMemo(() => ({ universe, setUniverse }), [universe, setUniverse]);
   return <UniverseContext.Provider value={value}><div data-universe={universe}>{children}</div></UniverseContext.Provider>;
 }
 

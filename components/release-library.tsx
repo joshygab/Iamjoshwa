@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/env";
 import { useUniverse } from "./universe-provider";
 import { Countdown } from "./countdown";
+import { TrackedLink } from "./tracked-link";
 import type { ReleaseItem } from "@/types/content";
 
 export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
@@ -61,9 +62,9 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
                   Ver ficha
                 </Link>
                 {primaryHref ? (
-                  <a className="button primary" href={primaryHref} onClick={() => future && void presave(item)} target="_blank" rel="noreferrer">
+                  <TrackedLink className="button primary" href={primaryHref} onClick={() => future && void presave(item)} target="_blank" rel="noreferrer" action={future ? "presave_click" : "release_listen_click"} entityType="releases" entityId={item.id} label={item.title}>
                     {future ? "Haz pre-save" : "Escuchar ahora"} <Play />
-                  </a>
+                  </TrackedLink>
                 ) : (
                   <button className="button primary" disabled>
                     {future ? "Pre-save pendiente" : "Enlaces pendientes"}
@@ -74,10 +75,10 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
               {platformLinks.length ? (
                 <div className="platform-grid" aria-label={`Plataformas de ${item.title}`}>
                   {platformLinks.map((link) => (
-                    <a key={`${item.id}-${link.label}`} href={link.url} target="_blank" rel="noreferrer">
+                    <TrackedLink key={`${item.id}-${link.label}`} href={link.url} target="_blank" rel="noreferrer" action="platform_click" entityType="releases" entityId={item.id} label={link.label}>
                       <span>{link.label}</span>
                       <ExternalLink />
-                    </a>
+                    </TrackedLink>
                   ))}
                 </div>
               ) : (
