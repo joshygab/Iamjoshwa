@@ -1938,3 +1938,429 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
     animation: none;
   }
 }
+
+/* IAMJOSHWA Pass level system */
+.pass-level-system {
+  --pass-level-color: #a8a8a8;
+  --pass-level-soft: rgba(168,168,168,.16);
+  --pass-level-glow: rgba(168,168,168,.18);
+  --pass-next-level-color: #4d7cfe;
+}
+
+.pass-level-system:after {
+  content: "";
+  position: fixed;
+  inset: auto -12vw -18vw auto;
+  width: 38vw;
+  height: 38vw;
+  min-width: 360px;
+  min-height: 360px;
+  border-radius: 999px;
+  background: var(--pass-level-glow);
+  filter: blur(70px);
+  opacity: .34;
+  pointer-events: none;
+  transform: translate3d(0,0,0);
+}
+
+.pass-level-system .section-kicker,
+.pass-level-system .pass-live-command article > span,
+.pass-level-system .pass-first-actions svg,
+.pass-level-system .badge-vault .section-heading > svg,
+.pass-level-system .points-timeline .section-heading > svg,
+.pass-level-system .premium-activity svg,
+.pass-level-system .points-timeline li > span,
+.pass-level-system .qr-command-card code {
+  color: var(--pass-level-color);
+}
+
+.level-wallet-card {
+  border-color: color-mix(in srgb, var(--pass-level-color) 34%, rgba(255,255,255,.2));
+  background:
+    radial-gradient(circle at 17% 14%, rgba(255,255,255,.18), transparent 18%),
+    radial-gradient(circle at 86% 18%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(135deg, #1d1d22, #050505 64%, #101013);
+  box-shadow:
+    0 48px 160px rgba(0,0,0,.58),
+    0 0 70px var(--pass-level-glow),
+    inset 0 1px rgba(255,255,255,.1);
+}
+
+.level-wallet-card[data-level="raver"] {
+  background:
+    linear-gradient(115deg, rgba(183,255,60,.06) 0 1px, transparent 1px 22px),
+    radial-gradient(circle at 86% 18%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(135deg, #1a1d17, #050505 64%, #0d100b);
+}
+
+.level-wallet-card[data-level="afterlover"] {
+  background:
+    radial-gradient(circle at 26% 24%, rgba(155,92,255,.12), transparent 18%),
+    radial-gradient(circle at 86% 18%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(135deg, #1d1729, #050505 64%, #100a16);
+}
+
+.level-wallet-card[data-level="day_one"] {
+  background:
+    radial-gradient(circle at 18% 84%, rgba(255,157,61,.1), transparent 20%),
+    radial-gradient(circle at 86% 18%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(135deg, #241b12, #050505 64%, #120d07);
+}
+
+.level-wallet-card[data-level="legend"] {
+  background:
+    linear-gradient(135deg, rgba(232,198,106,.09), transparent 28%),
+    radial-gradient(circle at 86% 18%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(135deg, #242015, #050505 64%, #11100b);
+  box-shadow:
+    0 52px 170px rgba(0,0,0,.6),
+    0 0 76px rgba(232,198,106,.2),
+    inset 0 1px rgba(255,255,255,.12);
+}
+
+.pass-top-label {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  text-align: right;
+}
+
+.pass-top-label span,
+.pass-top-label small,
+.pass-level-row small,
+.pass-xp-strip small {
+  color: rgba(255,255,255,.68);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.pass-top-label span,
+.pass-level-row strong {
+  color: var(--pass-level-color);
+}
+
+.pass-identity-block {
+  display: grid;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.level-wallet-card .pass-identity-block small {
+  color: var(--pass-level-color);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.level-wallet-card .pass-identity-block strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font: 800 clamp(44px, 7vw, 78px)/.78 var(--font-display);
+  letter-spacing: -.075em;
+  color: white;
+}
+
+.pass-identity-block span {
+  color: rgba(255,255,255,.7);
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.pass-level-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 9px;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--pass-level-color) 40%, rgba(255,255,255,.1));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pass-level-color) 10%, rgba(0,0,0,.34));
+  padding: 9px 12px;
+  margin-top: 20px;
+}
+
+.pass-level-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--pass-level-color);
+  box-shadow: 0 0 18px var(--pass-level-color);
+}
+
+.level-wallet-card .pass-level-row strong {
+  overflow-wrap: normal;
+  font: 800 14px/1 var(--font-sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.pass-xp-strip {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(0,0,0,.24);
+  padding: 14px;
+  margin-top: 18px;
+}
+
+.pass-xp-strip > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.pass-xp-strip span {
+  color: white;
+  font-weight: 800;
+}
+
+.pass-xp-strip small {
+  text-align: right;
+}
+
+.pass-xp-track {
+  height: 8px;
+  margin-top: 0;
+}
+
+.pass-level-system .level-progress-track span {
+  background: linear-gradient(90deg, var(--pass-level-color), color-mix(in srgb, var(--pass-level-color) 38%, white));
+  box-shadow: 0 0 34px var(--pass-level-glow);
+}
+
+.pass-next-level-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pass-next-level-line span:last-child {
+  color: var(--pass-next-level-color);
+}
+
+.pass-view-nav {
+  position: sticky;
+  top: 78px;
+  z-index: 20;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  gap: 8px;
+  margin: 30px auto 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(8,7,10,.72);
+  padding: 8px;
+  backdrop-filter: blur(18px) saturate(1.15);
+  box-shadow: 0 18px 70px rgba(0,0,0,.32);
+}
+
+.pass-view-nav a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  transition: color .22s ease, background .22s ease, transform .22s ease;
+}
+
+.pass-view-nav a:hover,
+.pass-view-nav a:focus-visible {
+  color: white;
+  background: var(--pass-level-soft);
+  transform: translateY(-1px);
+}
+
+.level-qr-frame {
+  border: 1px solid color-mix(in srgb, var(--pass-level-color) 45%, rgba(255,255,255,.2));
+  box-shadow: 0 28px 100px rgba(0,0,0,.42), 0 0 46px var(--pass-level-glow);
+}
+
+.pass-level-system .pass-stats article {
+  border-color: color-mix(in srgb, var(--pass-level-color) 18%, rgba(255,255,255,.1));
+}
+
+.pass-level-system .pass-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pass-level-system .pass-stats article:nth-child(1) strong,
+.pass-level-system .pass-stats article:nth-child(3) strong {
+  color: var(--pass-level-color);
+}
+
+.pass-level-system .badge-token.unlocked {
+  border-color: color-mix(in srgb, var(--pass-level-color) 28%, rgba(255,255,255,.1));
+  box-shadow: inset 0 1px rgba(255,255,255,.08);
+}
+
+.level-up-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 45%, var(--pass-level-glow), transparent 26rem),
+    rgba(0,0,0,.74);
+  backdrop-filter: blur(18px);
+  animation: levelOverlayIn .28s ease both;
+}
+
+.level-up-card {
+  position: relative;
+  width: min(520px, 100%);
+  border: 1px solid color-mix(in srgb, var(--pass-level-color) 42%, rgba(255,255,255,.12));
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 82% 10%, var(--pass-level-glow), transparent 18rem),
+    linear-gradient(145deg, rgba(255,255,255,.1), rgba(255,255,255,.025));
+  box-shadow: 0 42px 150px rgba(0,0,0,.62), 0 0 70px var(--pass-level-glow);
+  padding: clamp(24px, 5vw, 44px);
+  overflow: hidden;
+  animation: levelCardIn .42s cubic-bezier(.2,.9,.2,1) both;
+}
+
+.level-up-card:before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from 110deg, transparent, var(--pass-level-glow), rgba(255,255,255,.16), transparent);
+  opacity: .6;
+  animation: levelSignalSpin 8s linear infinite;
+}
+
+.level-up-card > * {
+  position: relative;
+}
+
+.level-up-card > span {
+  color: var(--pass-level-color);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.level-up-card h2 {
+  margin: 12px 0;
+  color: white;
+  font: 800 clamp(56px, 13vw, 104px)/.82 var(--font-display);
+  letter-spacing: -.08em;
+}
+
+.level-up-card p {
+  color: #ddd;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+@keyframes levelOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes levelCardIn {
+  from { opacity: 0; transform: translate3d(0,22px,0) scale(.96); filter: blur(10px); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
+}
+
+@keyframes levelSignalSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media(max-width:900px) {
+  .pass-view-nav {
+    top: 72px;
+    overflow-x: auto;
+  }
+
+  .pass-xp-strip > div:first-child,
+  .pass-next-level-line {
+    display: grid;
+  }
+
+  .pass-level-system .pass-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pass-xp-strip small {
+    text-align: left;
+  }
+}
+
+@media(max-width:720px) {
+  .pass-level-system:after {
+    width: 82vw;
+    height: 82vw;
+    right: -42vw;
+    bottom: 8vh;
+    opacity: .24;
+  }
+
+  .pass-view-nav {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 20px;
+    margin-top: 22px;
+  }
+
+  .pass-view-nav a {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
+  }
+
+  .pass-level-system .pass-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .level-wallet-card .pass-identity-block strong {
+    font-size: clamp(42px, 15vw, 64px);
+  }
+
+  .pass-level-row {
+    grid-template-columns: auto auto;
+    width: 100%;
+  }
+
+  .pass-level-row strong {
+    grid-column: 1 / -1;
+  }
+
+  .pass-xp-strip {
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .level-up-card {
+    border-radius: 26px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .pass-view-nav a,
+  .pass-view-nav a:hover,
+  .pass-view-nav a:focus-visible {
+    transition: none;
+    transform: none;
+  }
+
+  .level-up-overlay,
+  .level-up-card,
+  .level-up-card:before {
+    animation: none;
+  }
+}

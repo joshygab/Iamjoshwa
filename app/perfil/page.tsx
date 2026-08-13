@@ -2,22 +2,17 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
+import type { CSSProperties } from "react";
 import { CalendarDays, Gift, LockKeyhole, Music2, QrCode, ShieldCheck, Sparkles, Ticket, Trophy, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { DeleteAccountButton } from "@/components/delete-account-button";
+import { LevelUpSignal } from "@/components/pass/level-up-signal";
+import { getLevelConfig, getLevelFromPoints, getLevelNumber, getNextLevelFromPoints } from "@/config/levels";
 import { contentRepository } from "@/lib/data";
 import { saveAvatar, savePreferences } from "./actions";
 
 const genres = ["House", "Tech House", "Afro House", "Latin House", "Disco", "Nu Disco", "Hard Bounce", "Hard Trance", "Hard Techno", "Euro Dance"];
-const fallbackLevels = [
-  { name: "Listener", min: 0 },
-  { name: "Inner Circle", min: 100 },
-  { name: "Raver", min: 350 },
-  { name: "Afterlover", min: 800 },
-  { name: "Day One", min: 1600 },
-  { name: "Legend", min: 3000 },
-];
 const requestTime = Date.now();
 
 export const metadata = { title: "Mi perfil" };
@@ -54,15 +49,19 @@ export default async function ProfilePage() {
     contentRepository.getRewards(),
   ]);
 
-  const total = Number(points?.points || status?.points || 0);
-  const fallbackCurrent = fallbackLevels.toReversed().find((item) => total >= item.min) || fallbackLevels[0];
-  const fallbackNext = fallbackLevels.find((item) => item.min > total);
-  const level = String(status?.level_name || fallbackCurrent.name);
-  const levelMin = Number(status?.level_min_points || fallbackCurrent.min || 0);
-  const nextLevel = status?.next_level_name ? String(status.next_level_name) : fallbackNext?.name;
-  const nextLevelPoints = status?.next_level_points ? Number(status.next_level_points) : fallbackNext?.min;
-  const progress = nextLevelPoints ? Math.max(0, Math.min(100, Math.round(((total - levelMin) / (nextLevelPoints - levelMin)) * 100))) : 100;
-  const pointsToNext = nextLevelPoints ? Math.max(0, nextLevelPoints - total) : 0;
+  const pointsBalance = Number(points?.points || 0);
+  const xpTotal = Number(status?.points || pointsBalance || 0);
+  const fallbackCurrent = getLevelFromPoints(xpTotal);
+  const fallbackNext = getNextLevelFromPoints(xpTotal);
+  const level = String(status?.level_name || fallbackCurrent.label);
+  const levelConfig = getLevelConfig(level);
+  const levelNumber = getLevelNumber(level);
+  const levelMin = Number(status?.level_min_points || fallbackCurrent.minPoints || 0);
+  const nextLevelConfig = status?.next_level_name ? getLevelConfig(String(status.next_level_name)) : fallbackNext;
+  const nextLevel = nextLevelConfig?.label;
+  const nextLevelPoints = status?.next_level_points ? Number(status.next_level_points) : fallbackNext?.minPoints;
+  const progress = nextLevelPoints ? Math.max(0, Math.min(100, Math.round(((xpTotal - levelMin) / (nextLevelPoints - levelMin)) * 100))) : 100;
+  const pointsToNext = nextLevelPoints ? Math.max(0, nextLevelPoints - xpTotal) : 0;
   const memberNumber = String(profile?.member_number || 0).padStart(6, "0");
   const displayName = String(profile?.public_alias || profile?.display_name || "Listener");
   const city = String(profile?.city || "Ciudad sin configurar");
@@ -78,14 +77,21 @@ export default async function ProfilePage() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
   const latestDrop = releases.filter((release) => release.universe === favoriteProject)[0];
   const vaultDrop = rewards.find((reward) => !reward.project || reward.project === favoriteProject);
+  const passLevelStyle = {
+    "--pass-level-color": levelConfig.color,
+    "--pass-level-soft": levelConfig.softColor,
+    "--pass-level-glow": levelConfig.glow,
+    "--pass-next-level-color": nextLevelConfig?.color || levelConfig.color,
+  } as CSSProperties;
 
   return (
-    <section className="dashboard-page premium-pass-page">
+    <section className="dashboard-page premium-pass-page pass-level-system" data-level={levelConfig.key} style={passLevelStyle}>
+      <LevelUpSignal level={level} memberNumber={memberNumber} points={xpTotal} />
       <div className="profile-head pass-hero-head">
         <div>
-          <span className="section-kicker">IAMJOSHWA PASS</span>
+          <span className="section-kicker">JOSH PASS · {levelConfig.label}</span>
           <h1>{displayName}</h1>
-          <p>{city} · Miembro #{memberNumber}</p>
+          <p>{city} · Member #{memberNumber} · {levelConfig.personality}</p>
         </div>
         <div className="inline-actions">
           <Link className="button primary" href="/recompensas">
@@ -98,7 +104,7 @@ export default async function ProfilePage() {
       </div>
 
       <section className="pass-console">
-        <div className="pass-card profile-pass premium-wallet-card" data-project={favoriteProject}>
+        <div className="pass-card profile-pass premium-wallet-card level-wallet-card" data-project={favoriteProject} data-level={levelConfig.key}>
           <div className="pass-card-shine" />
           <div className="pass-card-top">
             {avatarUrl ? (
@@ -106,13 +112,30 @@ export default async function ProfilePage() {
             ) : (
               <div className="pass-avatar placeholder">{displayName.slice(0, 1).toUpperCase()}</div>
             )}
-            <span>IAMJOSHWA PASS</span>
+            <div className="pass-top-label">
+              <span>JOSH PASS</span>
+              <small>INNER CIRCLE ACCESS</small>
+            </div>
           </div>
-          <strong>
-            {memberNumber}
-            <br />
-              {level.toUpperCase()}
-          </strong>
+          <div className="pass-identity-block">
+            <small>@{displayName.replace(/^@/, "").toLowerCase()}</small>
+            <strong>{displayName}</strong>
+            <span>{city} · {String(profile?.country || "MX").toUpperCase()}</span>
+          </div>
+          <div className="pass-level-row" aria-label={`Nivel ${levelNumber}, ${levelConfig.label}`}>
+            <span className="pass-level-dot" />
+            <small>LEVEL {String(levelNumber).padStart(2, "0")}</small>
+            <strong>{levelConfig.label}</strong>
+          </div>
+          <div className="pass-xp-strip">
+            <div>
+              <span>{xpTotal.toLocaleString("es-MX")} / {nextLevelPoints ? nextLevelPoints.toLocaleString("es-MX") : xpTotal.toLocaleString("es-MX")} XP</span>
+              <small>{nextLevel ? `${pointsToNext.toLocaleString("es-MX")} XP para ${nextLevel}` : "Nivel máximo desbloqueado"}</small>
+            </div>
+            <div className="level-progress-track pass-xp-track" aria-label={`Progreso ${progress}%`}>
+              <span style={{ width: `${progress}%` }} />
+            </div>
+          </div>
           <small>{displayName} · {city}</small>
           <div className="profile-pass-meta">
             <span>{favoriteProject === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA SIGNAL"}</span>
@@ -128,12 +151,16 @@ export default async function ProfilePage() {
         <div className="pass-status-panel">
           <div className="profile-grid pass-stats">
             <article>
-              <span>PUNTOS</span>
-              <strong>{total}</strong>
+              <span>XP</span>
+              <strong>{xpTotal.toLocaleString("es-MX")}</strong>
             </article>
             <article>
-              <span>NIVEL</span>
-              <strong>{level}</strong>
+              <span>PUNTOS</span>
+              <strong>{pointsBalance.toLocaleString("es-MX")}</strong>
+            </article>
+            <article>
+              <span>BADGES</span>
+              <strong>{unlockedBadges.length}</strong>
             </article>
             <article>
               <span>INVITADOS</span>
@@ -142,12 +169,16 @@ export default async function ProfilePage() {
           </div>
           <article className="level-progress-card">
             <div>
-              <span className="section-kicker">PROGRESO DE NIVEL</span>
-              <h2>{nextLevel ? `${pointsToNext} puntos para ${nextLevel}` : "Nivel máximo desbloqueado"}</h2>
+              <span className="section-kicker">PROGRESO DE XP</span>
+              <h2>{nextLevel ? `${pointsToNext.toLocaleString("es-MX")} XP para ${nextLevel}` : "Nivel máximo desbloqueado"}</h2>
               <p>{nextLevel ? `Vas al ${progress}% del camino. Cada acción verificada suma desde funciones seguras del servidor.` : "Ya estás en la cima del Inner Circle."}</p>
             </div>
             <div className="level-progress-track" aria-label={`Progreso ${progress}%`}>
               <span style={{ width: `${progress}%` }} />
+            </div>
+            <div className="pass-next-level-line">
+              <span>Actual · {levelConfig.label}</span>
+              <span>{nextLevel ? `Siguiente · ${nextLevel}` : "Final tier · Legend"}</span>
             </div>
           </article>
           <div className="pass-first-actions">
@@ -200,16 +231,22 @@ export default async function ProfilePage() {
         </article>
       </section>
 
-      <section className="pass-command-grid">
+      <nav className="pass-view-nav" aria-label="Vistas del IAMJOSHWA Pass">
+        <a href="#pass-view-pass">PASS</a>
+        <a href="#pass-view-activity">ACTIVITY</a>
+        <a href="#pass-view-collection">COLLECTION</a>
+      </nav>
+
+      <section id="pass-view-pass" className="pass-command-grid">
         <article className="qr-command-card">
-          <div className="qr-frame">
+          <div className="qr-frame level-qr-frame">
             <Image src={qr} alt="Código QR de invitación personal" width={220} height={220} unoptimized />
           </div>
           <div>
-            <span className="section-kicker">QR PERSONAL</span>
+            <span className="section-kicker">QR PERSONAL · NIVEL {String(levelNumber).padStart(2, "0")}</span>
             <h2>Tu entrada al Inner Circle.</h2>
             <code>{inviteUrl}</code>
-            <p>Comparte este enlace. Las recompensas solo se procesan cuando la cuenta invitada se confirma.</p>
+            <p>El QR se mantiene blanco y negro para máxima lectura. El marco usa el color de tu nivel sin alterar la seguridad visual del código.</p>
             <Link className="button secondary" href="/recompensas">
               <QrCode /> Ver reglas
             </Link>
@@ -228,7 +265,7 @@ export default async function ProfilePage() {
         </form>
       </section>
 
-      <section className="pass-showcase-grid">
+      <section id="pass-view-collection" className="pass-showcase-grid">
         <article className="badge-vault">
           <div className="section-heading">
             <div>
@@ -258,8 +295,8 @@ export default async function ProfilePage() {
         <article className="points-timeline">
           <div className="section-heading">
             <div>
-              <span className="section-kicker">LEDGER</span>
-              <h2>Historial de puntos</h2>
+              <span className="section-kicker">SIGNAL LEDGER</span>
+              <h2>Historial de actividad</h2>
             </div>
             <Zap />
           </div>
@@ -281,7 +318,7 @@ export default async function ProfilePage() {
         </article>
       </section>
 
-      <section className="profile-activity premium-activity">
+      <section id="pass-view-activity" className="profile-activity premium-activity">
         <div>
           <CalendarDays />
           <h2>Eventos asistidos</h2>
