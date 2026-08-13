@@ -26,9 +26,10 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
   const visible = items.filter((item) => item.universe === universe);
   if (!visible.length) {
     return (
-      <div className="admin-empty public-empty">
-        <h2>Sin lanzamientos publicados.</h2>
-        <p>Cuando publiques una canción desde el admin aparecerá aquí automáticamente.</p>
+      <div className="admin-empty public-empty branded-empty">
+        <span>NEXT DROP</span>
+        <h2>NEW MUSIC INCOMING.</h2>
+        <p>El siguiente lanzamiento todavía está en cola. Activa tu Pass para recibir pre-save, links y transmisión de salida.</p>
       </div>
     );
   }
@@ -53,7 +54,7 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
             <div>
               <span>{item.type}</span>
               <h2>{item.title}</h2>
-              <p>{item.story || "Historia del lanzamiento pendiente de publicar."}</p>
+              <p>{item.story || "La historia oficial de este lanzamiento está reservada para la siguiente transmisión."}</p>
               {future ? (
                 <Countdown
                   targetDate={item.releaseAt}
@@ -82,7 +83,7 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
                   </TrackedLink>
                 ) : (
                   <button className="button primary" disabled>
-                    {future ? "Pre-save pendiente" : "Enlaces pendientes"}
+                    {future ? "Pre-save queued" : "Links queued"}
                   </button>
                 )}
               </div>
@@ -97,7 +98,7 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
                   ))}
                 </div>
               ) : (
-                <p className="form-note">Agrega links de Spotify, Apple Music, YouTube u otras plataformas desde Admin → Lanzamientos.</p>
+                <p className="form-note">Platform links queued. Spotify, Apple Music, YouTube y SoundCloud pueden activarse desde Admin → Lanzamientos.</p>
               )}
             </div>
           </article>

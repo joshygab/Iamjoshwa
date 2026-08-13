@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { SiteShell } from "@/components/site-shell";
 import { UniverseProvider } from "@/components/universe-provider";
 import { PlayerProvider } from "@/components/player-provider";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <UniverseProvider>
           <PlayerProvider>
+            <PwaRegister />
             <SiteShell>{children}</SiteShell>
           </PlayerProvider>
         </UniverseProvider>

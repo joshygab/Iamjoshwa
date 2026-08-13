@@ -114,8 +114,8 @@ export function VaultExperience({ rewards, sets = [], balance, signedIn, now }: 
             </Link>
           )) : (
             <article>
-              <strong>Audio pendiente</strong>
-              <span>Cuando asignes MP3/WAV a tus sets, aparecerán aquí como señales listas para crecer hacia The Vault.</span>
+              <strong>Audio signal queued</strong>
+              <span>Los MP3/WAV autorizados pueden convertirse en señales privadas y crecer hacia The Vault.</span>
             </article>
           )}
         </div>
@@ -164,9 +164,9 @@ export function VaultExperience({ rewards, sets = [], balance, signedIn, now }: 
         ) : (
           <div className="vault-empty-state">
             <LockKeyhole />
-            <h2>El Vault está listo, pero aún no hay drops publicados.</h2>
-            <p>Cuando subas recompensas, demos autorizados, edits, PDFs, sets privados o descargas limitadas desde el admin, aparecerán aquí sin editar código.</p>
-            <Link className="button primary" href="/admin/recompensas">Administrar drops</Link>
+            <h2>VAULT SEALED.</h2>
+            <p>La primera señal privada todavía no fue liberada. Mantén tu Pass activo para recibir códigos, drops y accesos limitados.</p>
+            <Link className="button primary" href={signedIn ? "/recompensas" : "/acceso?next=%2Fthe-vault"}>{signedIn ? "Ver recompensas" : "Activar Pass"}</Link>
           </div>
         )}
       </section>

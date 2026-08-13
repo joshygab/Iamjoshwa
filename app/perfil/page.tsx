@@ -64,7 +64,7 @@ export default async function ProfilePage() {
   const pointsToNext = nextLevelPoints ? Math.max(0, nextLevelPoints - xpTotal) : 0;
   const memberNumber = String(profile?.member_number || 0).padStart(6, "0");
   const displayName = String(profile?.public_alias || profile?.display_name || "Listener");
-  const city = String(profile?.city || "Ciudad sin configurar");
+  const city = String(profile?.city || "Signal city");
   const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const referralCode = String(profile?.referral_code || "pendiente");
   const inviteUrl = referralCode === "pendiente" ? `${origin}/acceso` : `${origin}/r/${referralCode}`;
@@ -205,8 +205,8 @@ export default async function ProfilePage() {
         <article>
           <Music2 />
           <span>LATEST DROP</span>
-          <h2>{latestDrop?.title || "Sin lanzamiento activo"}</h2>
-          <p>{latestDrop?.story || "Cuando publiques un lanzamiento para tu universo favorito aparecerá aquí."}</p>
+          <h2>{latestDrop?.title || "NEW DROP INCOMING"}</h2>
+          <p>{latestDrop?.story || "Tu universo favorito todavía no liberó un lanzamiento activo. Mantén el Pass listo para recibir la señal."}</p>
           <Link className="button secondary" href={latestDrop ? `/lanzamientos/${latestDrop.slug}` : "/lanzamientos"}>
             Ver música
           </Link>
@@ -214,8 +214,8 @@ export default async function ProfilePage() {
         <article>
           <Ticket />
           <span>NEXT SHOW</span>
-          <h2>{nextEvent?.name || "Sin fecha activa"}</h2>
-          <p>{nextEvent ? `${nextEvent.city} · ${formatDate(nextEvent.date)}` : "Cuando publiques una fecha aparecerá aquí como acceso rápido del Pass."}</p>
+          <h2>{nextEvent?.name || "NEXT SIGNAL STANDBY"}</h2>
+          <p>{nextEvent ? `${nextEvent.city} · ${formatDate(nextEvent.date)}` : "La próxima fecha oficial todavía no fue revelada para tu universo favorito."}</p>
           <Link className="button secondary" href={nextEvent ? `/fechas/${nextEvent.slug}` : "/fechas"}>
             Ver shows
           </Link>
@@ -224,7 +224,7 @@ export default async function ProfilePage() {
           <LockKeyhole />
           <span>THE VAULT</span>
           <h2>{vaultDrop?.name || "Vault listo"}</h2>
-          <p>{vaultDrop ? `${vaultDrop.pointsCost} puntos · ${vaultDrop.description}` : "Crea drops o recompensas desde admin para activar accesos privados."}</p>
+          <p>{vaultDrop ? `${vaultDrop.pointsCost} puntos · ${vaultDrop.description}` : "Vault sealed. Las recompensas privadas se activarán como drops oficiales."}</p>
           <Link className="button primary" href="/the-vault">
             Abrir Vault
           </Link>
@@ -313,7 +313,7 @@ export default async function ProfilePage() {
               ))}
             </ol>
           ) : (
-            <p className="muted">Tus movimientos aparecerán aquí cuando escuches sets, confirmes asistencia o desbloquees recompensas.</p>
+            <p className="muted">SIGNAL LEDGER listo. Tus acciones verificadas empezarán a escribir actividad aquí.</p>
           )}
         </article>
       </section>
@@ -322,12 +322,12 @@ export default async function ProfilePage() {
         <div>
           <CalendarDays />
           <h2>Eventos asistidos</h2>
-          {attendance?.length ? attendance.map((item) => <p key={item.id}>{relationName(item.events)} · {formatDate(item.checked_in_at)}</p>) : <p>Tus check-ins verificados aparecerán aquí.</p>}
+          {attendance?.length ? attendance.map((item) => <p key={item.id}>{relationName(item.events)} · {formatDate(item.checked_in_at)}</p>) : <p>Event memory standby. Tu primer check-in activará esta sección.</p>}
         </div>
         <div>
           <Gift />
           <h2>Contenido desbloqueado</h2>
-          {redemptions?.length ? redemptions.map((item) => <p key={item.id}>{relationName(item.rewards)} · {item.status}</p>) : <p>Aún no has canjeado recompensas.</p>}
+          {redemptions?.length ? redemptions.map((item) => <p key={item.id}>{relationName(item.rewards)} · {item.status}</p>) : <p>ACCESS QUEUED. Tus canjes y drops desbloqueados vivirán aquí.</p>}
         </div>
         <div>
           <Sparkles />
@@ -393,6 +393,6 @@ function relationName(value: unknown) {
 }
 
 function formatDate(value: string | null | undefined) {
-  if (!value) return "Fecha pendiente";
+  if (!value) return "Date queued";
   return new Date(value).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
 }

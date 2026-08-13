@@ -99,7 +99,7 @@ export function EventList({ items, now }: { items: EventItem[]; now: number }) {
               ))}
             </ol>
           ) : (
-            <p className="muted">No hay eventos para mostrar con estos filtros.</p>
+            <p className="muted">NO ACTIVE SIGNAL con estos filtros.</p>
           )}
         </aside>
 
@@ -120,7 +120,7 @@ export function EventList({ items, now }: { items: EventItem[]; now: number }) {
               <MapPin />
               {value}
             </button>
-          )) : <span className="muted">Sin ciudades publicadas todavía.</span>}
+          )) : <span className="muted">CITY SIGNAL en espera.</span>}
         </div>
       </section>
     </div>
@@ -187,9 +187,10 @@ function EventCard({ item, past }: { item: EventItem; past: boolean }) {
 
 function EmptyShows() {
   return (
-    <div className="admin-empty public-empty shows-empty">
-      <h2>No hay eventos con estos filtros.</h2>
-      <p>Prueba otra ciudad, estado o periodo. Solo se muestran fechas oficiales publicadas.</p>
+    <div className="admin-empty public-empty branded-empty shows-empty">
+      <span>NEXT SIGNAL</span>
+      <h2>NO ACTIVE SIGNAL.</h2>
+      <p>Cambia ciudad, estado o periodo para encontrar la próxima transmisión oficial.</p>
     </div>
   );
 }

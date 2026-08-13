@@ -107,7 +107,7 @@ export default async function ReleaseDetailPage({ params }: Props) {
                 {future ? "Haz pre-save" : "Escuchar ahora"} <ExternalLink />
               </TrackedLink>
             ) : (
-              <button className="button primary" disabled>{future ? "Pre-save pendiente" : "Links pendientes"}</button>
+              <button className="button primary" disabled>{future ? "Pre-save queued" : "Links queued"}</button>
             )}
             <a className="button secondary" href={`https://wa.me/?text=${encodeURIComponent(`Escucha ${release.title}: ${process.env.NEXT_PUBLIC_SITE_URL || ""}/lanzamientos/${release.slug}`)}`} target="_blank" rel="noreferrer">
               Compartir <Share2 />

@@ -1,5 +1,112 @@
 "use client";
-import{CalendarPlus,Copy,MapPin,MessageCircle,Ticket,UserCheck}from"lucide-react";import{useState}from"react";import{createClient}from"@/lib/supabase/client";import{isSupabaseConfigured,publicEnv}from"@/lib/env";import{TrackedLink}from"./tracked-link";
-type Data={id:string;slug:string;name:string;date:string;venue:string;city:string;ticketUrl?:string;mapUrl?:string;status:string;demo?:boolean};
-export function EventActions({event}:{event:Data}){const[state,setState]=useState("");const end=new Date(new Date(event.date).getTime()+2*60*60*1000).toISOString();const google=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${calendarDate(event.date)}/${calendarDate(end)}&location=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;const shareUrl=`${publicEnv.NEXT_PUBLIC_SITE_URL}/fechas/${event.slug}`;async function record(action:"confirm_attendance"|"share"){if(!isSupabaseConfigured||event.demo)return null;const db=createClient();const{data:{user}}=await db.auth.getUser();if(!user)return null;const{data}=await db.rpc("record_fan_action",{p_action:action,p_source_id:event.id});return data as {awarded?:boolean;points?:number}|null}async function going(){if(!isSupabaseConfigured)return;const db=createClient();const{data:{user}}=await db.auth.getUser();if(!user){window.location.href="/acceso";return}const{error}=await db.from("event_attendees").upsert({event_id:event.id,user_id:user.id,status:"going"});if(error){setState("No fue posible confirmar.");return}const points=await record("confirm_attendance");setState(points?.awarded?`Asistencia confirmada. +${points.points} puntos.`:"Asistencia confirmada.")}async function copy(){await navigator.clipboard.writeText(window.location.href);const points=await record("share");setState(points?.awarded?`Enlace copiado. +${points.points} puntos.`:"Enlace copiado.")}async function share(){void record("share")}const waitlist=event.status==="Lista de espera"||event.status==="Sold out";return <><div className="event-actions">{event.ticketUrl?<TrackedLink className="button primary sticky-ticket" href={event.ticketUrl} target="_blank" rel="noreferrer" action="ticket_click" entityType="events" entityId={event.id} label={event.name}><Ticket/>Comprar boletos</TrackedLink>:<button className="button primary" disabled><Ticket/>{waitlist?"Lista de espera pendiente":"Boletos por anunciar"}</button>}<button className="button secondary" onClick={going} disabled={!isSupabaseConfigured||event.demo}><UserCheck/>{isSupabaseConfigured&&!event.demo?"Voy a asistir":"Asistencia · Fase 4"}</button><TrackedLink className="button secondary" href={google} target="_blank" rel="noreferrer" action="calendar_click" entityType="events" entityId={event.id} label={event.name}><CalendarPlus/>Google Calendar</TrackedLink><a className="icon-button" aria-label="Descargar archivo de calendario" href={`/api/events/${event.id}/ics`}><CalendarPlus/></a>{event.mapUrl&&<TrackedLink className="icon-button" aria-label="Abrir mapa" href={event.mapUrl} target="_blank" rel="noreferrer" action="map_click" entityType="events" entityId={event.id} label={event.name}><MapPin/></TrackedLink>}<a className="icon-button" aria-label="Compartir por WhatsApp" onClick={share} href={`https://wa.me/?text=${encodeURIComponent(`${event.name} — ${shareUrl}`)}`} target="_blank" rel="noreferrer"><MessageCircle/></a><button className="icon-button" aria-label="Copiar enlace" onClick={copy}><Copy/></button></div>{state&&<p className="success-alert" role="status">{state}</p>}</>}
-function calendarDate(value:string){return new Date(value).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"")}
+
+import { CalendarPlus, Copy, MapPin, MessageCircle, Ticket, UserCheck } from "lucide-react";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured, publicEnv } from "@/lib/env";
+import { TrackedLink } from "./tracked-link";
+
+type Data = {
+  id: string;
+  slug: string;
+  name: string;
+  date: string;
+  venue: string;
+  city: string;
+  ticketUrl?: string;
+  mapUrl?: string;
+  status: string;
+  demo?: boolean;
+};
+
+export function EventActions({ event }: { event: Data }) {
+  const [state, setState] = useState("");
+  const end = new Date(new Date(event.date).getTime() + 2 * 60 * 60 * 1000).toISOString();
+  const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${calendarDate(event.date)}/${calendarDate(end)}&location=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
+  const shareUrl = `${publicEnv.NEXT_PUBLIC_SITE_URL}/fechas/${event.slug}`;
+
+  async function record(action: "confirm_attendance" | "share") {
+    if (!isSupabaseConfigured || event.demo) return null;
+    const db = createClient();
+    const {
+      data: { user },
+    } = await db.auth.getUser();
+    if (!user) return null;
+    const { data } = await db.rpc("record_fan_action", { p_action: action, p_source_id: event.id });
+    return data as { awarded?: boolean; points?: number } | null;
+  }
+
+  async function going() {
+    if (!isSupabaseConfigured) return;
+    const db = createClient();
+    const {
+      data: { user },
+    } = await db.auth.getUser();
+    if (!user) {
+      window.location.href = "/acceso";
+      return;
+    }
+
+    const { error } = await db.from("event_attendees").upsert({ event_id: event.id, user_id: user.id, status: "going" });
+    if (error) {
+      setState("SIGNAL INTERRUPTED. Intenta confirmar otra vez.");
+      return;
+    }
+
+    const points = await record("confirm_attendance");
+    setState(points?.awarded ? `SIGNAL RECEIVED. +${points.points} puntos.` : "SIGNAL RECEIVED. Asistencia confirmada.");
+  }
+
+  async function copy() {
+    await navigator.clipboard.writeText(window.location.href);
+    const points = await record("share");
+    setState(points?.awarded ? `SAVED TO PASS. +${points.points} puntos.` : "SAVED TO PASS. Enlace copiado.");
+  }
+
+  async function share() {
+    void record("share");
+  }
+
+  const waitlist = event.status === "Lista de espera" || event.status === "Sold out";
+
+  return (
+    <>
+      <div className="event-actions">
+        {event.ticketUrl ? (
+          <TrackedLink className="button primary sticky-ticket" href={event.ticketUrl} target="_blank" rel="noreferrer" action="ticket_click" entityType="events" entityId={event.id} label={event.name}>
+            <Ticket /> Comprar boletos
+          </TrackedLink>
+        ) : (
+          <button className="button primary" disabled>
+            <Ticket /> {waitlist ? "Waitlist queued" : "Tickets incoming"}
+          </button>
+        )}
+        <button className="button secondary" onClick={going} disabled={!isSupabaseConfigured || event.demo}>
+          <UserCheck /> {isSupabaseConfigured && !event.demo ? "Voy a asistir" : "Attendance queued"}
+        </button>
+        <TrackedLink className="button secondary" href={google} target="_blank" rel="noreferrer" action="calendar_click" entityType="events" entityId={event.id} label={event.name}>
+          <CalendarPlus /> Google Calendar
+        </TrackedLink>
+        <a className="icon-button" aria-label="Descargar archivo de calendario" href={`/api/events/${event.id}/ics`}>
+          <CalendarPlus />
+        </a>
+        {event.mapUrl ? (
+          <TrackedLink className="icon-button" aria-label="Abrir mapa" href={event.mapUrl} target="_blank" rel="noreferrer" action="map_click" entityType="events" entityId={event.id} label={event.name}>
+            <MapPin />
+          </TrackedLink>
+        ) : null}
+        <a className="icon-button" aria-label="Compartir por WhatsApp" onClick={share} href={`https://wa.me/?text=${encodeURIComponent(`${event.name} — ${shareUrl}`)}`} target="_blank" rel="noreferrer">
+          <MessageCircle />
+        </a>
+        <button className="icon-button" aria-label="Copiar enlace" onClick={copy}>
+          <Copy />
+        </button>
+      </div>
+      {state ? <p className="success-alert" role="status">{state}</p> : null}
+    </>
+  );
+}
+
+function calendarDate(value: string) {
+  return new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+}

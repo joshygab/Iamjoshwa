@@ -283,7 +283,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
             </div>
           </section>
         ) : (
-          <EmptySection kicker="NEXT SIGNAL" title="COMING SOON" body="La siguiente fecha aparecerá aquí cuando se publique desde el CMS." ctaHref="/fechas" ctaLabel="Ver shows" />
+          <EmptySection kicker="NEXT SIGNAL" title="COMING SOON" body="La próxima transmisión oficial todavía no fue revelada. Mantén el Pass activo para recibir la primera señal." ctaHref="/fechas" ctaLabel="Ver shows" />
         )
       ) : null}
 
@@ -324,7 +324,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
               ) : null}
             </div>
           ) : (
-            <EmptySection kicker="NEW SOUND" title="INCOMING" body="Sets y lanzamientos aparecerán aquí cuando se publiquen desde el admin." ctaHref="/musica" ctaLabel="Abrir música" />
+            <EmptySection kicker="NEW SOUND" title="INCOMING" body="La siguiente señal sonora está en preparación. Entra a Música para activar el player cuando el drop esté disponible." ctaHref="/musica" ctaLabel="Abrir música" />
           )}
         </section>
       ) : null}
@@ -415,10 +415,10 @@ export function FilteredList({ kind, items }: { kind: "events" | "sets" | "relea
 
   if (!filtered.length) {
     const empty = kind === "events"
-      ? ["NEXT SIGNAL", "COMING SOON", "La próxima fecha aparecerá aquí cuando se publique oficialmente."]
+      ? ["NEXT SIGNAL", "COMING SOON", "La próxima transmisión oficial todavía no fue revelada."]
       : kind === "sets"
-        ? ["NEW SOUND", "INCOMING", "Los próximos sets aparecerán aquí sin reproducción automática."]
-        : ["NEXT DROP", "LOADING", "Los lanzamientos oficiales aparecerán aquí cuando estén publicados."];
+        ? ["NEW SOUND", "INCOMING", "La siguiente sesión está entrando al sistema. No hay autoplay."]
+        : ["NEXT DROP", "LOADING", "El siguiente lanzamiento está en cola de publicación."];
     return <EmptySection kicker={empty[0]} title={empty[1]} body={empty[2]} />;
   }
 
@@ -448,7 +448,7 @@ export function FilteredList({ kind, items }: { kind: "events" | "sets" | "relea
             <h2>{item.title}</h2>
             <p>{item.location} · {item.duration} · {item.bpm} BPM</p>
             <div className="tag-row">{item.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
-            {item.externalUrl ? <a className="button primary" href={item.externalUrl} target="_blank" rel="noreferrer">Escuchar</a> : <span className="muted">Link oficial pendiente</span>}
+            {item.externalUrl ? <a className="button primary" href={item.externalUrl} target="_blank" rel="noreferrer">Escuchar</a> : <span className="muted">Platform link queued</span>}
           </article>
         ))}
       </div>
@@ -467,7 +467,7 @@ export function FilteredList({ kind, items }: { kind: "events" | "sets" | "relea
             <h2>{item.title}</h2>
             <p>{item.story}</p>
             {future ? <Countdown date={item.releaseAt} /> : null}
-            {url ? <a className="button secondary" href={url} target="_blank" rel="noreferrer">{future ? "Haz pre-save" : "Escuchar ahora"}</a> : <span className="muted">Link oficial pendiente</span>}
+            {url ? <a className="button secondary" href={url} target="_blank" rel="noreferrer">{future ? "Haz pre-save" : "Escuchar ahora"}</a> : <span className="muted">Platform links queued</span>}
           </article>
         );
       })}

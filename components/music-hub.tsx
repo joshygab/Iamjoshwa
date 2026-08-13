@@ -80,11 +80,11 @@ export function MusicHub({ sets, releases }: { sets: SetItem[]; releases: Releas
             <div>
               <span>NOW IN ROTATION</span>
               <h3>{featuredSet.title}</h3>
-              <p>{featuredSet.description || "Set oficial pendiente de descripción."}</p>
+              <p>{featuredSet.description || "La nota oficial de esta sesión está reservada para la siguiente actualización."}</p>
               <div className="inline-actions">
                 {featuredSet.demo || featuredSet.exclusive ? (
                   <button className="button primary" disabled>
-                    <Headphones /> Audio pendiente
+                    <Headphones /> Audio signal queued
                   </button>
                 ) : (
                   <button className="button primary" onClick={() => void openSet(featuredSet)}>

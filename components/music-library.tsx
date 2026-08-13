@@ -80,7 +80,7 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
               {item.demo ? (
                 <button className="button primary" disabled>
                   <Headphones />
-                  Audio oficial pendiente
+                  Audio signal queued
                 </button>
               ) : item.exclusive ? (
                 <button className="button secondary" disabled>
@@ -111,7 +111,7 @@ function Empty() {
     <div className="admin-empty public-empty branded-empty">
       <span>NEW SOUND</span>
       <h2>INCOMING</h2>
-      <p>Los próximos sets oficiales aparecerán aquí. Nunca se reproduce música automáticamente.</p>
+      <p>La siguiente sesión está entrando al sistema. El sitio nunca reproduce audio automáticamente.</p>
     </div>
   );
 }

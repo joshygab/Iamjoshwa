@@ -24,7 +24,7 @@ export function MediaGallery({ items }: { items: MediaGalleryItem[] }) {
     return () => window.removeEventListener("keydown", key);
   }, [selected, visible.length]);
 
-  if (!visible.length) return <Empty title="Archivo visual pendiente" />;
+  if (!visible.length) return <Empty title="VISUAL ARCHIVE LOCKED" />;
 
   return (
     <>
@@ -73,7 +73,7 @@ export function ArtistStory({ artists, items }: { artists: ArtistProfileItem[]; 
   return (
     <section className="section story">
       <span>{artist?.displayName || universe.toUpperCase()}</span>
-      <h2>{artist?.tagline || "Historia por publicar"}</h2>
+          <h2>{artist?.tagline || "Artist story loading."}</h2>
       {artist?.longBio && <p>{artist.longBio}</p>}
       <div className="tag-row">{artist?.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
       {visible.map((item) => (
@@ -103,7 +103,7 @@ export function EpkContent({ artists, sections, events, media }: { artists: Arti
           <div className="tag-row">{artist?.genres.map((genre) => <span key={genre}>{genre}</span>)}</div>
         </div>
         <div>
-          <p>{artist?.longBio || "La biografía oficial aún no se ha publicado."}</p>
+          <p>{artist?.longBio || "La narrativa oficial está en preparación. Para prensa, booking o riders, usa el contacto profesional del EPK."}</p>
           <button className="button secondary" onClick={() => window.print()}>
             <Printer /> Imprimir EPK
           </button>
@@ -176,7 +176,7 @@ function Empty({ title }: { title: string }) {
     <section className="section empty-state">
       <span>ARCHIVO</span>
       <h2>{title}</h2>
-      <p>Se mostrará aquí cuando exista material oficial.</p>
+      <p>Signal queued. Esta sección se activa únicamente con material oficial.</p>
     </section>
   );
 }

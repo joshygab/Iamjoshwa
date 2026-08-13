@@ -79,12 +79,12 @@ export default async function SetDetailPage({ params }: Props) {
         <div className="set-detail-copy">
           <span className="section-kicker">{set.universe.toUpperCase()} · {set.category}</span>
           <h1>{set.title}</h1>
-          <p>{set.description || "Descripción oficial pendiente de publicar desde el admin."}</p>
+          <p>{set.description || "La nota oficial de esta sesión está reservada para la siguiente actualización del universo."}</p>
           <div className="set-detail-meta">
-            <span><MapPin /> {set.location || "Lugar por confirmar"}</span>
-            <span><Radio /> {set.duration || "Duración pendiente"}</span>
-            <span><Gauge /> {set.bpm || "BPM pendiente"}</span>
-            <span><Music2 /> {set.genres.join(" / ") || "Géneros pendientes"}</span>
+            <span><MapPin /> {set.location || "Location queued"}</span>
+            <span><Radio /> {set.duration || "Duration queued"}</span>
+            <span><Gauge /> {set.bpm || "BPM queued"}</span>
+            <span><Music2 /> {set.genres.join(" / ") || "Genres queued"}</span>
           </div>
           <SetDetailActions item={set} shareUrl={shareUrl} />
         </div>
@@ -104,7 +104,7 @@ export default async function SetDetailPage({ params }: Props) {
             <div>
               <span>{set.audioMimeType === "audio/wav" ? "WAV MASTER" : "MP3 STREAM"}</span>
               <strong>{set.title}</strong>
-              <small>{set.category} · {set.duration || "duración pendiente"}</small>
+              <small>{set.category} · {set.duration || "duration queued"}</small>
             </div>
             <SetAudioPlayer item={set} />
           </div>
@@ -116,9 +116,10 @@ export default async function SetDetailPage({ params }: Props) {
             allow="encrypted-media; fullscreen; picture-in-picture"
           />
         ) : (
-          <div className="admin-empty public-empty">
-            <h2>Player pendiente.</h2>
-            <p>Sube un MP3/WAV en Media Studio o agrega un link de SoundCloud, YouTube o Mixcloud desde el admin.</p>
+          <div className="admin-empty public-empty branded-empty">
+            <span>AUDIO SIGNAL</span>
+            <h2>QUEUED.</h2>
+            <p>Esta ficha está lista para recibir MP3/WAV o player oficial de SoundCloud, YouTube o Mixcloud.</p>
           </div>
         )}
         <aside className="set-reward-card">
@@ -146,9 +147,10 @@ export default async function SetDetailPage({ params }: Props) {
             ))}
           </ol>
         ) : (
-          <div className="admin-empty public-empty">
-            <h2>Tracklist pendiente.</h2>
-            <p>Cuando agregues tracks desde el admin aparecerán aquí.</p>
+          <div className="admin-empty public-empty branded-empty">
+            <span>TRACKLIST</span>
+            <h2>LOCKED.</h2>
+            <p>La arquitectura completa del set se revelará cuando el tracklist oficial esté publicado.</p>
           </div>
         )}
       </section>
@@ -166,14 +168,15 @@ export default async function SetDetailPage({ params }: Props) {
               <Link href={`/musica/${item.slug}`} className="set-next-card" key={item.id}>
                 <span>{item.category}</span>
                 <strong>{item.title}</strong>
-                <small>{item.audioUrl ? "Audio propio" : item.provider ? item.provider.toUpperCase() : "Player pendiente"} · {item.duration || "duración pendiente"}</small>
+                <small>{item.audioUrl ? "Audio propio" : item.provider ? item.provider.toUpperCase() : "Player queued"} · {item.duration || "duration queued"}</small>
               </Link>
             ))}
           </div>
         ) : (
-          <div className="admin-empty public-empty">
-            <h2>Más sets aparecerán aquí.</h2>
-            <p>Cuando publiques más sesiones del mismo universo, la ficha recomendará automáticamente qué escuchar después.</p>
+          <div className="admin-empty public-empty branded-empty">
+            <span>NEXT ROTATION</span>
+            <h2>INCOMING.</h2>
+            <p>Cuando exista otra sesión del mismo universo, esta ficha activará una ruta de escucha automática.</p>
           </div>
         )}
       </section>

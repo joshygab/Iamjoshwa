@@ -6,6 +6,7 @@ import { CalendarDays, Headphones, Home, Sparkles, Ticket, X, Menu } from "lucid
 import { useState } from "react";
 import { ImmersiveEffects } from "./immersive-effects";
 import { UniverseSwitch } from "./universe-switch";
+import { CommandMenu } from "./command-menu";
 
 const nav = [
   ["Inicio", "/"],
@@ -39,6 +40,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             <Link key={href} href={href} aria-current={active(href) ? "page" : undefined}>{label}</Link>
           ))}
         </nav>
+        <CommandMenu />
         <UniverseSwitch />
         <Link className="nav-book-now" href="/booking" aria-current={active("/booking") ? "page" : undefined}>
           Book Now
