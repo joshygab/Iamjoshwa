@@ -3,7 +3,7 @@ import { contentRepository } from "@/lib/data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const paths = ["", "/fechas", "/musica", "/lanzamientos", "/booking", "/epk", "/media", "/historia", "/comunidad"];
+  const paths = ["", "/fechas", "/musica", "/lanzamientos", "/the-vault", "/booking", "/epk", "/media", "/historia", "/comunidad"];
   const [events, releases, sets] = await Promise.all([contentRepository.getEvents(), contentRepository.getReleases(), contentRepository.getSets()]);
 
   return [

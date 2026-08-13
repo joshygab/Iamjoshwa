@@ -12,6 +12,7 @@ const nav = [
   ["Fechas", "/fechas"],
   ["Música", "/musica"],
   ["Lanzamientos", "/lanzamientos"],
+  ["The Vault", "/the-vault"],
   ["Media", "/media"],
   ["Historia", "/historia"],
   ["Comunidad", "/comunidad"],
