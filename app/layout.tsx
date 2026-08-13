@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: "IAMJOSHWA — DJ & Producer CDMX",
     template: "%s | IAMJOSHWA",
   },
-  description: "Sitio oficial de IAMJOSHWA y AFTERLUV: shows, música, lanzamientos, The Vault, EPK y booking.",
+  description: "IAMJOSHWA WORLD: shows, music, Inner Circle Pass, The Vault, EPK, booking and AFTERLUV.",
   applicationName: "IAMJOSHWA",
   manifest: "/manifest.webmanifest",
   keywords: ["IAMJOSHWA", "AFTERLUV", "DJ CDMX", "House", "Tech House", "Hard Trance", "Booking DJ"],
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   category: "music",
   openGraph: {
     title: "IAMJOSHWA — DJ & Producer CDMX",
-    description: "Shows, music, EPK, booking and AFTERLUV in one official platform.",
+    description: "Enter IAMJOSHWA WORLD: music, shows, Inner Circle Pass, The Vault, EPK, booking and AFTERLUV.",
     type: "website",
     locale: "es_MX",
     siteName: "IAMJOSHWA",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "IAMJOSHWA — DJ & Producer CDMX",
-    description: "Shows, music, EPK, booking and AFTERLUV in one official platform.",
+    description: "Enter IAMJOSHWA WORLD: music, shows, Inner Circle Pass, The Vault, EPK, booking and AFTERLUV.",
     images: ["/og.png"],
   },
   robots: { index: true, follow: true },

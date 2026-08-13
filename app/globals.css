@@ -925,3 +925,504 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
     transform: none;
   }
 }
+
+/* Public site final polish: artist world, branded empty states and home missions */
+.world-hero {
+  min-height: 100svh;
+}
+
+.world-hero-content {
+  max-width: min(980px, 100%);
+}
+
+.world-hero-content .hero-tagline {
+  max-width: 560px;
+}
+
+.hero-main-cta {
+  min-width: 190px;
+}
+
+.hero-signal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.hero-signal-row span {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(0,0,0,.28);
+  backdrop-filter: blur(14px);
+  padding: 8px 11px;
+  color: rgba(255,255,255,.72);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.world-paths .path-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
+  backdrop-filter: blur(18px);
+}
+
+.world-paths .path-grid > a {
+  min-height: 180px;
+}
+
+.personalized-feed,
+.home-pass-spotlight,
+.home-vault-tease {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(20px, 4vw, 54px);
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 88% 10%, var(--glow), transparent 24rem),
+    linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.016));
+  box-shadow: 0 28px 110px rgba(0,0,0,.28);
+  backdrop-filter: blur(20px);
+  margin: 0 clamp(20px, 7vw, 110px);
+}
+
+.personalized-feed h2,
+.home-pass-spotlight h2,
+.home-missions h2,
+.home-vault-tease h2 {
+  font: 800 clamp(42px, 7vw, 96px)/.86 var(--font-display);
+  letter-spacing: -.065em;
+  margin: 10px 0;
+}
+
+.personalized-feed p,
+.home-pass-spotlight p,
+.home-vault-tease p {
+  color: var(--muted);
+  line-height: 1.58;
+  max-width: 760px;
+}
+
+.home-pass-spotlight {
+  grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr);
+}
+
+.home-pass-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 420px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 38px;
+  background:
+    radial-gradient(circle at 72% 12%, rgba(155,83,255,.72), transparent 34%),
+    linear-gradient(135deg,#282532,#050505 70%);
+  box-shadow: 0 48px 160px rgba(0,0,0,.48), 0 0 90px rgba(155,83,255,.22);
+  padding: clamp(26px, 4vw, 42px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transform: perspective(980px) rotateY(6deg) translate3d(0,0,0);
+  transition: transform .32s ease, box-shadow .32s ease;
+  will-change: transform;
+}
+
+.home-pass-card[data-project="afterluv"] {
+  background:
+    radial-gradient(circle at 72% 12%, rgba(255,43,79,.72), transparent 34%),
+    linear-gradient(135deg,#30161c,#050505 70%);
+  box-shadow: 0 48px 160px rgba(0,0,0,.48), 0 0 90px rgba(255,43,79,.24);
+}
+
+.home-pass-card:before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.16), transparent 56%);
+  animation: passShine 8s ease-in-out infinite;
+}
+
+.home-pass-card:hover {
+  transform: perspective(980px) rotateY(0deg) translateY(-5px);
+}
+
+.home-pass-card > span {
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.home-pass-card strong {
+  font: 800 clamp(64px, 9vw, 132px)/.78 var(--font-display);
+  letter-spacing: -.08em;
+}
+
+.home-pass-card small {
+  color: rgba(255,255,255,.68);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.home-missions .section-heading {
+  margin-bottom: 24px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mission-grid a {
+  min-height: 230px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.014));
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 22px 80px rgba(0,0,0,.18);
+  transition: transform .24s ease, border-color .24s ease, background .24s ease;
+}
+
+.mission-grid a:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,.26);
+  background: rgba(255,255,255,.06);
+}
+
+.mission-grid span {
+  color: rgba(255,255,255,.22);
+  font: 800 54px/1 var(--font-display);
+}
+
+.mission-grid strong {
+  font: 800 clamp(27px, 4vw, 48px)/.92 var(--font-display);
+  letter-spacing: -.05em;
+}
+
+.mission-grid p {
+  color: var(--muted);
+  line-height: 1.48;
+  margin: 0;
+}
+
+.home-vault-tease {
+  grid-template-columns: 1fr 1fr;
+}
+
+.locked-drop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.locked-drop-grid article {
+  min-height: 260px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 24px;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    radial-gradient(circle at 50% 16%, var(--glow), transparent 48%),
+    rgba(0,0,0,.28);
+  background-size: 42px 42px, auto, auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  filter: saturate(.8);
+}
+
+.locked-drop-grid svg {
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
+}
+
+.locked-drop-grid strong {
+  font: 800 clamp(34px, 5vw, 72px)/.82 var(--font-display);
+  letter-spacing: -.07em;
+}
+
+.locked-drop-grid span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.home-audio-feature button {
+  width: max-content;
+  border: 0;
+  background: transparent;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  cursor: pointer;
+}
+
+.home-audio-feature button svg {
+  width: 15px;
+  color: var(--accent);
+}
+
+.branded-empty {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border-style: solid;
+  background:
+    radial-gradient(circle at 82% 12%, var(--glow), transparent 22rem),
+    linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.014));
+  box-shadow: 0 24px 90px rgba(0,0,0,.24);
+}
+
+.branded-empty svg {
+  width: 34px;
+  height: 34px;
+  color: var(--accent);
+  margin: 0 auto 12px;
+}
+
+.branded-empty > span {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.branded-empty h2 {
+  font: 800 clamp(42px, 7vw, 90px)/.86 var(--font-display);
+  letter-spacing: -.065em;
+}
+
+.branded-empty .button {
+  width: max-content;
+  margin: 12px auto 0;
+}
+
+@media(max-width:1120px) {
+  .world-paths .path-grid,
+  .home-pass-spotlight,
+  .home-vault-tease,
+  .locked-drop-grid,
+  .mission-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .personalized-feed {
+    grid-template-columns: 1fr;
+  }
+
+  .home-pass-card {
+    transform: none;
+  }
+}
+
+@media(max-width:720px) {
+  .world-paths .path-grid,
+  .home-pass-spotlight,
+  .home-vault-tease,
+  .locked-drop-grid,
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .personalized-feed,
+  .home-pass-spotlight,
+  .home-vault-tease {
+    margin: 0 16px;
+    border-radius: 24px;
+  }
+
+  .home-pass-card {
+    min-height: 320px;
+    border-radius: 26px;
+  }
+
+  .mission-grid a,
+  .locked-drop-grid article,
+  .branded-empty {
+    border-radius: 20px;
+  }
+
+  .mission-grid a {
+    min-height: 170px;
+  }
+
+  .locked-drop-grid article {
+    min-height: 180px;
+  }
+
+  .hero-signal-row span {
+    font-size: 8px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .home-pass-card,
+  .mission-grid a {
+    transition: none;
+  }
+
+  .home-pass-card:hover,
+  .mission-grid a:hover {
+    transform: none;
+  }
+
+  .home-pass-card:before {
+    animation: none;
+  }
+}
+
+/* Motion restoration: keep the site alive on desktop and mobile */
+@keyframes heroSignalIn {
+  from {
+    opacity: 0;
+    filter: blur(18px);
+    transform: translate3d(0, 28px, 0) scale(.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes glowDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(14px, -18px, 0) scale(1.04);
+  }
+}
+
+@keyframes cardSignalPulse {
+  0%, 100% {
+    box-shadow: 0 22px 80px rgba(0,0,0,.18), 0 0 0 rgba(255,255,255,0);
+  }
+  50% {
+    box-shadow: 0 26px 92px rgba(0,0,0,.24), 0 0 34px var(--glow);
+  }
+}
+
+.world-hero .orb-one,
+.world-hero .orb-two,
+.home-vault-tease:before,
+.home-pass-spotlight:before,
+.personalized-feed:before {
+  transform: translate3d(0,0,0);
+  will-change: transform, opacity;
+}
+
+.world-hero .orb-one {
+  animation: float 8s ease-in-out infinite, glowDrift 12s ease-in-out infinite;
+}
+
+.world-hero .orb-two {
+  animation: float 9s ease-in-out infinite reverse, glowDrift 14s ease-in-out infinite reverse;
+}
+
+.world-hero-content {
+  animation: heroSignalIn .9s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.hero-signal-row span,
+.path-grid > a,
+.feature-cards article,
+.mission-grid a,
+.locked-drop-grid article,
+.home-pass-card,
+.poster-card {
+  transform: translate3d(0,0,0);
+  will-change: transform;
+}
+
+.hero-signal-row span {
+  transition: transform .24s ease, border-color .24s ease, background .24s ease, box-shadow .24s ease;
+}
+
+.hero-signal-row span:hover {
+  transform: translate3d(0,-2px,0);
+  border-color: rgba(255,255,255,.26);
+  background: rgba(255,255,255,.075);
+  box-shadow: 0 16px 48px var(--glow);
+}
+
+.locked-drop-grid article:hover {
+  animation: cardSignalPulse 1.9s ease-in-out infinite;
+}
+
+@media(max-width:720px) {
+  .reveal {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translate3d(0, 26px, 0) scale(.988);
+    transition: opacity .58s ease, filter .58s ease, transform .58s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .cinematic-hero .hero-content.world-hero-content {
+    animation: heroSignalIn .82s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .world-hero .orb-one,
+  .world-hero .orb-two {
+    animation-duration: 10s, 16s;
+  }
+
+  .path-grid > a:active,
+  .mission-grid a:active,
+  .locked-drop-grid article:active,
+  .home-pass-card:active {
+    transform: translate3d(0,-2px,0) scale(.992);
+  }
+
+  .waveform-art:after {
+    animation: waveFloat 2.6s ease-in-out infinite;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .world-hero-content,
+  .world-hero .orb-one,
+  .world-hero .orb-two,
+  .locked-drop-grid article:hover,
+  .waveform-art:after {
+    animation: none!important;
+  }
+
+  .hero-signal-row span,
+  .path-grid > a,
+  .feature-cards article,
+  .mission-grid a,
+  .locked-drop-grid article,
+  .home-pass-card,
+  .poster-card,
+  .reveal,
+  .reveal.is-visible {
+    transition: none!important;
+    transform: none!important;
+    filter: none!important;
+    opacity: 1!important;
+  }
+}

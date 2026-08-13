@@ -108,9 +108,10 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
 
 function Empty() {
   return (
-    <div className="admin-empty public-empty">
-      <h2>Aún no hay sets publicados.</h2>
-      <p>El material oficial aparecerá aquí sin reproducción automática.</p>
+    <div className="admin-empty public-empty branded-empty">
+      <span>NEW SOUND</span>
+      <h2>INCOMING</h2>
+      <p>Los próximos sets oficiales aparecerán aquí. Nunca se reproduce música automáticamente.</p>
     </div>
   );
 }

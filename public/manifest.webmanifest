@@ -1,13 +1,38 @@
 {
   "name": "IAMJOSHWA Official",
   "short_name": "IAMJOSHWA",
-  "description": "Sitio oficial de IAMJOSHWA y AFTERLUV: shows, music, EPK, booking y The Vault.",
+  "description": "IAMJOSHWA WORLD: music, shows, Inner Circle Pass, booking, EPK, The Vault y AFTERLUV.",
+  "id": "/?source=pwa",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#070609",
   "orientation": "portrait",
+  "categories": ["music", "entertainment", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Listen",
+      "short_name": "Listen",
+      "description": "Abrir música y sets.",
+      "url": "/musica",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Book Now",
+      "short_name": "Booking",
+      "description": "Solicitar una contratación.",
+      "url": "/booking",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "IAMJOSHWA Pass",
+      "short_name": "Pass",
+      "description": "Abrir perfil e Inner Circle.",
+      "url": "/perfil",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
