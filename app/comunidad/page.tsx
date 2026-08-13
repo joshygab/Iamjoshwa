@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Gift, LockKeyhole, QrCode, Radio, ShieldCheck, Sparkles, Trophy, Zap } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
+import { pageMetadata } from "@/lib/seo";
 
 const levels = [
   ["01", "Listener", "Entrada al universo, perfil y preferencias."],
@@ -18,10 +19,11 @@ const actions = [
   ["Desbloquea Vault", "Canjea puntos por drops, edits y contenido privado.", LockKeyhole],
 ];
 
-export const metadata = {
+export const generateMetadata = () => pageMetadata({
+  path: "/comunidad",
   title: "Comunidad",
   description: "IAMJOSHWA Pass, niveles, puntos, badges, referidos y acceso a The Vault.",
-};
+});
 
 export default function CommunityPage() {
   return (

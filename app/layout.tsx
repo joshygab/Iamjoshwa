@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   authors: [{ name: "IAMJOSHWA" }],
   creator: "IAMJOSHWA",
   alternates: { canonical: "/" },
+  category: "music",
   openGraph: {
     title: "IAMJOSHWA — DJ & Producer CDMX",
     description: "Shows, music, EPK, booking and AFTERLUV in one official platform.",
@@ -34,6 +35,16 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
   robots: { index: true, follow: true },
+  appleWebApp: {
+    capable: true,
+    title: "IAMJOSHWA",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
   icons: {
     icon: [{ url: "/favicon.svg" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: "/apple-touch-icon.png",

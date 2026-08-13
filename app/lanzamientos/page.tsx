@@ -3,8 +3,13 @@ import { ArrowRight, LockKeyhole } from "lucide-react";
 import { ReleaseLibrary } from "@/components/release-library";
 import { PageHero } from "@/components/page-hero";
 import { contentRepository } from "@/lib/data";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = { title: "Lanzamientos" };
+export const generateMetadata = () => pageMetadata({
+  path: "/lanzamientos",
+  title: "Lanzamientos",
+  description: "Pre-saves, canciones, visualizers y links oficiales de plataformas de IAMJOSHWA y AFTERLUV.",
+});
 
 export default async function ReleasesPage() {
   const items = await contentRepository.getReleases();

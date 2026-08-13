@@ -1,2 +1,3 @@
-import {PageHero} from "@/components/page-hero";import {ArtistStory} from "@/components/public-cms-content";import {contentRepository} from "@/lib/data";
+import {PageHero} from "@/components/page-hero";import {ArtistStory} from "@/components/public-cms-content";import {contentRepository} from "@/lib/data";import {pageMetadata} from "@/lib/seo";
+export const generateMetadata=()=>pageMetadata({path:"/historia",title:"Historia",description:"Biografía, visión artística y timeline oficial de IAMJOSHWA y AFTERLUV."});
 export default async function StoryPage(){const[artists,items]=await Promise.all([contentRepository.getArtists(),contentRepository.getTimeline()]);return <><PageHero kicker="HISTORIA" title="De CDMX hacia la siguiente noche." description="El recorrido de IAMJOSHWA y el universo AFTERLUV."/><ArtistStory artists={artists} items={items}/></>}

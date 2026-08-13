@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarDays, ExternalLink, Music2, Share2, Sparkles } from 
 import { Countdown } from "@/components/countdown";
 import { TrackedLink } from "@/components/tracked-link";
 import { contentRepository } from "@/lib/data";
+import { absoluteUrl, defaultOgImage, jsonLd, safeDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -18,18 +19,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const release = await contentRepository.getReleaseBySlug(slug);
   if (!release) return { title: "Lanzamiento no encontrado" };
-  const description = release.story || `${release.title} — lanzamiento oficial de ${release.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA"}.`;
+  const artist = release.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA";
+  const description = safeDescription(release.story || "", `${release.title} — lanzamiento oficial de ${artist}.`);
+  const image = release.coverUrl || defaultOgImage;
   return {
-    title: release.title,
+    title: `${release.title} · ${release.type}`,
     description,
     alternates: { canonical: `/lanzamientos/${release.slug}` },
+    robots: release.demo ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${release.title} | IAMJOSHWA`,
+      title: `${release.title} | ${artist}`,
       description,
       type: "music.song",
-      images: release.coverUrl ? [{ url: release.coverUrl, alt: `Portada de ${release.title}` }] : undefined,
+      url: absoluteUrl(`/lanzamientos/${release.slug}`),
+      siteName: "IAMJOSHWA",
+      locale: "es_MX",
+      images: [{ url: image, width: 1200, height: 630, alt: `Portada de ${release.title}` }],
     },
-    twitter: { card: "summary_large_image", images: release.coverUrl ? [release.coverUrl] : undefined },
+    twitter: { card: "summary_large_image", title: `${release.title} | ${artist}`, description, images: [image] },
   };
 }
 
@@ -47,12 +54,17 @@ export default async function ReleaseDetailPage({ params }: Props) {
     byArtist: { "@type": "MusicGroup", name: release.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA" },
     datePublished: release.releaseAt,
     image: release.coverUrl,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/lanzamientos/${release.slug}`,
+    url: absoluteUrl(`/lanzamientos/${release.slug}`),
+    sameAs: release.platforms?.map((link) => link.url),
+    potentialAction: {
+      "@type": "ListenAction",
+      target: release.listenUrl || release.presaveUrl || release.platforms?.[0]?.url || absoluteUrl(`/lanzamientos/${release.slug}`),
+    },
   };
 
   return (
     <article className="release-detail-page">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structured) }} />
       <Link className="text-link release-back" href="/lanzamientos">
         <ArrowLeft /> Todos los lanzamientos
       </Link>

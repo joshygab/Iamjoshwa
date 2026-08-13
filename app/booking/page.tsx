@@ -3,11 +3,13 @@ import { CalendarCheck, FileText, ShieldCheck, Timer, UserRoundCheck } from "luc
 import { PageHero } from "@/components/page-hero";
 import { BookingForm } from "@/components/booking-form";
 import { isSupabaseConfigured } from "@/lib/env";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const generateMetadata = () => pageMetadata({
+  path: "/booking",
   title: "Booking",
-  description: "Solicita una fecha para IAMJOSHWA o AFTERLUV con folio, revisión humana y seguimiento profesional.",
-};
+  description: "Solicita una fecha para IAMJOSHWA o AFTERLUV con folio, revisión humana, EPK y seguimiento profesional.",
+});
 
 export default function BookingPage() {
   const enabled = isSupabaseConfigured && Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);

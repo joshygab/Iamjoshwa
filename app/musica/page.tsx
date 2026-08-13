@@ -2,11 +2,13 @@ import { MusicHub } from "@/components/music-hub";
 import { MusicLibrary } from "@/components/music-library";
 import { PageHero } from "@/components/page-hero";
 import { contentRepository } from "@/lib/data";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const generateMetadata = () => pageMetadata({
+  path: "/musica",
   title: "Music Hub",
   description: "Sets, lanzamientos y plataformas oficiales de IAMJOSHWA y AFTERLUV.",
-};
+});
 
 export default async function MusicPage() {
   const [sets, releases] = await Promise.all([

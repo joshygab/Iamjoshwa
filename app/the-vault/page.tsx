@@ -2,17 +2,13 @@ import { PageHero } from "@/components/page-hero";
 import { VaultExperience } from "@/components/vault-experience";
 import { contentRepository } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const generateMetadata = () => pageMetadata({
+  path: "/the-vault",
   title: "The Vault",
   description: "Demos, edits, mashups, sets privados y drops limitados de IAMJOSHWA / AFTERLUV.",
-  alternates: { canonical: "/the-vault" },
-  openGraph: {
-    title: "The Vault | IAMJOSHWA",
-    description: "Drops limitados, demos autorizados, edits y sets privados desbloqueables con IAMJOSHWA Pass.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "The Vault IAMJOSHWA" }],
-  },
-};
+});
 
 export default async function VaultPage() {
   const db = await createClient();

@@ -1,2 +1,3 @@
-import {PageHero} from "@/components/page-hero";import {MediaGallery} from "@/components/public-cms-content";import {contentRepository} from "@/lib/data";
+import {PageHero} from "@/components/page-hero";import {MediaGallery} from "@/components/public-cms-content";import {contentRepository} from "@/lib/data";import {pageMetadata} from "@/lib/seo";
+export const generateMetadata=()=>pageMetadata({path:"/media",title:"Media",description:"Press photos, galería, aftermovies y momentos oficiales de IAMJOSHWA y AFTERLUV."});
 export default async function MediaPage(){const items=await contentRepository.getMedia();return <><PageHero kicker="MEDIA" title="Luces, cuerpos, memoria." description="Press photos, aftermovies y momentos oficiales en vivo."/><MediaGallery items={items}/></>}

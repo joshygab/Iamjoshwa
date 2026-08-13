@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { ArrowLeft, Gauge, MapPin, Music2, Radio } from "lucide-react";
 import { SetDetailActions } from "@/components/set-detail-actions";
 import { contentRepository } from "@/lib/data";
+import { absoluteUrl, defaultOgImage, jsonLd, safeDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,18 +18,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const set = await contentRepository.getSetBySlug(slug);
   if (!set) return { title: "Set no encontrado" };
-  const description = set.description || `${set.title} — set oficial de ${set.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA"}.`;
+  const artist = set.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA";
+  const description = safeDescription(set.description || "", `${set.title} — set oficial de ${artist}.`);
+  const image = set.coverUrl || defaultOgImage;
   return {
-    title: set.title,
+    title: `${set.title} · ${set.category}`,
     description,
     alternates: { canonical: `/musica/${set.slug}` },
+    robots: set.demo ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title: `${set.title} | IAMJOSHWA`,
+      title: `${set.title} | ${artist}`,
       description,
       type: "music.playlist",
-      images: set.coverUrl ? [{ url: set.coverUrl, alt: `Portada de ${set.title}` }] : undefined,
+      url: absoluteUrl(`/musica/${set.slug}`),
+      siteName: "IAMJOSHWA",
+      locale: "es_MX",
+      images: [{ url: image, width: 1200, height: 630, alt: `Portada de ${set.title}` }],
     },
-    twitter: { card: "summary_large_image", images: set.coverUrl ? [set.coverUrl] : undefined },
+    twitter: { card: "summary_large_image", title: `${set.title} | ${artist}`, description, images: [image] },
   };
 }
 
@@ -45,11 +52,13 @@ export default async function SetDetailPage({ params }: Props) {
     genre: set.genres,
     image: set.coverUrl,
     url: shareUrl,
+    numTracks: set.tracklist?.length,
+    track: set.tracklist?.map((track, index) => ({ "@type": "MusicRecording", position: index + 1, name: track.title })),
   };
 
   return (
     <article className="set-detail-page">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structured) }} />
       <Link className="text-link set-back" href="/musica">
         <ArrowLeft /> Todos los sets
       </Link>
