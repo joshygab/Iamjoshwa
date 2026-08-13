@@ -1426,3 +1426,215 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
     opacity: 1!important;
   }
 }
+
+/* Mobile motion pack: visible movement without relying on hover */
+.motion-ready .reveal {
+  transition-delay: calc(var(--reveal-index, 0) * 44ms);
+}
+
+.motion-ready .topbar {
+  animation: chromeDrop .52s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.motion-ready .premium-bottom-nav {
+  animation: mobileDockIn .62s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.motion-ready .world-hero:before {
+  animation: heroBreath 9s ease-in-out infinite;
+}
+
+.motion-ready .hero-grid {
+  animation: gridDrift 14s ease-in-out infinite;
+}
+
+.motion-ready .path-grid > a,
+.motion-ready .feature-cards article,
+.motion-ready .list-card,
+.motion-ready .event-card,
+.motion-ready .set-card,
+.motion-ready .release-card,
+.motion-ready .media-gallery article,
+.motion-ready .mission-grid a,
+.motion-ready .locked-drop-grid article {
+  transition:
+    transform .28s cubic-bezier(.2,.8,.2,1),
+    border-color .28s ease,
+    background .28s ease,
+    box-shadow .28s ease,
+    filter .28s ease;
+}
+
+.motion-ready .path-grid > a:active,
+.motion-ready .feature-cards article:active,
+.motion-ready .list-card:active,
+.motion-ready .event-card:active,
+.motion-ready .set-card:active,
+.motion-ready .release-card:active,
+.motion-ready .media-gallery article:active,
+.motion-ready .mission-grid a:active,
+.motion-ready .locked-drop-grid article:active,
+.motion-ready .button:active {
+  transform: translate3d(0, -2px, 0) scale(.985);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 22px 70px rgba(0,0,0,.34), 0 0 32px var(--glow);
+}
+
+.motion-ready .reveal.is-visible .path-grid > a,
+.motion-ready .reveal.is-visible .feature-cards article,
+.motion-ready .reveal.is-visible .mission-grid a,
+.motion-ready .reveal.is-visible .locked-drop-grid article {
+  animation: childSignalIn .58s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.motion-ready .reveal.is-visible .path-grid > a:nth-child(2),
+.motion-ready .reveal.is-visible .feature-cards article:nth-child(2),
+.motion-ready .reveal.is-visible .mission-grid a:nth-child(2),
+.motion-ready .reveal.is-visible .locked-drop-grid article:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.motion-ready .reveal.is-visible .path-grid > a:nth-child(3),
+.motion-ready .reveal.is-visible .mission-grid a:nth-child(3),
+.motion-ready .reveal.is-visible .locked-drop-grid article:nth-child(3) {
+  animation-delay: 150ms;
+}
+
+.motion-ready .reveal.is-visible .mission-grid a:nth-child(4) {
+  animation-delay: 220ms;
+}
+
+@keyframes chromeDrop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mobileDockIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes heroBreath {
+  0%, 100% {
+    opacity: .58;
+    transform: scale(1.04) translate3d(0,0,0);
+  }
+  50% {
+    opacity: .74;
+    transform: scale(1.075) translate3d(0,-10px,0);
+  }
+}
+
+@keyframes gridDrift {
+  0%, 100% {
+    opacity: .28;
+    transform: perspective(720px) rotateX(62deg) scale(1.72) translate3d(0, 18%, 0);
+  }
+  50% {
+    opacity: .42;
+    transform: perspective(720px) rotateX(62deg) scale(1.78) translate3d(10px, 15%, 0);
+  }
+}
+
+@keyframes childSignalIn {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate3d(0, 18px, 0) scale(.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media(max-width:720px) {
+  .motion-ready .reveal {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translate3d(0, 30px, 0) scale(.986);
+    transition:
+      opacity .72s ease,
+      filter .72s ease,
+      transform .72s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .motion-ready .reveal.is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .motion-ready .world-hero-content {
+    animation: heroSignalIn .82s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .motion-ready .cinema-depth {
+    transform: translate3d(0, calc(var(--scroll-y, 0) * 18px), 0);
+    transition: transform .2s linear;
+  }
+
+  .motion-ready .hero-signal-row span {
+    animation: childSignalIn .58s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .motion-ready .hero-signal-row span:nth-child(2) {
+    animation-delay: 90ms;
+  }
+
+  .motion-ready .hero-signal-row span:nth-child(3) {
+    animation-delay: 170ms;
+  }
+
+  .motion-ready .premium-bottom-nav a {
+    transition: transform .24s ease, color .24s ease, background .24s ease;
+  }
+
+  .motion-ready .premium-bottom-nav a:active {
+    transform: translate3d(0, -3px, 0) scale(.94);
+  }
+
+  .motion-ready .premium-bottom-nav a[aria-current="page"] svg {
+    animation: activeNavPulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes activeNavPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0 var(--glow));
+    transform: translate3d(0,0,0);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px var(--accent));
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .motion-ready .topbar,
+  .motion-ready .premium-bottom-nav,
+  .motion-ready .world-hero:before,
+  .motion-ready .hero-grid,
+  .motion-ready .world-hero-content,
+  .motion-ready .hero-signal-row span,
+  .motion-ready .premium-bottom-nav a[aria-current="page"] svg,
+  .motion-ready .reveal.is-visible .path-grid > a,
+  .motion-ready .reveal.is-visible .feature-cards article,
+  .motion-ready .reveal.is-visible .mission-grid a,
+  .motion-ready .reveal.is-visible .locked-drop-grid article {
+    animation: none!important;
+  }
+}
