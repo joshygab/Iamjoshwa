@@ -17,7 +17,6 @@ const nav = [
   ["Historia", "/historia"],
   ["Comunidad", "/comunidad"],
   ["EPK", "/epk"],
-  ["Booking", "/booking"],
 ];
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
@@ -41,6 +40,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <UniverseSwitch />
+        <Link className="nav-book-now" href="/booking" aria-current={active("/booking") ? "page" : undefined}>
+          Book Now
+        </Link>
         <button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? "Cerrar menú" : "Abrir menú"}>
           {open ? <X /> : <Menu />}
         </button>
@@ -50,6 +52,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           {nav.map(([label, href]) => (
             <Link key={href} href={href} onClick={close} aria-current={active(href) ? "page" : undefined}>{label}</Link>
           ))}
+          <Link className="mobile-book-now" href="/booking" onClick={close} aria-current={active("/booking") ? "page" : undefined}>Book Now</Link>
         </nav>
       ) : null}
       <main id="contenido">{children}</main>
