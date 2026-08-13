@@ -7,6 +7,11 @@ export const metadata = {
   title: "The Vault",
   description: "Demos, edits, mashups, sets privados y drops limitados de IAMJOSHWA / AFTERLUV.",
   alternates: { canonical: "/the-vault" },
+  openGraph: {
+    title: "The Vault | IAMJOSHWA",
+    description: "Drops limitados, demos autorizados, edits y sets privados desbloqueables con IAMJOSHWA Pass.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "The Vault IAMJOSHWA" }],
+  },
 };
 
 export default async function VaultPage() {

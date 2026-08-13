@@ -24,7 +24,7 @@ export function VaultExperience({ rewards, balance, signedIn }: { rewards: Rewar
         <div>
           <span className="section-kicker">THE VAULT · {universe.toUpperCase()}</span>
           <h1>Contenido que no vive en la superficie.</h1>
-          <p>Demos, edits, mashups, versiones extendidas, sets privados y drops limitados. Todo debe publicarse desde el admin o como recompensa: no hay descargas falsas ni audio inventado.</p>
+          <p>Demos, edits, mashups, versiones extendidas, sets privados y drops limitados. Todo se publica desde el admin o como recompensa: solo contenido autorizado y listo para compartir.</p>
           <div className="inline-actions">
             {signedIn ? (
               <Link className="button primary" href="/recompensas">
@@ -101,7 +101,7 @@ export function VaultExperience({ rewards, balance, signedIn }: { rewards: Rewar
       <section className="vault-rules">
         <article><Timer /><strong>Acceso limitado</strong><span>Los drops pueden tener inventario, fecha límite o costo en puntos.</span></article>
         <article><ShieldCheck /><strong>Seguro por servidor</strong><span>Los puntos y canjes se procesan con funciones seguras, no desde el frontend.</span></article>
-        <article><LockKeyhole /><strong>Sin audio falso</strong><span>El Vault no reproduce ni descarga contenido que no haya sido publicado oficialmente.</span></article>
+        <article><LockKeyhole /><strong>Contenido oficial</strong><span>El Vault no reproduce ni descarga material que no haya sido publicado y autorizado.</span></article>
       </section>
     </div>
   );

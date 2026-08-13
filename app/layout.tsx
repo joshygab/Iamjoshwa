@@ -5,9 +5,56 @@ import { PlayerProvider } from "@/components/player-provider";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-export const metadata: Metadata = { metadataBase: new URL(siteUrl), title: { default: "IAMJOSHWA — DJ & Producer CDMX", template: "%s | IAMJOSHWA" }, description: "Sitio oficial de IAMJOSHWA y AFTERLUV: fechas, sets, lanzamientos, EPK y booking.", applicationName:"IAMJOSHWA",manifest:"/manifest.webmanifest",keywords:["IAMJOSHWA","AFTERLUV","DJ CDMX","House","Hard Trance"],authors:[{name:"IAMJOSHWA"}],creator:"IAMJOSHWA",openGraph: { title: "IAMJOSHWA — DJ & Producer CDMX", description: "Dos universos. Una misma frecuencia.", type: "website", locale: "es_MX",siteName:"IAMJOSHWA",images:[{url:"/images/brand/iamjoshwa-hero.webp",width:1536,height:1024,alt:"Identidad visual abstracta de IAMJOSHWA"}] }, twitter: { card: "summary_large_image",images:["/images/brand/iamjoshwa-hero.webp"] }, robots: { index: true, follow: true },icons:{icon:"/favicon.svg",apple:"/favicon.svg"} };
-export const viewport: Viewport = { themeColor: "#070609", colorScheme: "dark" };
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "IAMJOSHWA — DJ & Producer CDMX",
+    template: "%s | IAMJOSHWA",
+  },
+  description: "Sitio oficial de IAMJOSHWA y AFTERLUV: shows, música, lanzamientos, The Vault, EPK y booking.",
+  applicationName: "IAMJOSHWA",
+  manifest: "/manifest.webmanifest",
+  keywords: ["IAMJOSHWA", "AFTERLUV", "DJ CDMX", "House", "Tech House", "Hard Trance", "Booking DJ"],
+  authors: [{ name: "IAMJOSHWA" }],
+  creator: "IAMJOSHWA",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "IAMJOSHWA — DJ & Producer CDMX",
+    description: "Shows, music, EPK, booking and AFTERLUV in one official platform.",
+    type: "website",
+    locale: "es_MX",
+    siteName: "IAMJOSHWA",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "IAMJOSHWA DJ & Producer CDMX" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "IAMJOSHWA — DJ & Producer CDMX",
+    description: "Shows, music, EPK, booking and AFTERLUV in one official platform.",
+    images: ["/og.png"],
+  },
+  robots: { index: true, follow: true },
+  icons: {
+    icon: [{ url: "/favicon.svg" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#070609",
+  colorScheme: "dark",
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="es" data-scroll-behavior="smooth"><body><UniverseProvider><PlayerProvider><SiteShell>{children}</SiteShell></PlayerProvider></UniverseProvider></body></html>;
+  return (
+    <html lang="es" data-scroll-behavior="smooth">
+      <body>
+        <UniverseProvider>
+          <PlayerProvider>
+            <SiteShell>{children}</SiteShell>
+          </PlayerProvider>
+        </UniverseProvider>
+      </body>
+    </html>
+  );
 }

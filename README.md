@@ -99,6 +99,17 @@ Antes de publicar carga desde `/admin`: logos, favicon, heroes 16:9 y 9:16, biog
 
 Las imágenes provisionales pueden reemplazarse desde `/admin/media` y `/admin/configuracion` sin modificar código ni desplegar nuevamente.
 
+## Checklist final antes de anunciar
+
+- Revisa en Vercel que `NEXT_PUBLIC_SITE_URL` apunte al dominio público final.
+- Comparte el link en WhatsApp y confirma que use `public/og.png`.
+- Publica al menos un hero desktop y uno móvil desde `/admin/configuracion`.
+- Publica contenido real o deja vacías las secciones sin datos; evita datos demo como si fueran fechas reales.
+- Confirma que `/booking` genera folio y que el aviso llega al correo configurado.
+- Confirma que `/epk` imprime correctamente y que las fotos públicas descargan.
+- Confirma que `/the-vault` muestra recompensas reales cuando existan drops publicados.
+- Ejecuta `npm run verify` antes de cada release importante.
+
 ## Seguridad
 
 - `.env.local` está ignorado por Git.

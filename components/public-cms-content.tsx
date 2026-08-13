@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Download, Printer, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Download, Mail, Printer, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUniverse } from "./universe-provider";
 import type { ArtistProfileItem, EpkSectionItem, EventItem, MediaGalleryItem, TimelineItem } from "@/types/content";
@@ -111,8 +111,8 @@ export function EpkContent({ artists, sections, events, media }: { artists: Arti
       </div>
 
       <div className="epk-grid">
-        <article><span>BASE</span><p>{artist?.baseCity || "Por confirmar"}</p></article>
-        <article><span>BIO CORTA</span><p>{artist?.shortBio || "Por publicar"}</p></article>
+        <article><span>BASE</span><p>{artist?.baseCity || "Ciudad de México"}</p></article>
+        <article><span>BIO CORTA</span><p>{artist?.shortBio || "DJ y productor de Ciudad de México con una plataforma oficial para shows, música, EPK y booking."}</p></article>
         {visible.map((item) => (
           <article key={item.id}>
             <span>{item.sectionKey.replaceAll("_", " ")}</span>
@@ -135,7 +135,7 @@ export function EpkContent({ artists, sections, events, media }: { artists: Arti
                 <Download /> Descargar
               </a>
             </div>
-          )) : <div>PRESS PHOTOS<br /><small>PENDIENTES</small></div>}
+          )) : <div>PRESS PHOTOS<br /><small>Solicitar por booking</small></div>}
         </div>
       </section>
 
@@ -150,18 +150,25 @@ export function EpkContent({ artists, sections, events, media }: { artists: Arti
         ))}
       </section>
 
-      <div className="download-row">
-        <button className="button secondary" disabled><Download /> Rider técnico pendiente</button>
-        <button className="button secondary" disabled><Download /> Hospitality rider pendiente</button>
-        <Link className="button primary" href="/booking">Solicitar booking</Link>
-      </div>
-      <p className="form-note">Los documentos y contactos se habilitarán cuando proporciones material oficial. Ningún documento privado está expuesto.</p>
+      <section className="epk-final-panel">
+        <div>
+          <span className="section-kicker">PRESS KIT READY</span>
+          <h2>Material para promotores y prensa.</h2>
+          <p>Imprime esta versión, descarga las fotografías públicas disponibles o solicita riders y materiales privados mediante booking. Ningún documento privado se expone sin autorización.</p>
+        </div>
+        <div className="epk-action-grid">
+          <button className="button secondary" onClick={() => window.print()}><Printer /> Imprimir EPK</button>
+          <Link className="button secondary" href="/media"><Download /> Ver media pública</Link>
+          <Link className="button secondary" href="/fechas"><CalendarDays /> Próximos shows</Link>
+          <Link className="button primary" href="/booking"><Mail /> Solicitar riders / booking</Link>
+        </div>
+      </section>
     </section>
   );
 }
 
 function contentText(content: Record<string, unknown>) {
-  return Object.values(content).filter((item): item is string => typeof item === "string").join(" · ") || "Contenido pendiente.";
+  return Object.values(content).filter((item): item is string => typeof item === "string").join(" · ") || "Disponible bajo solicitud.";
 }
 
 function Empty({ title }: { title: string }) {
