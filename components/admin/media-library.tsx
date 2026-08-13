@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 export type MediaAsset = {
   id: string;
+  bucket?: string;
   display_name: string;
   title: string | null;
   description: string | null;
@@ -18,23 +19,31 @@ export type MediaAsset = {
   focal_x: number | null;
   focal_y: number | null;
   in_gallery?: boolean;
+  usage_count?: number;
+  usage_labels?: string[];
 };
 
 export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset[]; isAdmin: boolean; onChange: React.Dispatch<React.SetStateAction<MediaAsset[]>> }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("image");
+  const [usageFilter, setUsageFilter] = useState("all");
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<MediaAsset | null>(null);
+  const activeAssets = assets.filter((item) => !item.archived_at);
+  const archivedAssets = assets.filter((item) => item.archived_at);
+  const unusedAssets = activeAssets.filter((item) => !item.in_gallery && !item.usage_count);
+  const totalSizeMb = assets.reduce((sum, item) => sum + Number(item.byte_size || 0), 0) / 1024 / 1024;
 
   const filtered = useMemo(
     () =>
       assets.filter((item) => {
         const matchesType = type === "all" || item.mime_type.startsWith(`${type}/`);
         const matchesArchive = showArchived ? Boolean(item.archived_at) : !item.archived_at;
+        const matchesUsage = usageFilter === "all" || (usageFilter === "used" ? Boolean(item.usage_count || item.in_gallery) : !item.usage_count && !item.in_gallery);
         const searchable = `${item.display_name} ${item.title || ""} ${(item.tags || []).join(" ")}`.toLowerCase();
-        return matchesType && matchesArchive && searchable.includes(query.toLowerCase());
+        return matchesType && matchesArchive && matchesUsage && searchable.includes(query.toLowerCase());
       }),
-    [assets, query, type, showArchived],
+    [assets, query, type, showArchived, usageFilter],
   );
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
@@ -108,6 +117,47 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
 
   return (
     <>
+      <section className="media-intelligence-board">
+        <article>
+          <span>ACTIVOS</span>
+          <strong>{activeAssets.length}</strong>
+          <p>Archivos disponibles para publicar.</p>
+        </article>
+        <article>
+          <span>SIN USO DETECTADO</span>
+          <strong>{unusedAssets.length}</strong>
+          <p>Candidatos para archivar si ya no los necesitas.</p>
+        </article>
+        <article>
+          <span>ARCHIVADOS</span>
+          <strong>{archivedAssets.length}</strong>
+          <p>Ocultos de la biblioteca activa.</p>
+        </article>
+        <article>
+          <span>TAMAÑO TOTAL</span>
+          <strong>{totalSizeMb.toFixed(1)} MB</strong>
+          <p>Referencial; no borres archivos en uso.</p>
+        </article>
+      </section>
+
+      {unusedAssets.length ? (
+        <section className="media-cleanup-panel">
+          <div>
+            <span className="section-kicker">LIMPIEZA SEGURA</span>
+            <h2>{unusedAssets.length} archivos parecen no estar conectados.</h2>
+            <p>Primero archiva. Eliminar permanente solo está disponible para admins y el servidor vuelve a validar referencias.</p>
+          </div>
+          <div>
+            {unusedAssets.slice(0, 5).map((asset) => (
+              <button key={asset.id} onClick={() => archive(asset)}>
+                <span>{asset.display_name}</span>
+                <small>Archivar</small>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="media-toolbar">
         <input aria-label="Buscar archivos" placeholder="Buscar por nombre, título o etiqueta" value={query} onChange={(event) => setQuery(event.target.value)} />
         <select aria-label="Filtrar por tipo" value={type} onChange={(event) => setType(event.target.value)}>
@@ -116,6 +166,11 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
           <option value="video">Videos</option>
           <option value="audio">Audio</option>
           <option value="application">Documentos</option>
+        </select>
+        <select aria-label="Filtrar por uso" value={usageFilter} onChange={(event) => setUsageFilter(event.target.value)}>
+          <option value="all">Uso: todos</option>
+          <option value="used">En uso</option>
+          <option value="unused">Sin uso detectado</option>
         </select>
         <button className="button secondary" onClick={() => setShowArchived((value) => !value)}>{showArchived ? "Ver activos" : "Ver archivados"}</button>
       </div>
@@ -135,15 +190,22 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
             )}
             <div className="media-card-title">
               <strong>{asset.display_name}</strong>
-              <span>{asset.archived_at ? "Archivado" : asset.in_gallery ? "En galería" : "Solo biblioteca"}</span>
+              <span>{asset.archived_at ? "Archivado" : asset.usage_count ? `${asset.usage_count} usos` : asset.in_gallery ? "En galería" : "Sin uso detectado"}</span>
             </div>
             <small>{Math.round(asset.byte_size / 1024)} KB · {asset.width && asset.height ? `${asset.width}x${asset.height}` : asset.mime_type}</small>
+            {asset.usage_labels?.length ? (
+              <div className="media-usage-list">
+                {asset.usage_labels.slice(0, 3).map((label) => <span key={label}>{label}</span>)}
+              </div>
+            ) : (
+              <p className="media-unused-note">No aparece conectado a contenido publicado o configuración.</p>
+            )}
             <div className="media-actions">
               <button onClick={() => setEditing(asset)}>Editar</button>
               {asset.mime_type.startsWith("image/") && !asset.archived_at && <button onClick={() => publish(asset)} disabled={asset.in_gallery}>{asset.in_gallery ? "Publicado" : "Mostrar en galería"}</button>}
               <button onClick={() => navigator.clipboard.writeText(asset.public_url)}>Copiar URL</button>
               {asset.archived_at ? <button onClick={() => restore(asset)}>Restaurar</button> : <button onClick={() => archive(asset)}>Archivar</button>}
-              {isAdmin && <button className="danger" onClick={() => remove(asset)}>Eliminar</button>}
+              {isAdmin && <button className="danger" onClick={() => remove(asset)} disabled={Boolean(asset.usage_count || asset.in_gallery)}>{asset.usage_count || asset.in_gallery ? "En uso" : "Eliminar"}</button>}
             </div>
           </article>
         )) : (
@@ -161,6 +223,10 @@ export function MediaLibrary({ assets, isAdmin, onChange }: { assets: MediaAsset
             <h2>Editar imagen</h2>
             <p className="form-note">Ajusta nombre, texto alternativo y punto focal. El punto focal mejora el recorte en hero, flyers y cards.</p>
             <div className="media-preview large" style={{ backgroundImage: `url(${editing.public_url})`, backgroundPosition: `${(editing.focal_x ?? 0.5) * 100}% ${(editing.focal_y ?? 0.5) * 100}%` }} />
+            <div className="media-usage-panel">
+              <span>Uso detectado</span>
+              {editing.usage_labels?.length ? editing.usage_labels.map((label) => <p key={label}>{label}</p>) : <p>Sin referencias detectadas. Puedes archivarlo si ya no lo necesitas.</p>}
+            </div>
             <label>Nombre visible<input name="displayName" defaultValue={editing.display_name} required /></label>
             <label>Título<input name="title" defaultValue={editing.title || ""} /></label>
             <label>Descripción<textarea name="description" rows={3} defaultValue={editing.description || ""} /></label>
