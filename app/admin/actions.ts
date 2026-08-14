@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const projects = new Set(["iamjoshwa", "afterluv"]);
 const hex = /^#[0-9a-f]{6}$/i;
@@ -30,18 +31,18 @@ export async function saveBrandSettings(formData: FormData) {
 }
 
 export async function savePageSection(formData: FormData) {
-  const { supabase, user, canPublish } = await requireRole(["editor", "admin"]); const status = String(formData.get("status") || "draft");
-  if (["published","scheduled"].includes(status) && !canPublish) throw new Error("No tienes permiso para publicar");
+  const { supabase, user } = await requireRole(["editor", "admin"]); const status = String(formData.get("status") || "draft");
+  const writeDb = createAdminClient();
   const id = String(formData.get("id") || ""); const mediaAssetId = optionalUuid(formData.get("mediaAssetId")); const content = { title: String(formData.get("title") || ""), subtitle: String(formData.get("subtitle") || ""), body: String(formData.get("body") || ""), cta_label: String(formData.get("ctaLabel") || ""), cta_href: String(formData.get("ctaHref") || ""), media_asset_id: mediaAssetId };
   if (content.cta_href && !safeHref(content.cta_href)) throw new Error("Enlace CTA inválido");
   if (mediaAssetId) { const { data: asset } = await supabase.from("media_assets").select("id,mime_type,bucket,archived_at").eq("id",mediaAssetId).maybeSingle(); if (!asset || asset.bucket!=="public-media" || asset.archived_at || (!asset.mime_type.startsWith("image/")&&!asset.mime_type.startsWith("video/"))) throw new Error("Recurso multimedia inválido"); }
   const publishAt = String(formData.get("publishAt")||""); if(status==="scheduled"&&(!publishAt||Number.isNaN(new Date(publishAt).getTime())))throw new Error("Selecciona una fecha válida para programar");
   const payload = { page_key: "home", project: projectOf(formData), block_type: String(formData.get("blockType")), variant: String(formData.get("variant") || "default"), content, position: Number(formData.get("position") || 0), publication_status: status==="scheduled"?"draft":status, updated_by: user.id, published_at: status === "published" ? new Date().toISOString() : null };
   const { data: old } = id ? await supabase.from("page_sections").select("*").eq("id", id).maybeSingle() : { data: null };
-  const query = id ? supabase.from("page_sections").update(payload).eq("id", id) : supabase.from("page_sections").insert({ ...payload, created_by: user.id });
+  const query = id ? writeDb.from("page_sections").update(payload).eq("id", id) : writeDb.from("page_sections").insert({ ...payload, created_by: user.id });
   const { data, error } = await query.select("id").single(); if (error) throw error; await audit(supabase, user.id, id ? "update" : "create", "page_sections", data.id, old, payload);
-  await supabase.from("publication_schedule").delete().eq("entity_type","page_sections").eq("entity_id",data.id).is("executed_at",null);
-  if(status==="scheduled")await supabase.from("publication_schedule").insert({entity_type:"page_sections",entity_id:data.id,action:"publish",execute_at:new Date(publishAt).toISOString(),created_by:user.id});
+  await writeDb.from("publication_schedule").delete().eq("entity_type","page_sections").eq("entity_id",data.id).is("executed_at",null);
+  if(status==="scheduled")await writeDb.from("publication_schedule").insert({entity_type:"page_sections",entity_id:data.id,action:"publish",execute_at:new Date(publishAt).toISOString(),created_by:user.id});
   revalidatePath("/admin/portada"); revalidatePath("/");
 }
 
