@@ -3026,3 +3026,298 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
     transform: none;
   }
 }
+
+.public-social-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.public-social-rail a {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  color: white;
+  box-shadow: 0 16px 50px rgba(0,0,0,.25);
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.public-social-rail a:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  background: radial-gradient(circle at 50% 0, var(--glow), transparent 120%), rgba(255,255,255,.08);
+  box-shadow: 0 22px 70px rgba(0,0,0,.35), 0 0 34px var(--glow);
+}
+
+.public-social-rail svg {
+  width: 18px;
+  height: 18px;
+}
+
+.public-social-rail span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.social-admin-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.social-admin-hero > svg {
+  width: clamp(72px,10vw,140px);
+  height: clamp(72px,10vw,140px);
+  color: var(--accent);
+  filter: drop-shadow(0 0 45px var(--glow));
+}
+
+.social-admin-grid {
+  display: grid;
+  grid-template-columns: .38fr .62fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.social-admin-form,
+.social-admin-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.018));
+  backdrop-filter: blur(18px);
+}
+
+.social-admin-form {
+  position: sticky;
+  top: 24px;
+}
+
+.social-admin-form > span {
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: .16em;
+}
+
+.social-admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.social-admin-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  padding: 18px;
+}
+
+.social-admin-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: radial-gradient(circle at 50% 0, var(--glow), transparent 130%), rgba(255,255,255,.05);
+  color: var(--accent);
+}
+
+.social-admin-fields,
+.social-admin-row,
+.social-admin-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.social-admin-row {
+  grid-template-columns: repeat(3,minmax(0,1fr));
+}
+
+.social-admin-actions {
+  align-content: start;
+  min-width: 150px;
+}
+
+.pro-community-pass {
+  min-height: 520px;
+  background:
+    radial-gradient(circle at 20% 16%, rgba(255,255,255,.18), transparent 18%),
+    radial-gradient(circle at 76% 10%, var(--accent), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.035) 36%, rgba(0,0,0,.82) 100%) !important;
+}
+
+.community-pass-orbit {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  right: -180px;
+  top: -160px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  box-shadow: inset 0 0 70px rgba(255,255,255,.04), 0 0 80px var(--glow);
+}
+
+.community-pass-top,
+.community-pass-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.community-pass-top span,
+.community-pass-top small,
+.community-pass-name small,
+.community-pass-name span,
+.community-pass-bottom small {
+  color: rgba(255,255,255,.68);
+  font-size: 11px;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.community-pass-top span {
+  color: var(--accent);
+}
+
+.community-pass-name {
+  display: grid;
+  gap: 10px;
+  position: relative;
+}
+
+.community-pass-name strong {
+  text-shadow: 0 0 34px rgba(255,255,255,.14);
+}
+
+.community-pass-bottom > div:first-child strong {
+  display: block;
+  margin-top: 6px;
+  font: 800 32px/1 var(--font-display);
+  letter-spacing: -.04em;
+}
+
+.community-pass-qr {
+  width: 94px;
+  height: 94px;
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 7px;
+  padding: 10px;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 20px 80px rgba(0,0,0,.35);
+}
+
+.community-pass-qr span {
+  border-radius: 8px;
+  background: #050505;
+}
+
+.community-pass-qr span:nth-child(2),
+.community-pass-qr span:nth-child(3) {
+  background: linear-gradient(135deg, #050505 45%, transparent 45% 56%, #050505 56%);
+}
+
+.community-pass-progress {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.community-pass-progress span {
+  display: block;
+  width: 35%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), white);
+  box-shadow: 0 0 24px var(--glow);
+}
+
+.pass-action-grid a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pass-action-grid a,
+.pass-action-grid article {
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.016));
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 80px rgba(0,0,0,.2);
+  padding: 24px;
+  transition: transform .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.pass-action-grid a:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  background: radial-gradient(circle at 80% 8%, var(--glow), transparent 75%), rgba(255,255,255,.055);
+}
+
+@media(max-width:1080px) {
+  .social-admin-grid,
+  .social-admin-card {
+    grid-template-columns: 1fr;
+  }
+
+  .social-admin-form {
+    position: static;
+  }
+
+  .social-admin-actions {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:720px) {
+  .public-social-rail {
+    justify-content: center;
+  }
+
+  .social-admin-row,
+  .social-admin-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .social-admin-card,
+  .social-admin-form,
+  .pro-community-pass {
+    border-radius: 24px;
+  }
+
+  .pro-community-pass {
+    min-height: 420px;
+  }
+
+  .community-pass-qr {
+    width: 78px;
+    height: 78px;
+    border-radius: 20px;
+  }
+
+  .pass-action-grid a:hover {
+    transform: none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .public-social-rail a,
+  .pass-action-grid a {
+    transition: none;
+  }
+
+  .public-social-rail a:hover,
+  .pass-action-grid a:hover {
+    transform: none;
+  }
+}

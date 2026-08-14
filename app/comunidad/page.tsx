@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Gift, LockKeyhole, QrCode, Radio, ShieldCheck, Sparkles, Trophy, Zap } from "lucide-react";
+import { ArrowRight, BadgeCheck, Gift, Instagram, LockKeyhole, QrCode, Radio, ShieldCheck, Sparkles, Trophy, Zap } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
+import { contentRepository } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 
 const levels = [
@@ -12,20 +13,23 @@ const levels = [
   ["06", "Legend", "Acceso máximo, recompensas especiales y prioridad."],
 ];
 
-const actions = [
-  ["Completa tu perfil", "Tu identidad, ciudad, gustos y canal favorito.", BadgeCheck],
-  ["Escucha sets", "Abre sesiones oficiales y registra actividad segura.", Radio],
-  ["Confirma asistencia", "Marca eventos y prepara tu check-in QR.", QrCode],
-  ["Desbloquea Vault", "Canjea puntos por drops, edits y contenido privado.", LockKeyhole],
-];
-
 export const generateMetadata = () => pageMetadata({
   path: "/comunidad",
   title: "Comunidad",
   description: "IAMJOSHWA Pass, niveles, puntos, badges, referidos y acceso a The Vault.",
 });
 
-export default function CommunityPage() {
+export default async function CommunityPage() {
+  const socials = await contentRepository.getSocialLinks();
+  const instagram = socials.find((item) => item.platform?.toLowerCase() === "instagram" && (!item.project || item.project === "iamjoshwa"));
+  const actions = [
+    ["Completa tu perfil", "Tu identidad, ciudad, gustos y canal favorito.", BadgeCheck, "/perfil"],
+    ["Escucha sets", "Abre sesiones oficiales y registra actividad segura.", Radio, "/musica"],
+    ["Confirma asistencia", "Marca eventos y prepara tu check-in QR.", QrCode, "/fechas"],
+    ["Sigue la señal", instagram ? "Conecta con Instagram y no te pierdas drops ni shows." : "Activa tu Pass; cuando agregues Instagram en Admin, esta misión abrirá tu perfil.", Instagram, instagram?.url || "/acceso?next=%2Fperfil"],
+    ["Desbloquea Vault", "Canjea puntos por drops, edits y contenido privado.", LockKeyhole, "/the-vault"],
+  ] as const;
+
   return (
     <>
       <PageHero
@@ -35,11 +39,31 @@ export default function CommunityPage() {
       />
 
       <section className="section pass-community-hero">
-        <div className="pass-community-card">
+        <div className="pass-community-card pro-community-pass">
           <div className="pass-card-shine" />
-          <span>IAMJOSHWA PASS</span>
-          <strong>ACCESS<br />GRANTED</strong>
-          <small>UNA CUENTA · DOS UNIVERSOS · THE VAULT</small>
+          <div className="community-pass-orbit" aria-hidden="true" />
+          <div className="community-pass-top">
+            <span>IAMJOSHWA PASS</span>
+            <small>INNER CIRCLE ACCESS</small>
+          </div>
+          <div className="community-pass-name">
+            <small>MEMBER PREVIEW</small>
+            <strong>ACCESS<br />GRANTED</strong>
+            <span>CDMX · MX · LEVEL 01</span>
+          </div>
+          <div className="community-pass-bottom">
+            <div>
+              <small>XP</small>
+              <strong>035 / 100</strong>
+            </div>
+            <div className="community-pass-qr" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+          <div className="community-pass-progress"><span /></div>
         </div>
         <div className="pass-community-copy">
           <span className="section-kicker">MEMBERSHIP SYSTEM</span>
@@ -68,12 +92,12 @@ export default function CommunityPage() {
           <p className="muted">Cada movimiento vive en un ledger, no en un total editable.</p>
         </div>
         <div className="pass-action-grid">
-          {actions.map(([title, body, Icon]) => (
-            <article key={String(title)}>
+          {actions.map(([title, body, Icon, href]) => (
+            <Link href={href} target={String(href).startsWith("http") ? "_blank" : undefined} rel={String(href).startsWith("http") ? "noreferrer" : undefined} key={String(title)}>
               <Icon />
               <h3>{String(title)}</h3>
               <p>{String(body)}</p>
-            </article>
+            </Link>
           ))}
         </div>
       </section>

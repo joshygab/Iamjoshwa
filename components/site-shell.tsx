@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ImmersiveEffects } from "./immersive-effects";
 import { UniverseSwitch } from "./universe-switch";
 import { CommandMenu } from "./command-menu";
+import { SocialIconRail } from "./social-icon-rail";
 
 const nav = [
   ["Inicio", "/"],
@@ -62,6 +63,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <div>
           <span className="wordmark">IAMJOSHWA</span>
           <p>DJ & Producer — Ciudad de México</p>
+          <SocialIconRail />
         </div>
         <p>© {new Date().getFullYear()} IAMJOSHWA. Sitio oficial.</p>
       </footer>
