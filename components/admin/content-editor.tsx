@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DeleteContentButton } from "./delete-content-button";
@@ -519,7 +520,55 @@ function SetTracksEditor({ value }: { value: unknown }) {
 function MediaSelect({ name, label, value, assets, kind = "image" }: { name: string; label: string; value: unknown; assets: Asset[]; kind?: "image" | "audio" }) {
   const options = assets.filter((asset) => asset.mime_type.startsWith(`${kind}/`));
   const [selectedId, setSelectedId] = useState(text(value));
+  const [query, setQuery] = useState("");
   const selected = options.find((asset) => asset.id === selectedId);
+  const visibleOptions = options.filter((asset) => asset.display_name.toLowerCase().includes(query.toLowerCase())).slice(0, 24);
+  if (kind === "image") {
+    return (
+      <section className="media-picker-field wide-field">
+        <input type="hidden" name={name} value={selectedId} />
+        <div className="media-picker-head">
+          <div>
+            <span>{label}</span>
+            <strong>{selected ? selected.display_name : "Sin imagen asignada"}</strong>
+          </div>
+          {selectedId ? <button type="button" className="compact-secondary-button" onClick={() => setSelectedId("")}>Quitar</button> : null}
+        </div>
+        <div className="media-picker-preview">
+          {selected?.public_url ? (
+            <Image src={selected.public_url} alt={selected.display_name} width={900} height={1125} sizes="(max-width: 760px) 100vw, 760px" />
+          ) : (
+            <div>
+              <strong>Elige un flyer de tu biblioteca</strong>
+              <small>{options.length ? "Selecciona una miniatura de abajo." : "Primero sube una imagen en Media Studio."}</small>
+            </div>
+          )}
+        </div>
+        <div className="media-picker-toolbar">
+          <input aria-label={`Buscar ${label}`} placeholder="Buscar imagen..." value={query} onChange={(event) => setQuery(event.target.value)} />
+          <small>{options.length} imágenes disponibles</small>
+        </div>
+        {visibleOptions.length ? (
+          <div className="media-picker-grid">
+            {visibleOptions.map((asset) => (
+              <button
+                aria-pressed={asset.id === selectedId}
+                className={asset.id === selectedId ? "is-selected" : ""}
+                key={asset.id}
+                onClick={() => setSelectedId(asset.id)}
+                type="button"
+              >
+                {asset.public_url ? <Image src={asset.public_url} alt="" width={240} height={300} sizes="118px" /> : null}
+                <span>{asset.display_name}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="media-picker-empty">{query ? "No encontré imágenes con ese nombre." : "No hay imágenes activas para asignar."}</p>
+        )}
+      </section>
+    );
+  }
   return (
     <label className={kind === "audio" ? "audio-asset-select" : undefined}>
       <span>{label}</span>
