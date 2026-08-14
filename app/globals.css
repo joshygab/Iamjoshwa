@@ -3773,3 +3773,188 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
     transform: none;
   }
 }
+
+/* Bloque 1: Home Signal Feed */
+.home-signal-feed {
+  position: relative;
+  isolation: isolate;
+}
+
+.home-signal-feed:before {
+  content: "";
+  position: absolute;
+  inset: 8% clamp(14px, 5vw, 80px) auto;
+  height: 340px;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 0, var(--glow), transparent 65%);
+  filter: blur(22px);
+  opacity: .72;
+  pointer-events: none;
+}
+
+.signal-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.signal-feed-card {
+  position: relative;
+  min-height: 285px;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+    rgba(0,0,0,.18);
+  box-shadow: 0 26px 95px rgba(0,0,0,.24);
+  backdrop-filter: blur(18px);
+  padding: clamp(18px, 3vw, 26px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  grid-column: span 2;
+  transition: transform .26s ease, border-color .26s ease, background .26s ease, box-shadow .26s ease;
+}
+
+.signal-feed-card:nth-child(1),
+.signal-feed-card:nth-child(2) {
+  grid-column: span 3;
+}
+
+.signal-feed-card:before {
+  content: "";
+  position: absolute;
+  inset: auto -20% -48% -20%;
+  height: 72%;
+  background: radial-gradient(circle at 50% 0, var(--glow), transparent 70%);
+  opacity: .46;
+  transition: opacity .26s ease, transform .26s ease;
+}
+
+.signal-feed-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--accent) 54%, rgba(255,255,255,.16));
+  background:
+    radial-gradient(circle at 88% 8%, var(--glow), transparent 68%),
+    linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.024));
+  box-shadow: 0 38px 130px rgba(0,0,0,.36), 0 0 70px var(--glow);
+}
+
+.signal-feed-card:hover:before {
+  opacity: .82;
+  transform: translateY(-10px);
+}
+
+.signal-feed-card[data-state="live"] {
+  border-color: rgba(255,88,122,.42);
+  box-shadow: 0 34px 120px rgba(0,0,0,.34), 0 0 70px rgba(255,45,95,.18);
+}
+
+.signal-feed-card[data-state="live"] .signal-feed-icon span {
+  color: #ffb7c6;
+}
+
+.signal-feed-card[data-state="locked"],
+.signal-feed-card[data-state="soon"] {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.014)),
+    rgba(0,0,0,.18);
+}
+
+.signal-feed-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.signal-feed-icon svg {
+  width: 28px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 18px var(--glow));
+}
+
+.signal-feed-icon span {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.signal-feed-card h3 {
+  position: relative;
+  z-index: 1;
+  font: 800 clamp(32px, 5vw, 70px)/.86 var(--font-display);
+  letter-spacing: -.06em;
+  margin: auto 0 14px;
+  overflow-wrap: anywhere;
+}
+
+.signal-feed-card p {
+  position: relative;
+  z-index: 1;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.signal-feed-card strong {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.signal-feed-card strong svg {
+  width: 16px;
+  color: var(--accent);
+}
+
+@media(max-width:1100px) {
+  .signal-feed-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .signal-feed-card,
+  .signal-feed-card:nth-child(1),
+  .signal-feed-card:nth-child(2) {
+    grid-column: span 1;
+  }
+}
+
+@media(max-width:720px) {
+  .signal-feed-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signal-feed-card {
+    min-height: 235px;
+    border-radius: 22px;
+  }
+
+  .signal-feed-card:hover {
+    transform: none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .signal-feed-card,
+  .signal-feed-card:before {
+    transition: none;
+  }
+
+  .signal-feed-card:hover {
+    transform: none;
+  }
+}

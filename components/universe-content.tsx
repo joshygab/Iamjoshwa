@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Camera, Headphones, LockKeyhole, MapPin, Play, QrCode, Radio, Sparkles, Ticket } from "lucide-react";
+import { ArrowRight, CalendarDays, Camera, Disc3, Gift, Headphones, LockKeyhole, MapPin, Play, QrCode, Radio, Signal, Sparkles, Ticket, Zap } from "lucide-react";
 import { Countdown } from "./countdown";
 import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
@@ -73,6 +73,17 @@ const missions = [
   ["04", "Book / Share", "Promotores encuentran EPK, contacto y booking en segundos.", "/booking"],
 ] as const;
 
+type HomeSignalCard = {
+  id: string;
+  kicker: string;
+  title: string;
+  body: string;
+  href: string;
+  action: string;
+  icon: "listen" | "show" | "drop" | "pass" | "mission" | "vault";
+  state: "live" | "active" | "soon" | "locked";
+};
+
 export function HomeContent({ events, sets, releases, rewards = [], artists = [], sections = [], now }: Props) {
   const { universe, setUniverse } = useUniverse();
   const { play } = usePlayer();
@@ -105,6 +116,72 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       .filter((item) => item.time > now)
       .sort((a, b) => a.time - b.time)[0];
   }, [now, scopedEvents, scopedReleases, scopedRewards, universe]);
+  const signalFeed = useMemo<HomeSignalCard[]>(() => {
+    const nextEvent = scopedEvents.find((item) => new Date(item.date).getTime() >= now);
+    const vaultReward = scopedRewards[0];
+    return [
+      {
+        id: "now-playing",
+        kicker: "NOW PLAYING",
+        title: set?.title || "NEW SOUND INCOMING",
+        body: set ? `${set.category} · ${set.duration || "Set oficial"} · ${set.genres.slice(0, 3).join(" / ") || "Club signal"}` : "El siguiente set aparecerá aquí cuando esté publicado desde Admin.",
+        href: set ? `/musica/${set.slug}` : "/musica",
+        action: set ? "Listen" : "Abrir música",
+        icon: "listen",
+        state: set ? "active" : "soon",
+      },
+      {
+        id: "next-event",
+        kicker: liveEvent ? "LIVE TONIGHT" : "NEXT EVENT",
+        title: nextEvent?.name || "NEXT SIGNAL — COMING SOON",
+        body: nextEvent ? `${nextEvent.city} · ${nextEvent.venue}` : "Cuando publiques una fecha, esta tarjeta se convierte en entrada rápida al show.",
+        href: nextEvent ? `/fechas/${nextEvent.slug}` : "/fechas",
+        action: nextEvent ? "Open show" : "Ver shows",
+        icon: "show",
+        state: liveEvent ? "live" : nextEvent ? "active" : "soon",
+      },
+      {
+        id: "latest-drop",
+        kicker: "LATEST DROP",
+        title: release?.title || "DROP LOADING",
+        body: release ? `${release.type} · ${new Date(release.releaseAt).getTime() > now ? "Pre-save activo" : "Escuchar ahora"}` : "Publica un lanzamiento con pre-save o plataformas para activar esta señal.",
+        href: release ? `/lanzamientos/${release.slug}` : "/lanzamientos",
+        action: release ? "Open drop" : "Ver releases",
+        icon: "drop",
+        state: release ? "active" : "soon",
+      },
+      {
+        id: "pass",
+        kicker: "JOSH PASS",
+        title: signal ? "Tu señal está personalizada" : "Create your access",
+        body: signal ? `${signal.favoriteProject.toUpperCase()} primero · ${signal.city || "Ciudad pendiente"}` : "Crea tu Pass para activar misiones, puntos, QR y The Vault.",
+        href: signal ? "/perfil" : "/acceso?next=%2Fperfil",
+        action: signal ? "Ver Pass" : "Crear Pass",
+        icon: "pass",
+        state: signal ? "active" : "locked",
+      },
+      {
+        id: "mission",
+        kicker: "NEW MISSION",
+        title: set ? "Listen to your first set" : "Complete your Pass",
+        body: set ? "Abre el set destacado y empieza a mover tu actividad." : "Alias, ciudad, universo favorito y preferencias.",
+        href: set ? `/musica/${set.slug}` : "/perfil",
+        action: "Start mission",
+        icon: "mission",
+        state: "active",
+      },
+      {
+        id: "vault",
+        kicker: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "THE VAULT",
+        title: vaultReward?.name || (universe === "afterluv" ? "CLASSIFIED RAVE SIGNAL" : "LOCKED DROP"),
+        body: vaultReward ? `${vaultReward.pointsCost} XP · recompensa disponible` : "Drops privados, códigos secretos y recompensas aparecerán aquí.",
+        href: "/the-vault",
+        action: "Enter Vault",
+        icon: "vault",
+        state: vaultReward ? "active" : "locked",
+      },
+    ];
+  }, [liveEvent, now, release, scopedEvents, scopedRewards, set, signal, universe]);
 
   const title = String(hero.title || artist.displayName);
   const tagline = String(hero.subtitle || artist.tagline);
@@ -211,6 +288,31 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
           </div>
         </section>
       ) : null}
+
+      <section className="section home-signal-feed reveal">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">SIGNAL FEED</p>
+            <h2>La app siempre debe sentirse viva.</h2>
+          </div>
+          <Link className="text-link" href={signal ? "/perfil" : "/acceso?next=%2Fperfil"}>
+            {signal ? "Open my Pass" : "Create Pass"} <ArrowRight />
+          </Link>
+        </div>
+        <div className="signal-feed-grid">
+          {signalFeed.map((item) => (
+            <Link className="signal-feed-card" data-state={item.state} href={item.href} key={item.id}>
+              <div className="signal-feed-icon">
+                <SignalIcon type={item.icon} />
+                <span>{item.kicker}</span>
+              </div>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <strong>{item.action}<ArrowRight /></strong>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="quick-paths section reveal world-paths">
         <p className="section-kicker">IAMJOSHWA WORLD</p>
@@ -425,6 +527,16 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       </section>
     </>
   );
+}
+
+function SignalIcon({ type }: { type: HomeSignalCard["icon"] }) {
+  if (type === "listen") return <Headphones />;
+  if (type === "show") return <CalendarDays />;
+  if (type === "drop") return <Disc3 />;
+  if (type === "pass") return <Sparkles />;
+  if (type === "mission") return <Zap />;
+  if (type === "vault") return <Gift />;
+  return <Signal />;
 }
 
 function isVisible(sections: PageSectionItem[], type: string) {
