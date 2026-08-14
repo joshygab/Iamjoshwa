@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/site-shell";
 import { UniverseProvider } from "@/components/universe-provider";
 import { PlayerProvider } from "@/components/player-provider";
 import { PwaRegister } from "@/components/pwa-register";
+import { contentRepository } from "@/lib/data";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -57,14 +58,18 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const [navigation, announcement] = await Promise.all([
+    contentRepository.getNavigation().catch(() => []),
+    contentRepository.getActiveAnnouncement().catch(() => null),
+  ]);
   return (
     <html lang="es" data-scroll-behavior="smooth">
       <body>
         <UniverseProvider>
           <PlayerProvider>
             <PwaRegister />
-            <SiteShell>{children}</SiteShell>
+            <SiteShell navigation={navigation} announcement={announcement}>{children}</SiteShell>
           </PlayerProvider>
         </UniverseProvider>
       </body>

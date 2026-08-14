@@ -10,3 +10,5 @@ export interface MediaGalleryItem{id:string;project:Universe|null;title:string;c
 export interface TimelineItem{id:string;project:Universe|null;title:string;body:string;occurredAt?:string|null;url?:string;alt?:string;demo?:boolean}
 export interface EpkSectionItem{id:string;project:Universe|null;sectionKey:string;content:Record<string,unknown>;position:number}
 export interface RewardItem{id:string;project:Universe|null;slug:string;name:string;description:string;pointsCost:number;inventory:number|null;expiresAt?:string|null;unlockAt?:string|null;imageUrl?:string}
+export interface NavigationItem{label:string;href:string;position:number;project:Universe|null;target?:string;icon?:string|null;badge?:string|null;showInNavbar?:boolean;showInFooter?:boolean;showOnDesktop?:boolean;showOnMobile?:boolean}
+export interface AnnouncementItem{id:string;project:Universe|null;eyebrow?:string|null;title:string;body?:string|null;ctaLabel?:string|null;ctaHref?:string|null;audience:string}
