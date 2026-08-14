@@ -3,34 +3,43 @@
   "short_name": "IAMJOSHWA",
   "description": "Music, shows, Inner Circle Pass, booking, EPK, The Vault y AFTERLUV.",
   "id": "/?source=pwa",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui", "browser"],
   "background_color": "#050505",
   "theme_color": "#070609",
   "orientation": "portrait",
   "categories": ["music", "entertainment", "lifestyle"],
+  "prefer_related_applications": false,
   "shortcuts": [
+    {
+      "name": "IAMJOSHWA Pass",
+      "short_name": "Pass",
+      "description": "Abrir perfil e Inner Circle.",
+      "url": "/perfil?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa/shortcut-pass.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }]
+    },
     {
       "name": "Listen",
       "short_name": "Listen",
       "description": "Abrir música y sets.",
-      "url": "/musica",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+      "url": "/musica?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa/shortcut-music.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }]
+    },
+    {
+      "name": "Fechas",
+      "short_name": "Shows",
+      "description": "Ver próximas fechas.",
+      "url": "/fechas?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa/shortcut-shows.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }]
     },
     {
       "name": "Book Now",
       "short_name": "Booking",
       "description": "Solicitar una contratación.",
-      "url": "/booking",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "IAMJOSHWA Pass",
-      "short_name": "Pass",
-      "description": "Abrir perfil e Inner Circle.",
-      "url": "/perfil",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+      "url": "/booking?source=pwa-shortcut",
+      "icons": [{ "src": "/pwa/shortcut-booking.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }]
     }
   ],
   "icons": [
@@ -38,13 +47,25 @@
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/favicon.svg",

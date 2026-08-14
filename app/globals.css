@@ -115,6 +115,25 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
 @media(max-width:720px){.cursor-glow{display:none}.reveal{opacity:1;filter:none;transform:none}.cinematic-hero{min-height:100svh}.cinematic-hero .hero-content{transform:none}.cinematic-hero:before{transform:scale(1.04);opacity:.58}.cinematic-hero h1{font-size:clamp(72px,22vw,118px)}.immersive-paths{border-radius:18px}.cinematic-contact{margin:0 16px 90px;padding:46px 20px}.media-gallery{grid-template-columns:1fr}.media-gallery article,.media-gallery article:nth-child(1),.media-gallery article:nth-child(2),.media-gallery article:nth-child(5n),.media-gallery article:nth-child(6n){grid-column:auto}.story article{margin-left:24px}.story article:before{left:-24px}.story article:after{left:-19px}.set-card,.release-card,.event-card{border-radius:20px}.button:hover,.path-grid>a:hover,.event-card:hover,.set-card:hover,.release-card:hover,.media-gallery article:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){.cursor-glow{display:none}.reveal{opacity:1;filter:none;transform:none}.cinematic-hero .hero-content,.cinema-depth,.hero-grid,.cinematic-hero:before{transform:none!important}.waveform-art:after{animation:none}}
 
+html[data-pwa="standalone"] body {
+  overscroll-behavior-y: none;
+}
+
+html[data-pwa="standalone"] .site-header {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
+
+.offline-signal {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(155,92,255,.22), transparent 28rem),
+    radial-gradient(circle at 80% 70%, rgba(255,45,141,.13), transparent 24rem),
+    #050505;
+}
+
+.offline-signal .inline-actions {
+  flex-wrap: wrap;
+}
+
 /* Final CMS polish */
 .admin-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .admin-content-card{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.02));box-shadow:0 20px 70px rgba(0,0,0,.25);transition:transform .22s ease,border-color .22s ease,background .22s ease}
