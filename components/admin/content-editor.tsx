@@ -7,6 +7,7 @@ type EditorValues = Record<string, unknown> & { id?: string };
 type Asset = { id: string; display_name: string; mime_type: string; byte_size?: number | null; public_url?: string };
 type ReleaseLink = { platform: string; url: string; position: number };
 type ReleaseCredit = { role: string; name: string };
+type SetTrack = { position: number; timestamp_seconds?: number; artist?: string; title: string; is_unreleased?: boolean };
 type Props = { module: string; initial?: EditorValues; assets?: Asset[] };
 
 export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
@@ -154,6 +155,10 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           <Text name="youtube_url" label="YouTube" value={initial.youtube_url} type="url" />
           <Text name="mixcloud_url" label="Mixcloud" value={initial.mixcloud_url} type="url" />
           <Text name="external_url" label="Enlace externo" value={initial.external_url} type="url" />
+          <div className="content-editor-note wide-field">
+            <strong>Audio opcional.</strong>
+            <span>Si no subes MP3/WAV, el set puede publicarse usando SoundCloud, YouTube, Mixcloud o un enlace externo oficial.</span>
+          </div>
           <label>
             Acceso
             <select name="access_level" defaultValue={text(initial.access_level, "public")}>
@@ -163,7 +168,7 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           </label>
           <label className="checkbox"><input name="featured" type="checkbox" defaultChecked={Boolean(initial.featured)} /> Destacado</label>
           <Area name="description" label="Descripción" value={initial.description} />
-          <Area name="set_tracks" label="Tracklist (JSON)" value={json(initial.set_tracks, [])} />
+          <SetTracksEditor value={initial.set_tracks} />
         </>
       )}
 
@@ -317,6 +322,62 @@ function ReleaseLinksEditor({ value }: { value: unknown }) {
   );
 }
 
+function SetTracksEditor({ value }: { value: unknown }) {
+  const existing = Array.isArray(value) ? value as Partial<SetTrack>[] : [];
+  const [tracks, setTracks] = useState<Array<{ time: string; artist: string; title: string; is_unreleased: boolean }>>(
+    existing.length
+      ? existing.map((item) => ({
+        time: secondsToTimestamp(typeof item.timestamp_seconds === "number" ? item.timestamp_seconds : undefined),
+        artist: String(item.artist || ""),
+        title: String(item.title || ""),
+        is_unreleased: Boolean(item.is_unreleased),
+      }))
+      : [{ time: "", artist: "", title: "", is_unreleased: false }],
+  );
+  const payload = tracks
+    .map((track, index) => ({
+      position: index + 1,
+      timestamp_seconds: timestampToSeconds(track.time),
+      artist: track.artist.trim() || undefined,
+      title: track.title.trim(),
+      is_unreleased: track.is_unreleased,
+    }))
+    .filter((track) => track.title)
+    .map((track) => track.timestamp_seconds == null ? omit(track, "timestamp_seconds") : track);
+
+  function update(index: number, key: "time" | "artist" | "title" | "is_unreleased", next: string | boolean) {
+    setTracks((current) => current.map((track, itemIndex) => itemIndex === index ? { ...track, [key]: next } : track));
+  }
+
+  function remove(index: number) {
+    setTracks((current) => current.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  return (
+    <section className="release-link-editor set-track-editor wide-field">
+      <input type="hidden" name="set_tracks" value={JSON.stringify(payload)} />
+      <div className="release-link-head">
+        <div><span>TRACKLIST</span><p>Agrega tracks sin escribir JSON. Si no tienes tracklist todavía, deja vacío y guarda normal.</p></div>
+        <button type="button" className="button secondary" onClick={() => setTracks((current) => [...current, { time: "", artist: "", title: "", is_unreleased: false }])}>Agregar track</button>
+      </div>
+      <div className="release-link-grid set-track-grid">
+        {tracks.map((track, index) => (
+          <div key={`${index}-${track.title}`}>
+            <input aria-label="Tiempo" placeholder="00:00" value={track.time} onChange={(event) => update(index, "time", event.target.value)} />
+            <input aria-label="Artista" placeholder="Artista opcional" value={track.artist} onChange={(event) => update(index, "artist", event.target.value)} />
+            <input aria-label="Título del track" placeholder="Título del track" value={track.title} onChange={(event) => update(index, "title", event.target.value)} />
+            <label className="mini-checkbox">
+              <input type="checkbox" checked={track.is_unreleased} onChange={(event) => update(index, "is_unreleased", event.target.checked)} />
+              Inédito
+            </label>
+            {tracks.length > 1 ? <button type="button" className="button secondary" onClick={() => remove(index)}>Quitar</button> : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function MediaSelect({ name, label, value, assets, kind = "image" }: { name: string; label: string; value: unknown; assets: Asset[]; kind?: "image" | "audio" }) {
   const options = assets.filter((asset) => asset.mime_type.startsWith(`${kind}/`));
   const [selectedId, setSelectedId] = useState(text(value));
@@ -374,4 +435,28 @@ function formatBytes(value: number) {
   if (!value) return "tamaño pendiente";
   if (value > 1024 * 1024) return `${(value / 1024 / 1024).toFixed(1)} MB`;
   return `${Math.round(value / 1024)} KB`;
+}
+
+function timestampToSeconds(value: string) {
+  const clean = value.trim();
+  if (!clean) return undefined;
+  const parts = clean.split(":").map((part) => Number(part));
+  if (parts.some((part) => !Number.isFinite(part) || part < 0)) return undefined;
+  if (parts.length === 2) return Math.round(parts[0] * 60 + parts[1]);
+  if (parts.length === 3) return Math.round(parts[0] * 3600 + parts[1] * 60 + parts[2]);
+  return undefined;
+}
+
+function secondsToTimestamp(value: number | undefined) {
+  if (value == null) return "";
+  const hours = Math.floor(value / 3600);
+  const minutes = Math.floor((value % 3600) / 60);
+  const seconds = Math.floor(value % 60);
+  return hours ? `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}` : `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function omit<T extends Record<string, unknown>, K extends keyof T>(value: T, key: K) {
+  const copy = { ...value };
+  delete copy[key];
+  return copy;
 }

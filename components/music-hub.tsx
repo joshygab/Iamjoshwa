@@ -86,9 +86,13 @@ export function MusicHub({ sets, releases }: { sets: SetItem[]; releases: Releas
                   <button className="button primary" disabled>
                     <Headphones /> Audio signal queued
                   </button>
+                ) : !featuredSet.audioUrl && !featuredSet.embedUrl && featuredSet.externalUrl ? (
+                  <a className="button primary" href={featuredSet.externalUrl} target="_blank" rel="noreferrer">
+                    <Headphones /> Abrir plataforma
+                  </a>
                 ) : (
-                  <button className="button primary" onClick={() => void openSet(featuredSet)}>
-                    <Headphones /> Listen
+                  <button className="button primary" onClick={() => void openSet(featuredSet)} disabled={!featuredSet.audioUrl && !featuredSet.embedUrl}>
+                    <Headphones /> {featuredSet.audioUrl ? "Listen" : featuredSet.embedUrl ? "Open player" : "Audio signal queued"}
                   </button>
                 )}
                 <Link className="button secondary" href={`/musica/${featuredSet.slug}`}>

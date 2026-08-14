@@ -115,6 +115,13 @@ export default async function SetDetailPage({ params }: Props) {
             loading="lazy"
             allow="encrypted-media; fullscreen; picture-in-picture"
           />
+        ) : set.externalUrl ? (
+          <div className="admin-empty public-empty branded-empty">
+            <span>OFFICIAL PLATFORM</span>
+            <h2>OPEN SIGNAL.</h2>
+            <p>Este set usa una plataforma externa oficial en lugar de archivo MP3/WAV interno.</p>
+            <a className="button primary" href={set.externalUrl} target="_blank" rel="noreferrer">Abrir plataforma</a>
+          </div>
         ) : (
           <div className="admin-empty public-empty branded-empty">
             <span>AUDIO SIGNAL</span>

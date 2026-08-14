@@ -87,10 +87,15 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
                   <Lock />
                   Exclusivo
                 </button>
-              ) : (
-                <button className="button primary" onClick={() => void openSet(item)}>
+              ) : !item.audioUrl && !item.embedUrl && item.externalUrl ? (
+                <a className="button primary" href={item.externalUrl} target="_blank" rel="noreferrer">
                   <Headphones />
-                  {item.audioUrl ? "Reproducir audio" : "Abrir reproductor"}
+                  Abrir plataforma
+                </a>
+              ) : (
+                <button className="button primary" onClick={() => void openSet(item)} disabled={!item.audioUrl && !item.embedUrl}>
+                  <Headphones />
+                  {item.audioUrl ? "Reproducir audio" : item.embedUrl ? "Abrir reproductor" : "Audio signal queued"}
                 </button>
               )}
               {item.externalUrl && !item.demo ? (

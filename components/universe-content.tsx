@@ -143,6 +143,10 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
 
   function startSet() {
     if (!set || set.demo) return;
+    if (!set.audioUrl && !set.embedUrl && set.externalUrl) {
+      window.open(set.externalUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     play(set);
   }
 
@@ -307,8 +311,8 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
                   {set.demo ? (
                     <Link href="/musica">Open library</Link>
                   ) : (
-                    <button type="button" onClick={startSet}>
-                      <Radio /> Start global player
+                    <button type="button" onClick={startSet} disabled={!set.audioUrl && !set.embedUrl && !set.externalUrl}>
+                      <Radio /> {!set.audioUrl && !set.embedUrl && set.externalUrl ? "Open platform" : "Start global player"}
                     </button>
                   )}
                 </article>

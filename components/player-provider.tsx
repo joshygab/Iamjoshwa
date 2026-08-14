@@ -127,7 +127,7 @@ export function usePlayer() {
 }
 
 function CompactPlayer() {
-  const { playing, active, expanded, volume, close, setActive, setExpanded, setVolume, toggle } =
+  const { playing, active, expanded, volume, close, setActive, setExpanded, setVolume } =
     usePlayer();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [current, setCurrent] = useState(0);
@@ -148,14 +148,24 @@ function CompactPlayer() {
 
   if (!playing) return null;
 
-  const fullPlayerHref = playing.slug ? `/musica/${playing.slug}` : playing.externalUrl || "/musica";
-  const providerLabel = playing.provider ? playing.provider.toUpperCase() : "OFICIAL";
-  const canExpand = Boolean(playing.embedUrl);
-  const hasNativeAudio = Boolean(playing.audioUrl);
+  const currentPlaying = playing;
+  const fullPlayerHref = currentPlaying.slug ? `/musica/${currentPlaying.slug}` : currentPlaying.externalUrl || "/musica";
+  const providerLabel = currentPlaying.provider ? currentPlaying.provider.toUpperCase() : "OFICIAL";
+  const canExpand = Boolean(currentPlaying.embedUrl);
+  const hasNativeAudio = Boolean(currentPlaying.audioUrl);
+  const opensExternal = Boolean(!hasNativeAudio && !canExpand && currentPlaying.externalUrl);
+  const primaryHref = opensExternal ? currentPlaying.externalUrl! : fullPlayerHref;
   const progress = duration > 0 ? current / duration : 0;
 
   function handlePrimary() {
-    if (!hasNativeAudio) return toggle();
+    if (!hasNativeAudio && currentPlaying.embedUrl) {
+      setExpanded(true);
+      return setActive(true);
+    }
+    if (!hasNativeAudio && currentPlaying.externalUrl) {
+      window.open(currentPlaying.externalUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     if (audioRef.current && !active) void audioRef.current.play().catch(() => setActive(false));
     else audioRef.current?.pause();
     setActive(!active);
@@ -223,9 +233,15 @@ function CompactPlayer() {
           />
         </label>
 
-        <Link href={fullPlayerHref} className="compact-player-link" aria-label="Abrir player completo">
-          <ExternalLink />
-        </Link>
+        {opensExternal ? (
+          <a href={primaryHref} className="compact-player-link" target="_blank" rel="noreferrer" aria-label="Abrir plataforma oficial">
+            <ExternalLink />
+          </a>
+        ) : (
+          <Link href={primaryHref} className="compact-player-link" aria-label="Abrir player completo">
+            <ExternalLink />
+          </Link>
+        )}
 
         {canExpand ? (
           <button
