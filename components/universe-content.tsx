@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Headphones, LockKeyhole, Play, Radio, Sparkles, Ticket } from "lucide-react";
+import { ArrowRight, Camera, Headphones, LockKeyhole, MapPin, Play, QrCode, Radio, Sparkles, Ticket } from "lucide-react";
 import { Countdown } from "./countdown";
 import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
@@ -86,6 +86,8 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
   const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
   const event = scopedEvents.find((item) => new Date(item.date).getTime() >= now) || scopedEvents[0];
+  const liveEvent = event && isLiveWindow(event.date, now) ? event : null;
+  const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item.date, now)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
   const nextSignal = useMemo(() => {
@@ -161,7 +163,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
           <div className="hero-grid" />
           <div className="hero-content world-hero-content reveal is-visible">
             {artist.logoUrl ? <Image className="hero-logo" src={artist.logoUrl} alt={`${artist.displayName} logo`} width={420} height={160} priority /> : null}
-            <p className="eyebrow">{universe === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA WORLD"}</p>
+            <p className="eyebrow">{liveEvent ? "LIVE TONIGHT" : universe === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA WORLD"}</p>
             <h1>{title}</h1>
             <p className="hero-tagline">{tagline}</p>
             <div className="hero-actions">
@@ -179,6 +181,34 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
             </div>
           </div>
           <div className="scroll-note">Scroll<span /></div>
+        </section>
+      ) : null}
+
+      {liveEvent ? (
+        <section className="section live-tonight-panel reveal is-visible">
+          <div>
+            <p className="section-kicker">LIVE TONIGHT</p>
+            <h2>{liveEvent.name}</h2>
+            <p>{liveEvent.city} · {liveEvent.venue} · {new Date(liveEvent.date).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</p>
+          </div>
+          <div className="live-command-actions">
+            {liveEvent.mapUrl ? <a className="button primary" href={liveEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : <Link className="button primary" href={`/fechas/${liveEvent.slug}`}><MapPin /> Info rápida</Link>}
+            <Link className="button secondary" href="/checkin"><QrCode /> QR check-in</Link>
+            <Link className="button secondary" href={`/fechas/${liveEvent.slug}`}><Ticket /> Boletos / detalles</Link>
+          </div>
+        </section>
+      ) : recentPastEvent ? (
+        <section className="section post-event-panel reveal">
+          <div>
+            <p className="section-kicker">POST SHOW SIGNAL</p>
+            <h2>{recentPastEvent.name}</h2>
+            <p>Después del evento puedes publicar fotos, set grabado y badges desbloqueables para que la experiencia no termine en la pista.</p>
+          </div>
+          <div className="live-command-actions">
+            <Link className="button secondary" href="/media"><Camera /> Fotos</Link>
+            <Link className="button secondary" href="/musica"><Radio /> Set</Link>
+            <Link className="button primary" href="/perfil"><Sparkles /> Badge</Link>
+          </div>
         </section>
       ) : null}
 
@@ -399,6 +429,20 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
 
 function isVisible(sections: PageSectionItem[], type: string) {
   return !sections.length || sections.some((item) => item.blockType === type);
+}
+
+function isLiveWindow(value: string, now: number) {
+  const time = dateToTime(value);
+  if (!time) return false;
+  const startsIn = time - now;
+  const endedAgo = now - time;
+  return startsIn <= 18 * 60 * 60 * 1000 && endedAgo <= 8 * 60 * 60 * 1000;
+}
+
+function isRecentPastEvent(value: string, now: number) {
+  const time = dateToTime(value);
+  if (!time || time > now) return false;
+  return now - time <= 5 * 24 * 60 * 60 * 1000;
 }
 
 function EmptySection({ kicker, title, body, ctaHref, ctaLabel }: { kicker?: string; title: string; body: string; ctaHref?: string; ctaLabel?: string }) {

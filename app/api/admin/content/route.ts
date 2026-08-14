@@ -31,6 +31,8 @@ async function save(request: Request) {
   delete payload.set_tracks;
   const publishAt = "publish_at" in parsed.data ? parsed.data.publish_at : undefined;
   const requestedStatus = String(payload.publication_status || payload.status || "draft");
+  const publishIssue = ["published", "scheduled"].includes(requestedStatus) ? getPublishIssue(contentModule, payload, { releaseLinks }) : null;
+  if (publishIssue) return NextResponse.json({ error: publishIssue }, { status: 400 });
   const table = tables[contentModule];
   const { data: old } = body.id ? await auth.db.from(table).select("*").eq("id", body.id).maybeSingle() : { data: null };
   if (body.id && !old) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -80,3 +82,20 @@ export async function DELETE(request: Request) {
 }
 
 function affectedPaths(module: AdminModule) { const map: Partial<Record<AdminModule, string[]>> = { eventos: ["/", "/fechas"], lanzamientos: ["/", "/lanzamientos"], sets: ["/", "/musica"], historia: ["/historia"], epk: ["/epk"] }; return map[module] || []; }
+
+function getPublishIssue(module: AdminModule, payload: Record<string, unknown>, extras: { releaseLinks?: Record<string, unknown>[] }) {
+  if (module === "sets" && !payload.audio_asset_id && !payload.soundcloud_url && !payload.youtube_url && !payload.mixcloud_url && !payload.external_url) {
+    return "Este set no tiene link ni audio. Sube un MP3/WAV o pega SoundCloud, YouTube, Mixcloud o un link externo antes de publicar.";
+  }
+  if (module === "lanzamientos") {
+    const links = extras.releaseLinks?.filter((link) => typeof link.url === "string" && link.url) || [];
+    const releaseTime = payload.releases_at ? new Date(String(payload.releases_at)).getTime() : Number.NaN;
+    if (Number.isFinite(releaseTime) && releaseTime <= Date.now() && !links.length) {
+      return "Este lanzamiento ya tiene fecha pasada. Agrega al menos un link de Spotify, Apple Music, YouTube, SoundCloud u otra plataforma para publicarlo como “Escuchar ahora”.";
+    }
+    if (!payload.presave_url && !links.length) {
+      return "Agrega un link de pre-save o al menos una plataforma antes de publicar este lanzamiento.";
+    }
+  }
+  return null;
+}

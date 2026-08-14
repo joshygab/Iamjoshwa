@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type EditorValues = Record<string, unknown> & { id?: string };
@@ -12,7 +12,9 @@ type Props = { module: string; initial?: EditorValues; assets?: Asset[] };
 
 export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
   const router = useRouter();
-  const [state, setState] = useState<{ loading?: boolean; error?: string; fields?: Record<string, string[]> }>({});
+  const [state, setState] = useState<{ loading?: boolean; error?: string; success?: string; fields?: Record<string, string[]> }>({});
+  const [previewValues, setPreviewValues] = useState<Record<string, FormDataEntryValue>>(() => initialSnapshot(module, initial));
+  const publishIssue = useMemo(() => getClientPublishIssue(module, previewValues), [module, previewValues]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -22,6 +24,8 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
       const source = String(values.name || values.title || "");
       if (source) values.slug = slugify(source);
     }
+    const issue = getClientPublishIssue(module, values);
+    if (issue) return setState({ error: issue });
     const response = await fetch("/api/admin/content", {
       method: initial.id ? "PATCH" : "POST",
       headers: { "content-type": "application/json" },
@@ -29,8 +33,12 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
     });
     const data = await response.json();
     if (!response.ok) return setState({ error: data.error || "No fue posible guardar.", fields: data.fields });
-    router.push(`/admin/${module}`);
-    router.refresh();
+    const status = String(values.publication_status || values.status || "draft");
+    setState({ success: status === "published" ? "Publicado correctamente." : "Guardado." });
+    window.setTimeout(() => {
+      router.push(initial.id ? `/admin/${module}` : `/admin/${module}/${data.id}`);
+      router.refresh();
+    }, 650);
   }
 
   async function archive() {
@@ -74,7 +82,8 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
   );
 
   return (
-    <form className="content-editor" onSubmit={submit}>
+    <form className="content-editor" onSubmit={submit} onInput={(event) => setPreviewValues(Object.fromEntries(new FormData(event.currentTarget)))} onChange={(event) => setPreviewValues(Object.fromEntries(new FormData(event.currentTarget)))}>
+      <PublishingPreview module={module} values={previewValues} issue={publishIssue} />
       {module === "eventos" && (
         <>
           {common}
@@ -142,7 +151,7 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           <Text name="title" label="Título" value={initial.title} required />
           <Text name="slug" label="Slug" value={initial.slug} pattern="[a-z0-9-]+" />
           <MediaSelect name="cover_asset_id" label="Portada" value={initial.cover_asset_id} assets={assets} />
-          <MediaSelect name="audio_asset_id" label="Archivo de audio del set (MP3/WAV)" value={initial.audio_asset_id} assets={assets} kind="audio" />
+          <SetSourceStudio initial={initial} assets={assets} onSourceChange={(values) => setPreviewValues((current) => ({ ...current, ...values }))} />
           <Text name="category" label="Categoría" value={initial.category || "Club"} />
           <Text name="recorded_at" label="Fecha de grabación" value={initial.recorded_at} type="date" />
           <Text name="location" label="Lugar" value={initial.location} />
@@ -151,10 +160,6 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           <NumberField name="bpm_min" label="BPM mínimo" value={initial.bpm_min} min="40" max="250" />
           <NumberField name="bpm_max" label="BPM máximo" value={initial.bpm_max} min="40" max="250" />
           <NumberField name="energy" label="Energía 1–5" value={initial.energy} min="1" max="5" />
-          <Text name="soundcloud_url" label="SoundCloud" value={initial.soundcloud_url} type="url" />
-          <Text name="youtube_url" label="YouTube" value={initial.youtube_url} type="url" />
-          <Text name="mixcloud_url" label="Mixcloud" value={initial.mixcloud_url} type="url" />
-          <Text name="external_url" label="Enlace externo" value={initial.external_url} type="url" />
           <div className="content-editor-note wide-field">
             <strong>Audio opcional.</strong>
             <span>Si no subes MP3/WAV, el set puede publicarse usando SoundCloud, YouTube, Mixcloud o un enlace externo oficial.</span>
@@ -239,6 +244,7 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           {state.fields && <ul>{Object.entries(state.fields).map(([key, messages]) => <li key={key}>{key}: {messages.join(", ")}</li>)}</ul>}
         </div>
       )}
+      {state.success && <div className="success-alert" role="status">{state.success}</div>}
       <div className="editor-actions">
         <button className="button primary" disabled={state.loading}>{state.loading ? "Guardando…" : "Guardar"}</button>
         {initial.id && <button type="button" className="button danger-button" onClick={archive}>Archivar</button>}
@@ -261,6 +267,32 @@ function DateTime({ name, label, value, required }: { name: string; label: strin
 
 function Area({ name, label, value }: { name: string; label: string; value: unknown }) {
   return <label className="wide-field">{label}<textarea name={name} rows={5} defaultValue={text(value)} /></label>;
+}
+
+function PublishingPreview({ module, values, issue }: { module: string; values: Record<string, unknown>; issue: string | null }) {
+  if (!["eventos", "lanzamientos", "sets"].includes(module)) return null;
+  const status = text(values.publication_status, "draft");
+  const project = text(values.project, "iamjoshwa").toUpperCase();
+  const slug = text(values.slug || values.name || values.title);
+  const path = publicPath(module, slugify(slug));
+  const visible = status === "published" && !issue;
+  const reason = visible
+    ? `Visible en ${project}.`
+    : issue || (status === "archived" ? "Está archivado y no aparece en la web." : status === "scheduled" ? "Está programado; aparecerá cuando se ejecute la publicación." : "Está como borrador; todavía no aparece públicamente.");
+
+  return (
+    <section className={`publish-preview wide-field ${visible ? "is-ready" : "is-waiting"}`}>
+      <div>
+        <span>PUBLICACIÓN</span>
+        <h2>{visible ? "Este contenido ya puede verse." : "Estado de visibilidad"}</h2>
+        <p>{reason}</p>
+      </div>
+      <div>
+        <strong>{project}</strong>
+        <small>{path}</small>
+      </div>
+    </section>
+  );
 }
 
 function CreditsEditor({ value }: { value: unknown }) {
@@ -304,19 +336,123 @@ function ReleaseLinksEditor({ value }: { value: unknown }) {
     setLinks((current) => current.map((link, itemIndex) => itemIndex === index ? { ...link, [key]: next } : link));
   }
   return (
-    <section className="release-link-editor wide-field">
+    <section className="release-link-editor release-studio wide-field">
       <input type="hidden" name="release_links" value={JSON.stringify(payload)} />
       <div className="release-link-head">
-        <div><span>PLATAFORMAS</span><p>Agrega los links oficiales donde ya se puede escuchar. Solo se publican los campos que tengan URL.</p></div>
+        <div><span>RELEASE STUDIO</span><p>{payload.length ? `${payload.length} plataforma${payload.length === 1 ? "" : "s"} conectada${payload.length === 1 ? "" : "s"}. Si la fecha ya pasó, la página mostrará “Escuchar ahora”.` : "Agrega pre-save o plataformas oficiales antes de publicar."}</p></div>
         <button type="button" className="button secondary" onClick={() => setLinks((current) => [...current, { platform: "", url: "", position: current.length }])}>Agregar otra</button>
       </div>
-      <div className="release-link-grid">
+      <div className="release-platform-cards">
         {links.map((link, index) => (
-          <div key={`${link.platform}-${index}`}>
+          <article className={link.url ? "is-connected" : ""} key={`${link.platform}-${index}`}>
+            <div>
+              <strong>{link.platform || "Plataforma"}</strong>
+              <span>{link.url ? "Conectado" : "Pendiente"}</span>
+            </div>
             <input aria-label="Plataforma" placeholder="Plataforma" value={link.platform} onChange={(event) => update(index, "platform", event.target.value)} />
             <input aria-label={`URL de ${link.platform || "plataforma"}`} placeholder="https://..." value={link.url} onChange={(event) => update(index, "url", event.target.value)} />
-          </div>
+          </article>
         ))}
+      </div>
+      <div className="studio-preview-card">
+        <span>PREVIEW PÚBLICA</span>
+        <strong>{payload.length ? "Escuchar ahora" : "Links pendientes"}</strong>
+        <p>{payload.length ? payload.map((item) => item.platform).join(" · ") : "Cuando conectes plataformas, aparecerán como cards visuales en la página del lanzamiento."}</p>
+      </div>
+    </section>
+  );
+}
+
+function SetSourceStudio({ initial, assets, onSourceChange }: { initial: EditorValues; assets: Asset[]; onSourceChange: (values: Record<string, string>) => void }) {
+  const audioAssets = assets.filter((asset) => asset.mime_type.startsWith("audio/"));
+  const [audioId, setAudioId] = useState(text(initial.audio_asset_id));
+  const [links, setLinks] = useState<Record<string, string>>({
+    soundcloud_url: text(initial.soundcloud_url),
+    youtube_url: text(initial.youtube_url),
+    mixcloud_url: text(initial.mixcloud_url),
+    external_url: text(initial.external_url),
+  });
+  const [source, setSource] = useState(() => initialSetSource(initial));
+  const selected = audioAssets.find((asset) => asset.id === audioId);
+  const activeLink = source === "audio" ? "" : links[source] || "";
+  const playable = Boolean(audioId || Object.values(links).some(Boolean));
+  const embed = activeLink ? previewEmbed(source, activeLink) : "";
+
+  function updateAudio(next: string) {
+    setAudioId(next);
+    onSourceChange({ audio_asset_id: next, ...links });
+  }
+
+  function updateLink(key: string, next: string) {
+    const updated = { ...links, [key]: next };
+    setLinks(updated);
+    onSourceChange({ audio_asset_id: audioId, ...updated });
+  }
+
+  return (
+    <section className="set-source-studio wide-field">
+      <div className="release-link-head">
+        <div>
+          <span>SET STUDIO</span>
+          <p>Elige una fuente. Puedes subir MP3/WAV o usar SoundCloud, YouTube, Mixcloud o un link externo oficial.</p>
+        </div>
+        <strong className={playable ? "studio-ready" : "studio-missing"}>{playable ? "Este set ya es publicable" : "Falta audio o link"}</strong>
+      </div>
+      <div className="set-source-options">
+        {[
+          ["audio", "Subir MP3/WAV"],
+          ["soundcloud_url", "SoundCloud"],
+          ["youtube_url", "YouTube"],
+          ["mixcloud_url", "Mixcloud"],
+          ["external_url", "Link externo"],
+        ].map(([key, label]) => (
+          <button className={source === key ? "is-active" : ""} type="button" key={key} onClick={() => setSource(key)}>
+            <strong>{label}</strong>
+            <span>{key === "audio" ? selected?.display_name || "Sin archivo" : links[key] ? "Link listo" : "Pendiente"}</span>
+          </button>
+        ))}
+      </div>
+      {source === "audio" ? (
+        <label className="audio-asset-select">
+          <span>Archivo de audio del set</span>
+          <select name="audio_asset_id" value={audioId} onChange={(event) => updateAudio(event.target.value)}>
+            <option value="">Sin asignar</option>
+            {audioAssets.map((asset) => <option value={asset.id} key={asset.id}>{asset.display_name}</option>)}
+          </select>
+        </label>
+      ) : (
+        <input type="hidden" name="audio_asset_id" value={audioId} />
+      )}
+      {(["soundcloud_url", "youtube_url", "mixcloud_url", "external_url"] as const).map((key) => (
+        source === key ? (
+          <label key={key}>
+            {sourceLabel(key)}
+            <input name={key} type="url" value={links[key]} placeholder="https://..." onChange={(event) => updateLink(key, event.target.value)} />
+          </label>
+        ) : (
+          <input key={key} type="hidden" name={key} value={links[key]} />
+        )
+      ))}
+      <div className="studio-preview-card set-player-preview">
+        <span>PREVIEW DEL PLAYER</span>
+        {source === "audio" && selected?.public_url ? (
+          <>
+            <strong>{selected.display_name}</strong>
+            <audio controls preload="metadata" src={selected.public_url} />
+          </>
+        ) : embed ? (
+          <iframe title="Preview del set" src={embed} loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" />
+        ) : activeLink ? (
+          <>
+            <strong>Link externo listo</strong>
+            <p>Al no existir embed oficial, el botón público abrirá la plataforma.</p>
+          </>
+        ) : (
+          <>
+            <strong>Sin fuente todavía</strong>
+            <p>Selecciona archivo o pega un link para ver la experiencia antes de guardar.</p>
+          </>
+        )}
       </div>
     </section>
   );
@@ -459,4 +595,95 @@ function omit<T extends Record<string, unknown>, K extends keyof T>(value: T, ke
   const copy = { ...value };
   delete copy[key];
   return copy;
+}
+
+function initialSnapshot(module: string, initial: EditorValues): Record<string, FormDataEntryValue> {
+  const base: Record<string, FormDataEntryValue> = {
+    project: text(initial.project, "iamjoshwa"),
+    publication_status: text(initial.publication_status, "draft"),
+    slug: text(initial.slug || initial.name || initial.title),
+  };
+  if (module === "sets") {
+    base.audio_asset_id = text(initial.audio_asset_id);
+    base.soundcloud_url = text(initial.soundcloud_url);
+    base.youtube_url = text(initial.youtube_url);
+    base.mixcloud_url = text(initial.mixcloud_url);
+    base.external_url = text(initial.external_url);
+  }
+  if (module === "lanzamientos") {
+    base.presave_url = text(initial.presave_url);
+    base.releases_at = text(initial.releases_at);
+    base.release_links = json(initial.release_links, []);
+  }
+  return base;
+}
+
+function getClientPublishIssue(module: string, values: Record<string, unknown>) {
+  const status = text(values.publication_status || values.status, "draft");
+  if (!["published", "scheduled"].includes(status)) return null;
+  if (module === "sets" && !values.audio_asset_id && !values.soundcloud_url && !values.youtube_url && !values.mixcloud_url && !values.external_url) {
+    return "Este set no tiene link ni audio. Sube un MP3/WAV o pega SoundCloud, YouTube, Mixcloud o un link externo antes de publicar.";
+  }
+  if (module === "lanzamientos") {
+    const links = parseLinks(values.release_links).filter((link) => link.url);
+    const releaseTime = values.releases_at ? new Date(String(values.releases_at)).getTime() : Number.NaN;
+    if (Number.isFinite(releaseTime) && releaseTime <= Date.now() && !links.length) {
+      return "Este lanzamiento ya tiene fecha pasada. Agrega links de plataformas para que pueda publicarse como “Escuchar ahora”.";
+    }
+    if (!values.presave_url && !links.length) return "Agrega un link de pre-save o al menos una plataforma antes de publicar este lanzamiento.";
+  }
+  return null;
+}
+
+function parseLinks(value: unknown): ReleaseLink[] {
+  if (Array.isArray(value)) return value as ReleaseLink[];
+  if (typeof value !== "string" || !value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed as ReleaseLink[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function publicPath(module: string, slug: string) {
+  if (module === "eventos") return `/fechas/${slug}`;
+  if (module === "lanzamientos") return `/lanzamientos/${slug}`;
+  if (module === "sets") return `/musica/${slug}`;
+  return "/";
+}
+
+function initialSetSource(initial: EditorValues) {
+  if (initial.audio_asset_id) return "audio";
+  if (initial.soundcloud_url) return "soundcloud_url";
+  if (initial.youtube_url) return "youtube_url";
+  if (initial.mixcloud_url) return "mixcloud_url";
+  if (initial.external_url) return "external_url";
+  return "audio";
+}
+
+function sourceLabel(key: string) {
+  return ({ soundcloud_url: "SoundCloud", youtube_url: "YouTube", mixcloud_url: "Mixcloud", external_url: "Enlace externo" } as Record<string, string>)[key] || "Link";
+}
+
+function previewEmbed(source: string, value: string) {
+  if (!value) return "";
+  if (source === "soundcloud_url") return `https://w.soundcloud.com/player/?url=${encodeURIComponent(value)}&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&visual=true`;
+  if (source === "mixcloud_url") return `https://www.mixcloud.com/widget/iframe/?hide_cover=1&light=0&feed=${encodeURIComponent(value)}`;
+  if (source === "youtube_url") {
+    const id = youtubeId(value);
+    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1` : "";
+  }
+  return "";
+}
+
+function youtubeId(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.hostname.includes("youtu.be")) return url.pathname.replace("/", "");
+    if (url.searchParams.get("v")) return url.searchParams.get("v") || "";
+    return url.pathname.match(/\/embed\/([^/?]+)/)?.[1] || "";
+  } catch {
+    return "";
+  }
 }
