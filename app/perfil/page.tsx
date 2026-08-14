@@ -10,6 +10,7 @@ import { DeleteAccountButton } from "@/components/delete-account-button";
 import { LevelUpSignal } from "@/components/pass/level-up-signal";
 import { getLevelConfig, getLevelFromPoints, getLevelNumber, getNextLevelFromPoints } from "@/config/levels";
 import { contentRepository } from "@/lib/data";
+import { publicEnv } from "@/lib/env";
 import { saveAvatar, savePreferences } from "./actions";
 
 const genres = ["House", "Tech House", "Afro House", "Latin House", "Disco", "Nu Disco", "Hard Bounce", "Hard Trance", "Hard Techno", "Euro Dance"];
@@ -65,10 +66,11 @@ export default async function ProfilePage() {
   const memberNumber = String(profile?.member_number || 0).padStart(6, "0");
   const displayName = String(profile?.public_alias || profile?.display_name || "Listener");
   const city = String(profile?.city || "Signal city");
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const referralCode = String(profile?.referral_code || "pendiente");
-  const inviteUrl = referralCode === "pendiente" ? `${origin}/acceso` : `${origin}/r/${referralCode}`;
-  const qr = await QRCode.toDataURL(inviteUrl, { width: 300, margin: 1, color: { dark: "#050505", light: "#ffffff" } });
+  const origin = publicEnv.NEXT_PUBLIC_SITE_URL;
+  const referralCode = String(profile?.referral_code || "").toUpperCase();
+  const passUrl = referralCode ? `${origin}/pass/${referralCode}` : `${origin}/perfil`;
+  const inviteUrl = referralCode ? `${origin}/r/${referralCode}` : `${origin}/acceso`;
+  const qr = await QRCode.toDataURL(passUrl, { width: 420, margin: 1, errorCorrectionLevel: "H", color: { dark: "#050505", light: "#ffffff" } });
   const unlockedBadges = badges || [];
   const lockedSlots = Math.max(0, 6 - unlockedBadges.length);
   const favoriteProject = profile?.favorite_project === "afterluv" ? "afterluv" : "iamjoshwa";
@@ -244,11 +246,19 @@ export default async function ProfilePage() {
           </div>
           <div>
             <span className="section-kicker">QR PERSONAL · NIVEL {String(levelNumber).padStart(2, "0")}</span>
-            <h2>Tu entrada al Inner Circle.</h2>
-            <code>{inviteUrl}</code>
-            <p>El QR se mantiene blanco y negro para máxima lectura. El marco usa el color de tu nivel sin alterar la seguridad visual del código.</p>
-            <Link className="button secondary" href="/recompensas">
-              <QrCode /> Ver reglas
+            <h2>Tu Pass escaneable.</h2>
+            <code>{passUrl}</code>
+            <p>Este QR abre tu credencial pública del IAMJOSHWA Pass. No muestra datos privados; solo alias, ciudad, nivel, número de miembro y estado del Pass.</p>
+            <div className="inline-actions pass-qr-actions">
+              <Link className="button secondary" href={passUrl} target="_blank">
+                <QrCode /> Ver Pass público
+              </Link>
+              <Link className="button secondary" href={inviteUrl} target="_blank">
+                Invitar con mi código
+              </Link>
+            </div>
+            <Link className="button text-button" href="/recompensas">
+              Ver reglas de puntos
             </Link>
           </div>
         </article>

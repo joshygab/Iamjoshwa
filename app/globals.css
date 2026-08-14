@@ -2193,6 +2193,193 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
   box-shadow: 0 28px 100px rgba(0,0,0,.42), 0 0 46px var(--pass-level-glow);
 }
 
+.pass-qr-actions {
+  margin: 16px 0 10px;
+}
+
+.public-pass-page {
+  min-height: 100svh;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(92px, 10vw, 132px) clamp(18px, 6vw, 90px) 70px;
+  background:
+    radial-gradient(circle at 12% 8%, var(--pass-level-glow), transparent 28rem),
+    radial-gradient(circle at 88% 22%, rgba(255,255,255,.08), transparent 24rem),
+    #050505;
+}
+
+.public-pass-page:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .5;
+  background:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 74px 74px;
+  mask-image: radial-gradient(circle at 50% 12%, black, transparent 70%);
+}
+
+.public-pass-page > * {
+  position: relative;
+}
+
+.public-pass-back {
+  width: max-content;
+  margin-bottom: 28px;
+}
+
+.public-pass-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: clamp(22px, 5vw, 74px);
+  align-items: center;
+}
+
+.public-pass-card,
+.public-pass-panel {
+  border: 1px solid color-mix(in srgb, var(--pass-level-color) 38%, rgba(255,255,255,.14));
+  background:
+    radial-gradient(circle at 82% 16%, var(--pass-level-soft), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.025));
+  box-shadow: 0 42px 150px rgba(0,0,0,.48), 0 0 70px var(--pass-level-glow);
+  backdrop-filter: blur(24px);
+}
+
+.public-pass-card {
+  position: relative;
+  min-height: min(680px, 80svh);
+  border-radius: 42px;
+  padding: clamp(24px, 4vw, 44px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transform: perspective(1000px) rotateY(-7deg) rotateX(2deg);
+  transform-origin: center;
+  transition: transform .28s ease, border-color .28s ease;
+}
+
+.public-pass-card:hover {
+  transform: perspective(1000px) rotateY(-4deg) rotateX(1deg) translate3d(0,-4px,0);
+  border-color: color-mix(in srgb, var(--pass-level-color) 58%, rgba(255,255,255,.2));
+}
+
+.public-pass-card[data-project="afterluv"] {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255,32,70,.24), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.025));
+}
+
+.public-pass-topline,
+.public-pass-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.public-pass-topline span,
+.public-pass-level strong,
+.public-pass-facts svg {
+  color: var(--pass-level-color);
+}
+
+.public-pass-identity small {
+  color: var(--pass-level-color);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.public-pass-identity h1 {
+  margin: 14px 0;
+  color: white;
+  font: 800 clamp(68px, 11vw, 148px)/.78 var(--font-display);
+  letter-spacing: -.085em;
+}
+
+.public-pass-identity p,
+.public-pass-panel p {
+  color: #d8d8de;
+  line-height: 1.6;
+}
+
+.public-pass-level {
+  width: max-content;
+  max-width: 100%;
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--pass-level-color) 38%, rgba(255,255,255,.12));
+  border-radius: 22px;
+  background: rgba(0,0,0,.24);
+  padding: 14px 16px;
+}
+
+.public-pass-level svg {
+  color: var(--pass-level-color);
+}
+
+.public-pass-level span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.public-pass-level strong {
+  display: block;
+  font: 800 30px/1 var(--font-display);
+  letter-spacing: -.04em;
+}
+
+.public-pass-panel {
+  border-radius: 34px;
+  padding: clamp(24px, 4vw, 44px);
+}
+
+.public-pass-panel h2 {
+  margin: 14px 0;
+  color: white;
+  font: 800 clamp(46px, 7vw, 92px)/.84 var(--font-display);
+  letter-spacing: -.065em;
+}
+
+.public-pass-panel .qr-frame {
+  width: max-content;
+  margin-bottom: 22px;
+}
+
+.public-pass-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 24px;
+}
+
+.public-pass-facts span {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(0,0,0,.22);
+  color: white;
+  padding: 0 14px;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .pass-level-system .pass-stats article {
   border-color: color-mix(in srgb, var(--pass-level-color) 18%, rgba(255,255,255,.1));
 }
