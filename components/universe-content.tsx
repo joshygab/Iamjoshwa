@@ -293,7 +293,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         <div className="section-heading">
           <div>
             <p className="section-kicker">SIGNAL FEED</p>
-            <h2>La app siempre debe sentirse viva.</h2>
+            <h2>El pulso de IAMJOSHWA World.</h2>
           </div>
           <Link className="text-link" href={signal ? "/perfil" : "/acceso?next=%2Fperfil"}>
             {signal ? "Open my Pass" : "Create Pass"} <ArrowRight />
