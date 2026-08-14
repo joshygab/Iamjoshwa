@@ -12,3 +12,5 @@ export interface EpkSectionItem{id:string;project:Universe|null;sectionKey:strin
 export interface RewardItem{id:string;project:Universe|null;slug:string;name:string;description:string;pointsCost:number;inventory:number|null;expiresAt?:string|null;unlockAt?:string|null;imageUrl?:string}
 export interface NavigationItem{label:string;href:string;position:number;project:Universe|null;target?:string;icon?:string|null;badge?:string|null;showInNavbar?:boolean;showInFooter?:boolean;showOnDesktop?:boolean;showOnMobile?:boolean}
 export interface AnnouncementItem{id:string;project:Universe|null;eyebrow?:string|null;title:string;body?:string|null;ctaLabel?:string|null;ctaHref?:string|null;audience:string}
+export type PublicSettings=Record<string,{enabled?:boolean;message?:string}|Record<string,unknown>|string|number|boolean|null>;
+export interface PublicSectionState{sectionKey:string;publicName:string;slug:string;status:string;showInSitemap:boolean;indexable:boolean}

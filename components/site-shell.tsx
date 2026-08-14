@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Headphones, Home, Sparkles, Ticket, X, Menu } from "lucide-react";
+import { CalendarDays, Disc3, FileText, Headphones, Home, ImageIcon, LockKeyhole, Sparkles, Ticket, X, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ImmersiveEffects } from "./immersive-effects";
 import { UniverseSwitch } from "./universe-switch";
@@ -10,7 +10,9 @@ import { CommandMenu } from "./command-menu";
 import { SocialIconRail } from "./social-icon-rail";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/env";
-import type { AnnouncementItem, NavigationItem } from "@/types/content";
+import { systemEnabled, systemMessage } from "@/lib/cms/labels";
+import { useUniverse } from "./universe-provider";
+import type { AnnouncementItem, NavigationItem, PublicSettings } from "@/types/content";
 
 const fallbackNav: NavigationItem[] = [
   { label: "Inicio", href: "/", position: 0, project: null, showInNavbar: true, showInFooter: false, showOnDesktop: true, showOnMobile: true },
@@ -24,13 +26,17 @@ const fallbackNav: NavigationItem[] = [
   { label: "EPK", href: "/epk", position: 80, project: null, showInNavbar: true, showInFooter: true, showOnDesktop: true, showOnMobile: true },
 ];
 
-export function SiteShell({ children, navigation = [], announcement }: { children: React.ReactNode; navigation?: NavigationItem[]; announcement?: AnnouncementItem | null }) {
+export function SiteShell({ children, navigation = [], announcements = [], publicSettings = {} }: { children: React.ReactNode; navigation?: NavigationItem[]; announcements?: AnnouncementItem[]; publicSettings?: PublicSettings }) {
   const [open, setOpen] = useState(false);
   const [pass, setPass] = useState<{ name: string; points: number } | null>(null);
   const pathname = usePathname();
-  const nav = (navigation.length ? navigation : fallbackNav).sort((a, b) => a.position - b.position);
+  const { universe } = useUniverse();
+  const nav = (navigation.length ? navigation : fallbackNav).filter((item) => !item.project || item.project === universe).sort((a, b) => a.position - b.position);
   const headerNav = nav.filter((item) => item.showInNavbar !== false);
   const footerNav = nav.filter((item) => item.showInFooter);
+  const bottomNav = headerNav.filter((item) => item.showOnMobile !== false).slice(0, 5);
+  const announcement = systemEnabled(publicSettings, "hide_announcements") ? null : announcements.find((item) => !item.project || item.project === universe) || null;
+  const maintenance = systemEnabled(publicSettings, "maintenance_mode");
   const active = (href: string) => (href === "/" ? pathname === href : pathname.startsWith(href));
   const close = () => setOpen(false);
 
@@ -58,6 +64,19 @@ export function SiteShell({ children, navigation = [], announcement }: { childre
   }, []);
 
   if (pathname.startsWith("/admin")) return <>{children}</>;
+  if (maintenance && !pathname.startsWith("/acceso")) {
+    return (
+      <>
+        <ImmersiveEffects />
+        <main id="contenido" className="maintenance-screen">
+          <span>SIGNAL INTERRUPTED</span>
+          <h1>IAMJOSHWA WORLD</h1>
+          <p>{systemMessage(publicSettings, "maintenance_mode", "IAMJOSHWA WORLD is currently being updated.")}</p>
+          <Link className="button primary" href="/acceso?next=%2Fadmin">Admin access</Link>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -113,27 +132,26 @@ export function SiteShell({ children, navigation = [], announcement }: { childre
         <p>© {new Date().getFullYear()} IAMJOSHWA. Sitio oficial.</p>
       </footer>
       <nav className="bottom-nav premium-bottom-nav" aria-label="Accesos rápidos">
-        <Link href="/" aria-current={active("/") ? "page" : undefined}>
-          <Home />
-          <span>Inicio</span>
-        </Link>
-        <Link href="/fechas" aria-current={active("/fechas") ? "page" : undefined}>
-          <CalendarDays />
-          <span>Shows</span>
-        </Link>
-        <Link href="/musica" aria-current={active("/musica") ? "page" : undefined}>
-          <Headphones />
-          <span>Listen</span>
-        </Link>
-        <Link href="/acceso" aria-current={active("/acceso") || active("/perfil") ? "page" : undefined}>
-          <Sparkles />
-          <span>Pass</span>
-        </Link>
-        <Link href="/booking" aria-current={active("/booking") ? "page" : undefined}>
-          <Ticket />
-          <span>Booking</span>
-        </Link>
+        {(bottomNav.length ? bottomNav : fallbackNav.slice(0, 5)).map((item) => (
+          <Link href={item.href} key={item.href} aria-current={active(item.href) ? "page" : undefined}>
+            <NavIcon item={item} />
+            <span>{item.label}</span>
+          </Link>
+        ))}
       </nav>
     </>
   );
+}
+
+function NavIcon({ item }: { item: NavigationItem }) {
+  const key = `${item.icon || ""} ${item.href} ${item.label}`.toLowerCase();
+  if (key.includes("fecha") || key.includes("show") || key.includes("calendar")) return <CalendarDays />;
+  if (key.includes("music") || key.includes("musica") || key.includes("listen") || key.includes("set")) return <Headphones />;
+  if (key.includes("release") || key.includes("lanzamiento") || key.includes("disc")) return <Disc3 />;
+  if (key.includes("vault") || key.includes("lock")) return <LockKeyhole />;
+  if (key.includes("pass") || key.includes("comunidad") || key.includes("spark")) return <Sparkles />;
+  if (key.includes("booking") || key.includes("ticket") || key.includes("book")) return <Ticket />;
+  if (key.includes("media") || key.includes("image")) return <ImageIcon />;
+  if (key.includes("epk") || key.includes("file")) return <FileText />;
+  return <Home />;
 }

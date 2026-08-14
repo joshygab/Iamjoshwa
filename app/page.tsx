@@ -7,13 +7,14 @@ const requestTime = Date.now();
 export const metadata = { alternates: { canonical: "/" } };
 
 export default async function HomePage() {
-  const [events, sets, releases, rewards, artists, sections] = await Promise.all([
+  const [events, sets, releases, rewards, artists, sections, labels] = await Promise.all([
     contentRepository.getEvents(),
     contentRepository.getSets(),
     contentRepository.getReleases(),
     contentRepository.getRewards(),
     contentRepository.getArtists(),
     contentRepository.getPageSections(),
+    contentRepository.getLabels(),
   ]);
 
   const structured = {
@@ -45,6 +46,7 @@ export default async function HomePage() {
         rewards={rewards}
         artists={artists}
         sections={sections}
+        labels={labels}
         now={requestTime}
       />
     </>

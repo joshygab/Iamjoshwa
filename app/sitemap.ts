@@ -4,7 +4,7 @@ import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const paths: Array<[string, MetadataRoute.Sitemap[number]["changeFrequency"], number]> = [
+  const fallbackPaths: Array<[string, MetadataRoute.Sitemap[number]["changeFrequency"], number]> = [
     ["", "weekly", 1],
     ["/fechas", "daily", 0.9],
     ["/musica", "weekly", 0.9],
@@ -16,11 +16,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ["/historia", "monthly", 0.65],
     ["/comunidad", "weekly", 0.8],
   ];
-  const [events, releases, sets] = await Promise.all([
+  const [events, releases, sets, cmsSections] = await Promise.all([
     contentRepository.getEvents(),
     contentRepository.getReleases(),
     contentRepository.getSets(),
+    contentRepository.getSitemapSections(),
   ]);
+  const sectionPriority: Record<string, number> = { home: 1, shows: .9, music: .9, releases: .9, booking: .95, epk: .9, pass: .8, vault: .75, media: .7, history: .65 };
+  const paths = cmsSections
+    ? cmsSections.map((section) => [`/${section.slug === "home" ? "" : section.slug}`.replace(/\/$/, ""), "weekly" as const, sectionPriority[section.sectionKey] || .7] satisfies [string, MetadataRoute.Sitemap[number]["changeFrequency"], number])
+    : fallbackPaths;
 
   return [
     ...paths.map(([path, changeFrequency, priority]) => ({

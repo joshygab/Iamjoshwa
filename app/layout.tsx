@@ -59,9 +59,10 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [navigation, announcement] = await Promise.all([
+  const [navigation, announcements, publicSettings] = await Promise.all([
     contentRepository.getNavigation().catch(() => []),
-    contentRepository.getActiveAnnouncement().catch(() => null),
+    contentRepository.getAnnouncements().catch(() => []),
+    contentRepository.getPublicSettings().catch(() => ({})),
   ]);
   return (
     <html lang="es" data-scroll-behavior="smooth">
@@ -69,7 +70,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <UniverseProvider>
           <PlayerProvider>
             <PwaRegister />
-            <SiteShell navigation={navigation} announcement={announcement}>{children}</SiteShell>
+            <SiteShell navigation={navigation} announcements={announcements} publicSettings={publicSettings}>{children}</SiteShell>
           </PlayerProvider>
         </UniverseProvider>
       </body>

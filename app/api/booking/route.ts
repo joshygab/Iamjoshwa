@@ -4,10 +4,14 @@ import { bookingSchema } from "@/lib/validation/booking";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/env";
 import { sendBookingEmails } from "@/lib/email/resend";
+import { systemEnabled, systemMessage } from "@/lib/cms/labels";
 
 export async function POST(request:Request){
   try{
     if(!isSupabaseConfigured||!process.env.SUPABASE_SERVICE_ROLE_KEY||!process.env.FINGERPRINT_SALT)return NextResponse.json({error:"El servicio aún no está configurado."},{status:503});
+    const db=createAdminClient();
+    const{data:bookingSetting}=await db.from("site_settings").select("value").eq("key","disable_booking").eq("is_public",true).maybeSingle();
+    if(systemEnabled({disable_booking:bookingSetting?.value},"disable_booking"))return NextResponse.json({error:systemMessage({disable_booking:bookingSetting?.value},"disable_booking","Booking is temporarily unavailable.")},{status:503});
     const parsed=bookingSchema.safeParse(await request.json());
     if(!parsed.success)return NextResponse.json({error:"Revisa los campos enviados.",fields:parsed.error.flatten().fieldErrors},{status:400});
     const input=parsed.data;
@@ -15,7 +19,6 @@ export async function POST(request:Request){
     const forwarded=request.headers.get("x-forwarded-for")?.split(",")[0]||"unknown";
     const ipHash=createHash("sha256").update(`${process.env.FINGERPRINT_SALT}:${forwarded}`).digest("hex");
     const fingerprint=createHash("sha256").update(`${input.email.toLowerCase()}:${input.eventDate}:${input.project}`).digest("hex");
-    const db=createAdminClient();
     const since=new Date(Date.now()-86400000).toISOString();
     const{count:recent}=await db.from("booking_requests").select("id",{count:"exact",head:true}).eq("ip_hash",ipHash).gte("created_at",since);
     if((recent||0)>=5)return NextResponse.json({error:"Se alcanzó el límite temporal de solicitudes. Intenta más tarde."},{status:429});

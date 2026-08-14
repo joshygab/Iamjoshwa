@@ -11,6 +11,7 @@ import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
 import { dateToTime } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
+import { createLabelGetter } from "@/lib/cms/labels";
 import { isSupabaseConfigured } from "@/lib/env";
 import type { ArtistProfileItem, EventItem, PageSectionItem, ReleaseItem, RewardItem, SetItem, Universe } from "@/types/content";
 
@@ -44,6 +45,7 @@ type Props = {
   rewards?: RewardItem[];
   artists?: ArtistProfileItem[];
   sections?: PageSectionItem[];
+  labels?: Record<string, string>;
   now: number;
 };
 
@@ -84,9 +86,10 @@ type HomeSignalCard = {
   state: "live" | "active" | "soon" | "locked";
 };
 
-export function HomeContent({ events, sets, releases, rewards = [], artists = [], sections = [], now }: Props) {
+export function HomeContent({ events, sets, releases, rewards = [], artists = [], sections = [], labels = {}, now }: Props) {
   const { universe, setUniverse } = useUniverse();
   const { play } = usePlayer();
+  const label = createLabelGetter(labels);
   const [signal, setSignal] = useState<PersonalSignal | null>(null);
   const artist = artists.find((item) => item.project === universe) || fallback[universe];
   const managed = sections.filter((item) => !item.project || item.project === universe);
@@ -249,7 +252,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
                 <Play /> Listen
               </Link>
               <Link className="button secondary" href="/booking">
-                Book Now
+                {label("booking.cta", "Book Now")}
               </Link>
             </div>
             <div className="hero-signal-row" aria-label="Señales principales del sitio">
@@ -294,7 +297,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         <div className="section-heading">
           <div>
             <p className="section-kicker">SIGNAL FEED</p>
-            <h2>El pulso de IAMJOSHWA World.</h2>
+            <h2>{label("home.signalFeed.title", "El pulso de IAMJOSHWA World.")}</h2>
           </div>
           <Link className="text-link" href={signal ? "/perfil" : "/acceso?next=%2Fperfil"}>
             {signal ? "Open my Pass" : "Create Pass"} <ArrowRight />
@@ -504,8 +507,8 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
 
       <section className="section home-vault-tease reveal">
         <div>
-          <p className="section-kicker">THE VAULT</p>
-          <h2>Locked drops. Secret codes. Private signals.</h2>
+          <p className="section-kicker">{label("nav.vault", "THE VAULT")}</p>
+          <h2>{label("vault.locked", "Locked drops. Secret codes. Private signals.")}</h2>
           <p>Demos, edits, WAV previews, sets privados y recompensas pueden vivir detrás de puntos, códigos o acceso manual.</p>
           <Link className="button primary" href="/the-vault">Enter The Vault</Link>
         </div>
@@ -524,7 +527,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         <span className="section-kicker">INNER CIRCLE</span>
         <h2>Enter the signal.</h2>
         <p>Shows, music, missions and secret drops with consent.</p>
-        <Link className="button primary" href="/acceso">Create IAMJOSHWA Pass</Link>
+        <Link className="button primary" href="/acceso">{label("pass.join", "Create IAMJOSHWA Pass")}</Link>
       </section>
     </>
   );
