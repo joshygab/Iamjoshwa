@@ -4434,3 +4434,314 @@ html.route-entering main#contenido {
     opacity: 1!important;
   }
 }
+
+/* Bloque Premium Motion System 2: hovers, microinteracciones y chrome táctil */
+.button,
+.text-link,
+.icon-button,
+.nav-book-now,
+.mobile-book-now,
+.pass-signal-chip,
+.command-trigger,
+.premium-bottom-nav a,
+.global-now-playing,
+.audio-wave-player,
+.event-card,
+.set-card,
+.release-card,
+.list-card,
+.signal-feed-card,
+.home-pass-card,
+.community-pro-pass,
+.public-pass-card,
+.public-pass-panel,
+.admin-content-card,
+.media-gallery article {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+}
+
+.button,
+.nav-book-now,
+.mobile-book-now,
+.pass-signal-chip,
+.command-trigger {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.button:before,
+.nav-book-now:before,
+.mobile-book-now:before,
+.pass-signal-chip:before,
+.command-trigger:before {
+  content: "";
+  position: absolute;
+  inset: -140% -80%;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 38%, rgba(255,255,255,.24), transparent 58%);
+  opacity: 0;
+  transform: translate3d(-28%,0,0) rotate(8deg);
+  transition: opacity .22s ease, transform .46s cubic-bezier(.2,.8,.2,1);
+}
+
+.button:hover:before,
+.button:focus-visible:before,
+.nav-book-now:hover:before,
+.nav-book-now:focus-visible:before,
+.mobile-book-now:hover:before,
+.mobile-book-now:focus-visible:before,
+.pass-signal-chip:hover:before,
+.pass-signal-chip:focus-visible:before,
+.command-trigger:hover:before,
+.command-trigger:focus-visible:before {
+  opacity: 1;
+  transform: translate3d(26%,0,0) rotate(8deg);
+}
+
+.motion-ready .button:active,
+.motion-ready .nav-book-now:active,
+.motion-ready .mobile-book-now:active,
+.motion-ready .pass-signal-chip:active,
+.motion-ready .command-trigger:active {
+  transform: translate3d(0,1px,0) scale(.982);
+}
+
+.motion-ready .event-card:hover,
+.motion-ready .set-card:hover,
+.motion-ready .release-card:hover,
+.motion-ready .list-card:hover,
+.motion-ready .signal-feed-card:hover,
+.motion-ready .home-pass-card:hover,
+.motion-ready .community-pro-pass:hover,
+.motion-ready .public-pass-card:hover,
+.motion-ready .public-pass-panel:hover,
+.motion-ready .admin-content-card:hover,
+.motion-ready .media-gallery article:hover {
+  border-color: color-mix(in srgb, var(--accent) 46%, rgba(255,255,255,.18));
+  box-shadow:
+    0 34px 120px rgba(0,0,0,.36),
+    0 0 55px color-mix(in srgb, var(--accent) 24%, transparent),
+    inset 0 1px rgba(255,255,255,.1);
+}
+
+.motion-ready .event-card:hover,
+.motion-ready .set-card:hover,
+.motion-ready .release-card:hover,
+.motion-ready .list-card:hover,
+.motion-ready .admin-content-card:hover {
+  transform: translate3d(0,-5px,0) scale(1.006);
+}
+
+.motion-ready .media-gallery article:hover img,
+.motion-ready .event-card:hover img,
+.motion-ready .set-card:hover img,
+.motion-ready .release-card:hover img {
+  transform: scale(1.045) translate3d(0,0,0);
+}
+
+.premium-bottom-nav {
+  box-shadow:
+    0 -18px 70px rgba(0,0,0,.42),
+    inset 0 1px rgba(255,255,255,.1);
+}
+
+.premium-bottom-nav a {
+  position: relative;
+  border-radius: 18px;
+}
+
+.premium-bottom-nav a:before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 16px;
+  z-index: -1;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 0, color-mix(in srgb, var(--accent) 32%, transparent), transparent 72%);
+  transition: opacity .24s ease, transform .24s ease;
+  transform: scale(.92);
+}
+
+.premium-bottom-nav a[aria-current="page"]:before,
+.premium-bottom-nav a:hover:before,
+.premium-bottom-nav a:focus-visible:before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.premium-bottom-nav a[aria-current="page"] {
+  color: white;
+}
+
+.premium-bottom-nav a[aria-current="page"] span {
+  color: white;
+}
+
+.global-now-playing {
+  border-color: color-mix(in srgb, var(--accent) 24%, rgba(255,255,255,.13));
+  box-shadow:
+    0 26px 95px rgba(0,0,0,.42),
+    0 0 44px color-mix(in srgb, var(--accent) 18%, transparent),
+    inset 0 1px rgba(255,255,255,.1);
+}
+
+.global-now-playing.is-active {
+  animation: playerSignalBreathe 3.4s ease-in-out infinite;
+}
+
+.global-now-playing .compact-player-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.global-now-playing.is-active .compact-player-primary:after,
+.audio-wave-player .audio-wave-play:after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  opacity: .36;
+  animation: controlPulse 1.9s ease-in-out infinite;
+}
+
+.audio-wave-player {
+  transition: border-color .26s ease, box-shadow .26s ease, transform .26s ease, background .26s ease;
+}
+
+.audio-wave-player:hover {
+  border-color: color-mix(in srgb, var(--accent) 42%, rgba(255,255,255,.16));
+  box-shadow: 0 30px 90px rgba(0,0,0,.34), 0 0 40px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.audio-wave-play {
+  position: relative;
+  overflow: visible;
+}
+
+.profile-pass,
+.premium-wallet-card,
+.community-pro-pass,
+.home-pass-card,
+.public-pass-card {
+  transform-style: preserve-3d;
+}
+
+.motion-ready .premium-wallet-card:hover,
+.motion-ready .profile-pass:hover {
+  transform: perspective(950px) rotateY(4deg) rotateX(1.5deg) translate3d(0,-5px,0);
+}
+
+.pass-mini-badges span,
+.community-pass-badges span,
+.profile-grid article,
+.admin-stats article {
+  transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.pass-mini-badges span:hover,
+.community-pass-badges span:hover,
+.profile-grid article:hover,
+.admin-stats article:hover {
+  transform: translate3d(0,-2px,0);
+  border-color: color-mix(in srgb, var(--accent) 34%, rgba(255,255,255,.14));
+  background: rgba(255,255,255,.06);
+}
+
+@keyframes playerSignalBreathe {
+  0%, 100% {
+    box-shadow:
+      0 26px 95px rgba(0,0,0,.42),
+      0 0 34px color-mix(in srgb, var(--accent) 16%, transparent),
+      inset 0 1px rgba(255,255,255,.1);
+  }
+  50% {
+    box-shadow:
+      0 30px 110px rgba(0,0,0,.48),
+      0 0 58px color-mix(in srgb, var(--accent) 28%, transparent),
+      inset 0 1px rgba(255,255,255,.12);
+  }
+}
+
+@keyframes controlPulse {
+  0%, 100% {
+    opacity: .2;
+    transform: scale(.94);
+  }
+  50% {
+    opacity: .48;
+    transform: scale(1.08);
+  }
+}
+
+@media(max-width:720px) {
+  .motion-ready .event-card:hover,
+  .motion-ready .set-card:hover,
+  .motion-ready .release-card:hover,
+  .motion-ready .list-card:hover,
+  .motion-ready .signal-feed-card:hover,
+  .motion-ready .home-pass-card:hover,
+  .motion-ready .community-pro-pass:hover,
+  .motion-ready .public-pass-card:hover,
+  .motion-ready .public-pass-panel:hover,
+  .motion-ready .admin-content-card:hover,
+  .motion-ready .media-gallery article:hover {
+    transform: translate3d(0,0,0);
+  }
+
+  .motion-ready .event-card:active,
+  .motion-ready .set-card:active,
+  .motion-ready .release-card:active,
+  .motion-ready .list-card:active,
+  .motion-ready .signal-feed-card:active,
+  .motion-ready .home-pass-card:active,
+  .motion-ready .community-pro-pass:active,
+  .motion-ready .public-pass-card:active,
+  .motion-ready .admin-content-card:active {
+    transform: translate3d(0,-2px,0) scale(.992);
+  }
+
+  .premium-bottom-nav a:before {
+    inset: 4px;
+  }
+
+  .global-now-playing.is-active {
+    animation-duration: 4.8s;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .button:before,
+  .nav-book-now:before,
+  .mobile-book-now:before,
+  .pass-signal-chip:before,
+  .command-trigger:before,
+  .premium-bottom-nav a:before,
+  .global-now-playing.is-active,
+  .global-now-playing.is-active .compact-player-primary:after,
+  .audio-wave-player .audio-wave-play:after {
+    animation: none!important;
+    transition: none!important;
+  }
+
+  .motion-ready .button:active,
+  .motion-ready .nav-book-now:active,
+  .motion-ready .mobile-book-now:active,
+  .motion-ready .pass-signal-chip:active,
+  .motion-ready .command-trigger:active,
+  .motion-ready .event-card:hover,
+  .motion-ready .set-card:hover,
+  .motion-ready .release-card:hover,
+  .motion-ready .list-card:hover,
+  .motion-ready .admin-content-card:hover,
+  .motion-ready .premium-wallet-card:hover,
+  .motion-ready .profile-pass:hover,
+  .pass-mini-badges span:hover,
+  .community-pass-badges span:hover,
+  .profile-grid article:hover,
+  .admin-stats article:hover {
+    transform: none!important;
+  }
+}
