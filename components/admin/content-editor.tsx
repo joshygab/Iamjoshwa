@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { DeleteContentButton } from "./delete-content-button";
 
 type EditorValues = Record<string, unknown> & { id?: string };
 type Asset = { id: string; display_name: string; mime_type: string; byte_size?: number | null; public_url?: string };
@@ -248,6 +249,7 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
       <div className="editor-actions">
         <button className="button primary" disabled={state.loading}>{state.loading ? "Guardando…" : "Guardar"}</button>
         {initial.id && <button type="button" className="button danger-button" onClick={archive}>Archivar</button>}
+        {initial.id && <DeleteContentButton module={module} id={String(initial.id)} title={String(initial.name || initial.title || initial.slug || "contenido")} />}
       </div>
     </form>
   );

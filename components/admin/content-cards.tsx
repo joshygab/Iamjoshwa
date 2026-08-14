@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Archive, Eye, Pencil, Rocket } from "lucide-react";
 import { updatePublicationStatus } from "@/app/admin/module-actions";
+import { DeleteContentButton } from "./delete-content-button";
 import { PublicLinkActions } from "./public-link-actions";
 
 type CmsRow = Record<string, unknown> & {
@@ -69,6 +70,7 @@ export function AdminContentCards({ module, rows }: { module: string; rows: CmsR
                   <StatusButton module={module} id={row.id} status="draft" label="Borrador" icon={<Eye />} />
                 )}
                 {status !== "archived" && <StatusButton module={module} id={row.id} status="archived" label="Archivar" icon={<Archive />} tone="danger" />}
+                <DeleteContentButton module={module} id={row.id} title={title} compact />
               </div>
             </div>
           </article>

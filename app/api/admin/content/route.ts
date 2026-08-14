@@ -72,6 +72,20 @@ export async function DELETE(request: Request) {
   const table = tables[body.module as AdminModule];
   const { data: old } = await auth.db.from(table).select("*").eq("id", body.id).single();
   if (!old) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+  if (body.hardDelete === true) {
+    await auth.writeDb.from("audit_logs").insert({ actor_id: auth.user.id, action: "delete", entity_type: table, entity_id: body.id, old_values: old });
+    await Promise.all([
+      auth.writeDb.from("publication_schedule").delete().eq("entity_type", table).eq("entity_id", body.id),
+      auth.writeDb.from("content_versions").delete().eq("entity_type", table).eq("entity_id", body.id),
+      auth.writeDb.from("media_usage").delete().eq("entity_type", table).eq("entity_id", body.id),
+      auth.writeDb.from("seo_metadata").delete().eq("entity_type", table).eq("entity_id", body.id),
+    ]);
+    const { error } = await auth.writeDb.from(table).delete().eq("id", body.id);
+    if (error) return NextResponse.json({ error: `No se pudo eliminar. Puede tener registros relacionados que deben archivarse primero. Detalle: ${error.message}` }, { status: 400 });
+    for (const path of affectedPaths(body.module as AdminModule)) revalidatePath(path);
+    revalidatePath(`/admin/${body.module}`);
+    return NextResponse.json({ ok: true, deleted: true });
+  }
   const statusField = body.module === "campanas" ? "status" : "publication_status";
   const archived = body.module === "campanas" ? "cancelled" : "archived";
   const { error } = await auth.writeDb.from(table).update({ [statusField]: archived, updated_at: new Date().toISOString() }).eq("id", body.id);

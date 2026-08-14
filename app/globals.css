@@ -2788,6 +2788,12 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
   padding: 14px 16px;
 }
 
+.compact-danger-button {
+  border-color: rgba(255,106,138,.32) !important;
+  background: rgba(255,106,138,.08) !important;
+  color: #ffd4dd !important;
+}
+
 .release-studio,
 .set-source-studio {
   border: 1px solid rgba(255,255,255,.1);
