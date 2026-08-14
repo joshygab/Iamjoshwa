@@ -118,6 +118,9 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
 /* Final CMS polish */
 .admin-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .admin-content-card{border:1px solid var(--line);border-radius:24px;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.02));box-shadow:0 20px 70px rgba(0,0,0,.25);transition:transform .22s ease,border-color .22s ease,background .22s ease}
+.admin-content-card.is-ready{border-color:rgba(105,255,191,.2)}
+.admin-content-card.has-warnings{border-color:rgba(255,204,102,.18)}
+.admin-content-card.needs-work{border-color:rgba(255,93,112,.24)}
 .admin-content-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.28);background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.03))}
 .admin-content-art{position:relative;aspect-ratio:4/3;background:radial-gradient(circle at 30% 20%,var(--glow),transparent 42%),#09080b;display:grid;place-items:center;overflow:hidden}
 .admin-content-art img{object-fit:cover;transition:transform .45s ease}.admin-content-card:hover .admin-content-art img{transform:scale(1.04)}
@@ -129,6 +132,12 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
 .admin-content-body h2{font:800 clamp(28px,3vw,42px)/.94 var(--font-display);letter-spacing:-.05em;margin:8px 0}
 .admin-content-body p,.release-link-head p,.release-live{color:var(--muted);margin:0}
 .admin-content-actions{display:grid;grid-template-columns:1fr;gap:8px}.admin-content-actions form,.admin-content-actions .button{width:100%}.admin-content-actions .button{min-height:42px}
+.publication-readiness{border:1px solid rgba(255,255,255,.1);border-radius:20px;background:rgba(0,0,0,.2);padding:14px;display:grid;gap:12px}
+.publication-readiness>div:first-child{display:flex;align-items:center;gap:9px}.publication-readiness>div:first-child svg{width:18px}.publication-readiness>div:first-child strong{font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+.publication-readiness.is-ready{border-color:rgba(105,255,191,.22);background:rgba(105,255,191,.055)}.publication-readiness.is-ready>div:first-child{color:#95ffd0}
+.publication-readiness.has-warnings{border-color:rgba(255,204,102,.24);background:rgba(255,204,102,.055)}.publication-readiness.has-warnings>div:first-child{color:#ffd98a}
+.publication-readiness.needs-work{border-color:rgba(255,93,112,.28);background:rgba(255,93,112,.06)}.publication-readiness.needs-work>div:first-child{color:#ff9aa7}
+.publication-readiness ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}.publication-readiness li{display:grid;grid-template-columns:22px 1fr;gap:9px;align-items:start}.publication-readiness li>span{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:12px;font-weight:900}.publication-readiness li[data-state=ok]>span{color:#95ffd0;background:rgba(105,255,191,.1)}.publication-readiness li[data-state=warning]>span{color:#ffd98a;background:rgba(255,204,102,.12)}.publication-readiness li[data-state=missing]>span{color:#ff9aa7;background:rgba(255,93,112,.12)}.publication-readiness li strong{display:block;color:white;font-size:12px}.publication-readiness li small{display:block;color:var(--muted);font-size:11px;line-height:1.35;margin-top:2px}
 .content-card-empty{grid-column:1/-1;border-radius:22px;background:rgba(255,255,255,.03)}
 .release-link-editor{grid-column:1/-1;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);padding:20px;display:grid;gap:18px}
 .release-link-head{display:flex;justify-content:space-between;gap:18px;align-items:start}.release-link-head p{max-width:680px;font-size:13px;margin-top:6px}
@@ -2846,6 +2855,26 @@ transform:translate3d(calc(var(--parallax-x,0px) * .7),calc(var(--parallax-y,0px
 
 .public-link-actions .button {
   min-height: 42px;
+}
+
+.public-link-standby {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  background: rgba(255,255,255,.035);
+  color: var(--muted);
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.public-link-standby svg {
+  width: 16px;
+  color: var(--muted);
 }
 
 .visibility-pill {
