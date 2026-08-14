@@ -1,8 +1,22 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export function ImmersiveEffects() {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    root.classList.remove("route-entering");
+    void root.offsetWidth;
+    root.classList.add("route-entering");
+    const timeout = window.setTimeout(() => root.classList.remove("route-entering"), 620);
+    return () => window.clearTimeout(timeout);
+  }, [pathname]);
+
   useEffect(() => {
     const root = document.documentElement;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -10,6 +24,25 @@ export function ImmersiveEffects() {
     if (reduced) return;
 
     const observed = new WeakSet<Element>();
+    const revealSelector = [
+      ".reveal",
+      "main > section",
+      ".section",
+      ".page-hero",
+      ".event-card",
+      ".set-card",
+      ".release-card",
+      ".list-card",
+      ".signal-feed-card",
+      ".media-gallery article",
+      ".community-mission-grid a",
+      ".community-feed-grid a",
+      ".vault-drop-grid article",
+      ".reward-card",
+      ".pass-live-command article",
+      ".public-pass-card",
+      ".public-pass-panel",
+    ].join(",");
 
     function move(event: PointerEvent) {
       root.style.setProperty("--pointer-x", `${event.clientX}px`);
@@ -31,12 +64,19 @@ export function ImmersiveEffects() {
       { threshold: 0.08, rootMargin: "0px 0px -6% 0px" },
     );
 
-    function observeRevealNodes(scope: ParentNode = document) {
-      scope.querySelectorAll(".reveal").forEach((node, index) => {
+    function watchRevealNode(node: Element, index: number) {
         if (observed.has(node)) return;
         observed.add(node);
-        if (node instanceof HTMLElement) node.style.setProperty("--reveal-index", String(index % 8));
+        if (node instanceof HTMLElement) {
+          if (!node.classList.contains("reveal")) node.classList.add("premium-reveal");
+          node.style.setProperty("--reveal-index", String(index % 10));
+        }
         observer.observe(node);
+    }
+
+    function observeRevealNodes(scope: ParentNode = document) {
+      scope.querySelectorAll(revealSelector).forEach((node, index) => {
+        watchRevealNode(node, index);
       });
     }
 
@@ -44,13 +84,7 @@ export function ImmersiveEffects() {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (!(node instanceof Element)) return;
-          if (node.matches(".reveal")) {
-            if (node instanceof HTMLElement) node.style.setProperty("--reveal-index", "0");
-            if (!observed.has(node)) {
-              observed.add(node);
-              observer.observe(node);
-            }
-          }
+          if (node.matches(revealSelector)) watchRevealNode(node, 0);
           observeRevealNodes(node);
         });
       });
@@ -64,6 +98,7 @@ export function ImmersiveEffects() {
 
     return () => {
       root.classList.remove("motion-ready");
+      root.classList.remove("route-entering");
       observer.disconnect();
       mutationObserver.disconnect();
       window.removeEventListener("pointermove", move);
@@ -71,5 +106,15 @@ export function ImmersiveEffects() {
     };
   }, []);
 
-  return <div className="cursor-glow" aria-hidden="true" />;
+  return (
+    <>
+      <div className="premium-page-transition" aria-hidden="true" />
+      <div className="premium-ambient-field" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="cursor-glow" aria-hidden="true" />
+    </>
+  );
 }
