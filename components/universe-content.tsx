@@ -97,13 +97,14 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
   const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
   const event = scopedEvents.find((item) => new Date(item.date).getTime() >= now) || scopedEvents[0];
+  const eventIsFeatured = Boolean(event && isVisible(managed, "next_event"));
   const liveEvent = event && isLiveWindow(event.date, now) ? event : null;
   const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item.date, now)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
   const nextSignal = useMemo(() => {
     const candidates: SignalCandidate[] = [
-      ...scopedEvents.map((item) => ({ id: item.id, href: `/fechas/${item.slug}`, type: universe === "afterluv" ? "afterluv" : "show", label: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "NEXT SHOW", title: item.name, subtitle: `${item.city} · ${item.venue}`, targetDate: item.date, time: dateToTime(item.date) || 0 } satisfies SignalCandidate)),
+      ...(eventIsFeatured ? [] : scopedEvents.map((item) => ({ id: item.id, href: `/fechas/${item.slug}`, type: universe === "afterluv" ? "afterluv" : "show", label: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "NEXT SHOW", title: item.name, subtitle: `${item.city} · ${item.venue}`, targetDate: item.date, time: dateToTime(item.date) || 0 } satisfies SignalCandidate))),
       ...scopedReleases.map((item) => ({ id: item.id, href: `/lanzamientos/${item.slug}`, type: item.universe === "afterluv" ? "afterluv" : "release", label: item.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "NEXT RELEASE", title: item.title, subtitle: item.type, targetDate: item.releaseAt, time: dateToTime(item.releaseAt) || 0 } satisfies SignalCandidate)),
       ...scopedRewards.flatMap((item) => {
         const rewardSignals: SignalCandidate[] = [];
@@ -115,7 +116,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
     return candidates
       .filter((item) => item.time > now)
       .sort((a, b) => a.time - b.time)[0];
-  }, [now, scopedEvents, scopedReleases, scopedRewards, universe]);
+  }, [eventIsFeatured, now, scopedEvents, scopedReleases, scopedRewards, universe]);
   const signalFeed = useMemo<HomeSignalCard[]>(() => {
     const nextEvent = scopedEvents.find((item) => new Date(item.date).getTime() >= now);
     const vaultReward = scopedRewards[0];
@@ -347,7 +348,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       {nextSignal ? (
         <section className="section next-signal-panel reveal">
           <div>
-            <p className="section-kicker">NEXT SIGNAL</p>
+              <p className="section-kicker">{nextSignal.type === "release" ? "LATEST SIGNAL" : nextSignal.type === "vault" ? "VAULT SIGNAL" : "NEXT SIGNAL"}</p>
             <h2>{nextSignal.title}</h2>
             <p>{nextSignal.subtitle}</p>
           </div>

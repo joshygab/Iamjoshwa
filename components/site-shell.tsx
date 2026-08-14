@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, Headphones, Home, Sparkles, Ticket, X, Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImmersiveEffects } from "./immersive-effects";
 import { UniverseSwitch } from "./universe-switch";
 import { CommandMenu } from "./command-menu";
 import { SocialIconRail } from "./social-icon-rail";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/env";
 
 const nav = [
   ["Inicio", "/"],
@@ -23,10 +25,35 @@ const nav = [
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [pass, setPass] = useState<{ name: string; points: number } | null>(null);
   const pathname = usePathname();
-  if (pathname.startsWith("/admin")) return <>{children}</>;
   const active = (href: string) => (href === "/" ? pathname === href : pathname.startsWith(href));
   const close = () => setOpen(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadPassSignal() {
+      if (!isSupabaseConfigured) return;
+      const db = createClient();
+      const { data: { user } } = await db.auth.getUser();
+      if (!user || cancelled) return;
+      const [{ data: profile }, { data: pointTotal }] = await Promise.all([
+        db.from("profiles").select("display_name,public_alias").eq("id", user.id).maybeSingle(),
+        db.from("fan_point_totals").select("points").eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (cancelled) return;
+      setPass({
+        name: String(profile?.public_alias || profile?.display_name || user.email?.split("@")[0] || "JOSH").slice(0, 12).toUpperCase(),
+        points: Number(pointTotal?.points || 0),
+      });
+    }
+    void loadPassSignal();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (pathname.startsWith("/admin")) return <>{children}</>;
 
   return (
     <>
@@ -43,6 +70,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </nav>
         <CommandMenu />
         <UniverseSwitch />
+        <Link className="pass-signal-chip" href={pass ? "/perfil" : "/acceso?next=%2Fperfil"} aria-label={pass ? `Abrir Josh Pass de ${pass.name}` : "Crear Josh Pass"}>
+          <Sparkles />
+          <span>{pass ? `${pass.name} · LISTENER` : "PASS"}</span>
+          {pass ? <strong>{String(pass.points).padStart(3, "0")} XP</strong> : null}
+        </Link>
         <Link className="nav-book-now" href="/booking" aria-current={active("/booking") ? "page" : undefined}>
           Book Now
         </Link>

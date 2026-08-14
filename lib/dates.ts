@@ -23,11 +23,12 @@ export function dateToTime(value: string | Date | null | undefined) {
 
 export function getCountdownState(target: string | Date | null | undefined, now: number): CountdownState {
   const targetTime = dateToTime(target);
-  if (!targetTime || !Number.isFinite(now) || now <= 0) {
+  const safeNow = Number.isFinite(now) && now > 0 ? now : Date.now();
+  if (!targetTime || !Number.isFinite(safeNow) || safeNow <= 0) {
     return { valid: Boolean(targetTime), complete: false, distanceMs: 0, far: true, units: placeholderUnits(), ariaLabel: "Cuenta regresiva cargando" };
   }
 
-  const distanceMs = Math.max(0, targetTime - now);
+  const distanceMs = Math.max(0, targetTime - safeNow);
   const complete = distanceMs <= 0;
   const totalSeconds = Math.floor(distanceMs / 1000);
   const days = Math.floor(totalSeconds / 86400);

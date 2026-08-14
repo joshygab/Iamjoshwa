@@ -29,7 +29,10 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
 
   return (
     <div className="music-library">
-      {visible.map((item) => (
+      {visible.map((item) => {
+        const repeatedCategory = item.category && item.title.toLowerCase().includes(item.category.toLowerCase());
+        const categoryLabel = repeatedCategory ? "SET" : item.category;
+        return (
         <article className="set-card" key={item.id}>
           <div className="set-cover">
             {item.coverUrl ? (
@@ -37,12 +40,12 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
             ) : (
               <span>{item.category}</span>
             )}
-            <span className="demo-badge">{item.demo ? "DEMO EDITABLE" : item.category}</span>
+            <span className="demo-badge">{item.demo ? "DEMO EDITABLE" : categoryLabel}</span>
           </div>
           <div className="set-copy">
             <div className="set-heading">
               <div>
-                <span>{item.category}</span>
+                <span>{categoryLabel}</span>
                 <h2>{item.title}</h2>
               </div>
               <strong aria-label={`Energía ${item.energy} de 5`}>
@@ -106,7 +109,7 @@ export function MusicLibrary({ items }: { items: SetItem[] }) {
             </div>
           </div>
         </article>
-      ))}
+      )})}
     </div>
   );
 }

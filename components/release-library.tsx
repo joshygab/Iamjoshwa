@@ -27,9 +27,10 @@ export function ReleaseLibrary({ items }: { items: ReleaseItem[] }) {
   if (!visible.length) {
     return (
       <div className="admin-empty public-empty branded-empty">
-        <span>NEXT DROP</span>
-        <h2>NEW MUSIC INCOMING.</h2>
-        <p>El siguiente lanzamiento todavía está en cola. Activa tu Pass para recibir pre-save, links y transmisión de salida.</p>
+        <span>TRANSMISSION 001</span>
+        <h2>IDENTITY CLASSIFIED.</h2>
+        <p>El próximo lanzamiento todavía no fue revelado. Activa tu Pass para recibir la señal, pre-save y links oficiales cuando se abra la transmisión.</p>
+        <Link className="button secondary" href="/acceso?next=%2Flanzamientos">Notify me</Link>
       </div>
     );
   }

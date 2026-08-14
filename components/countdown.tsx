@@ -49,7 +49,7 @@ export function Countdown({
   const viewed = useRef(false);
   const completed = useRef(false);
   const finalType = contentType || type;
-  const finalLabel = label || defaultLabel(type);
+  const finalLabel = countdownMomentLabel(type, state.distanceMs, label || defaultLabel(type));
   const isAfterluv = type === "afterluv";
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export function Countdown({
       <div className="premium-countdown-units" aria-hidden="true">
         {state.units.map((unit, index) => (
           <div className="premium-countdown-unit" key={unit.key}>
-            <strong>{state.hydrated ? String(unit.value).padStart(2, "0") : "--"}</strong>
+            <strong>{String(unit.value).padStart(2, "0")}</strong>
             <span data-short={unit.shortLabel}>{unit.label}</span>
             {index < state.units.length - 1 ? <em>:</em> : null}
           </div>
@@ -122,6 +122,14 @@ function defaultLabel(type: CountdownType) {
   if (type === "afterluv") return "TRANSMISSION BEGINS IN";
   if (type === "presale") return "PRESALE OPENS IN";
   return "NEXT SIGNAL";
+}
+
+function countdownMomentLabel(type: CountdownType, distanceMs: number, fallback: string) {
+  if (!["show", "afterluv"].includes(type) || distanceMs <= 0) return fallback;
+  const hour = 60 * 60 * 1000;
+  if (distanceMs <= 24 * hour) return "TONIGHT — SIGNAL IMMINENT";
+  if (distanceMs <= 48 * hour) return "TOMORROW — SIGNAL IMMINENT";
+  return fallback;
 }
 
 function defaultCompleteLabel(type: CountdownType) {

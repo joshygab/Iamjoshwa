@@ -29,22 +29,24 @@ export function MediaGallery({ items }: { items: MediaGalleryItem[] }) {
   return (
     <>
       <section className="section media-gallery">
-        {visible.map((item, index) => (
+        {visible.map((item, index) => {
+          const title = publicMediaTitle(item, index);
+          return (
           <article key={item.id}>
-            <button className="media-open" onClick={() => setSelectedIndex(index)} aria-label={`Ampliar ${item.title}`}>
+            <button className="media-open" onClick={() => setSelectedIndex(index)} aria-label={`Ampliar ${title}`}>
               <Image priority src={item.url} alt={item.alt} width={1200} height={900} sizes="(max-width: 720px) 100vw, 50vw" />
             </button>
             <div>
               <span>{item.demo ? "DEMO EDITABLE" : item.type}</span>
-              <h2>{item.title}</h2>
+              <h2>{title}</h2>
               <p>{item.caption}</p>
             </div>
           </article>
-        ))}
+        )})}
       </section>
 
       {selected && (
-        <div className="lightbox pro-lightbox" role="dialog" aria-modal="true" aria-label={selected.title} onClick={() => setSelectedIndex(null)}>
+        <div className="lightbox pro-lightbox" role="dialog" aria-modal="true" aria-label={publicMediaTitle(selected, selectedIndex || 0)} onClick={() => setSelectedIndex(null)}>
           <button className="lightbox-close" aria-label="Cerrar imagen" onClick={() => setSelectedIndex(null)}>
             <X />
           </button>
@@ -57,7 +59,7 @@ export function MediaGallery({ items }: { items: MediaGalleryItem[] }) {
           </button>
           <div className="lightbox-caption" onClick={(event) => event.stopPropagation()}>
             <span>{selected.type}</span>
-            <h2>{selected.title}</h2>
+            <h2>{publicMediaTitle(selected, selectedIndex || 0)}</h2>
             <p>{selected.caption}</p>
           </div>
         </div>
@@ -169,6 +171,17 @@ export function EpkContent({ artists, sections, events, media }: { artists: Arti
 
 function contentText(content: Record<string, unknown>) {
   return Object.values(content).filter((item): item is string => typeof item === "string").join(" · ") || "Disponible bajo solicitud.";
+}
+
+function publicMediaTitle(item: MediaGalleryItem, index: number) {
+  const raw = (item.title || "").trim();
+  const technical = !raw || /^[a-f0-9-]{24,}$/i.test(raw) || /\.(jpg|jpeg|png|webp|avif|mp4|webm)$/i.test(raw);
+  if (!technical) return raw;
+  if (item.occurredAt) {
+    const year = new Date(item.occurredAt).getFullYear();
+    return `IAMJOSHWA — Press ${String(index + 1).padStart(3, "0")}${Number.isFinite(year) ? ` · ${year}` : ""}`;
+  }
+  return `IAMJOSHWA — Visual ${String(index + 1).padStart(3, "0")}`;
 }
 
 function Empty({ title }: { title: string }) {
