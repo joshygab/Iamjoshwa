@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Pause,
   Play,
+  Radio,
   Volume2,
   X,
 } from "lucide-react";
@@ -181,10 +182,12 @@ function CompactPlayer() {
 
   return (
     <aside
-      className={`compact-player global-now-playing ${active ? "is-active" : ""} ${expanded ? "expanded" : ""}`}
+      key={currentPlaying.id}
+      className={`compact-player global-now-playing is-switching ${active ? "is-active" : ""} ${expanded ? "expanded" : ""} ${hasNativeAudio ? "has-native-audio" : "has-platform-player"}`}
       aria-label="Now Playing Global"
     >
       <div className="compact-player-artwork" aria-hidden="true">
+        <span className="compact-player-art-ring" />
         {playing.coverUrl ? (
           <Image src={playing.coverUrl} alt="" width={64} height={64} sizes="64px" />
         ) : (
@@ -193,6 +196,12 @@ function CompactPlayer() {
       </div>
 
       <div className="compact-player-body">
+        <div className="compact-player-status" aria-live="polite">
+          <span className="compact-player-live-dot" />
+          <strong>{active ? "SIGNAL ACTIVE" : "SIGNAL READY"}</strong>
+          <small>{hasNativeAudio ? "Native audio" : canExpand ? "Official embed" : "External platform"}</small>
+          <Radio aria-hidden="true" />
+        </div>
         <div className="compact-player-meta">
           <span>NOW PLAYING · {providerLabel}</span>
           <strong>{playing.title}</strong>
@@ -201,7 +210,7 @@ function CompactPlayer() {
 
         <div className={`compact-player-signal ${hasNativeAudio ? "is-seekable" : ""}`} aria-label="Waveform del set" onClick={hasNativeAudio ? seek : undefined}>
           {Array.from({ length: 28 }).map((_, index) => (
-            <span key={index} className={hasNativeAudio && index / 28 <= progress ? "is-active" : undefined} style={{ "--wave-index": index } as React.CSSProperties} />
+            <span key={index} className={hasNativeAudio && index / 28 <= progress ? "is-active" : undefined} style={{ "--wave-index": index, "--wave-height": `${32 + ((index * 17) % 58)}%` } as React.CSSProperties} />
           ))}
         </div>
 

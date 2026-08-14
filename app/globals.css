@@ -4745,3 +4745,273 @@ html.route-entering main#contenido {
     transform: none!important;
   }
 }
+
+/* Bloque Premium Motion System 3: Now Playing cinematográfico */
+.global-now-playing {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.global-now-playing:after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(105deg, transparent 0 34%, rgba(255,255,255,.13) 43%, transparent 52%),
+    radial-gradient(circle at 8% 50%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 18rem);
+  opacity: .18;
+  transform: translate3d(-20%,0,0);
+}
+
+.global-now-playing.is-switching {
+  animation: playerTrackSwitch .52s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.global-now-playing.is-switching:after {
+  animation: playerSweep .52s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.compact-player-artwork {
+  position: relative;
+  isolation: isolate;
+}
+
+.compact-player-artwork:before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  border-radius: 26px;
+  background: conic-gradient(from 90deg, transparent, var(--accent), rgba(255,255,255,.7), var(--accent2), transparent);
+  opacity: .24;
+  filter: blur(10px);
+}
+
+.compact-player-art-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: 2;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, rgba(255,255,255,.18));
+  box-shadow: inset 0 1px rgba(255,255,255,.18);
+}
+
+.global-now-playing.is-active .compact-player-artwork:before {
+  animation: artworkAura 3.6s linear infinite;
+}
+
+.compact-player-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.compact-player-status strong {
+  color: white;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.compact-player-status small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-player-status svg {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+  margin-left: auto;
+}
+
+.compact-player-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 18px var(--accent);
+  flex: 0 0 auto;
+}
+
+.global-now-playing.is-active .compact-player-live-dot {
+  animation: liveDotPulse 1.45s ease-in-out infinite;
+}
+
+.compact-player-signal {
+  position: relative;
+  min-height: 28px;
+}
+
+.compact-player-signal:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+  opacity: .42;
+  transform: translate3d(-55%,0,0);
+}
+
+.global-now-playing.is-active .compact-player-signal:before {
+  animation: waveformScan 2.4s ease-in-out infinite;
+}
+
+.compact-player-signal span {
+  height: var(--wave-height, 46%);
+  opacity: .34;
+}
+
+.global-now-playing.is-active .compact-player-signal span {
+  animation-duration: 1.05s;
+}
+
+.compact-player-signal span.is-active {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 58%, transparent);
+}
+
+.global-now-playing.has-platform-player .compact-player-signal span {
+  animation: platformWaveIdle 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--wave-index) * -68ms);
+}
+
+.global-now-playing .compact-player-controls button,
+.global-now-playing .compact-player-controls a,
+.compact-player-volume {
+  box-shadow: inset 0 1px rgba(255,255,255,.08);
+}
+
+.global-now-playing .compact-player-controls button:active,
+.global-now-playing .compact-player-controls a:active {
+  transform: translate3d(0,1px,0) scale(.96);
+}
+
+.global-now-playing .compact-player-primary svg {
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.28));
+}
+
+.global-now-playing.expanded {
+  width: min(980px, calc(100vw - 28px));
+}
+
+.global-now-playing iframe {
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 18px 60px rgba(0,0,0,.28);
+}
+
+@keyframes playerTrackSwitch {
+  0% {
+    opacity: .72;
+    transform: translate3d(0, 10px, 0) scale(.985);
+    filter: blur(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes playerSweep {
+  0% {
+    opacity: 0;
+    transform: translate3d(-35%,0,0);
+  }
+  45% {
+    opacity: .42;
+  }
+  100% {
+    opacity: .18;
+    transform: translate3d(28%,0,0);
+  }
+}
+
+@keyframes artworkAura {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes liveDotPulse {
+  0%, 100% {
+    opacity: .62;
+    transform: scale(.86);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes waveformScan {
+  0% {
+    opacity: 0;
+    transform: translate3d(-60%,0,0);
+  }
+  35%, 65% {
+    opacity: .5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(60%,0,0);
+  }
+}
+
+@keyframes platformWaveIdle {
+  0%, 100% {
+    transform: scaleY(.34);
+    opacity: .28;
+  }
+  50% {
+    transform: scaleY(.82);
+    opacity: .58;
+  }
+}
+
+@media(max-width:980px) {
+  .compact-player-status {
+    grid-template-columns: auto auto 1fr auto;
+  }
+
+  .compact-player-status small {
+    max-width: 42vw;
+  }
+}
+
+@media(max-width:420px) {
+  .compact-player-status small {
+    display: none;
+  }
+
+  .compact-player-status strong {
+    letter-spacing: .12em;
+  }
+
+  .compact-player-signal {
+    min-height: 24px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .global-now-playing.is-switching,
+  .global-now-playing.is-switching:after,
+  .global-now-playing.is-active .compact-player-artwork:before,
+  .global-now-playing.is-active .compact-player-live-dot,
+  .global-now-playing.is-active .compact-player-signal:before,
+  .global-now-playing.has-platform-player .compact-player-signal span {
+    animation: none!important;
+  }
+
+  .global-now-playing:after {
+    opacity: .08;
+    transform: none;
+  }
+}
