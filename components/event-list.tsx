@@ -103,8 +103,11 @@ export function EventList({ items, now }: { items: EventItem[]; now: number }) {
           )}
         </aside>
 
-        <div className="event-grid pro-event-grid">
-          {visible.length ? visible.map((item) => <EventCard key={item.id} item={item} past={!isUpcoming(item, now)} />) : <EmptyShows />}
+        <div className="event-grid pro-event-grid mobile-show-mosaic">
+          {visible.length ? visible.map((item, index) => {
+            const past = !isUpcoming(item, now);
+            return <EventCard key={item.id} item={item} past={past} priority={period === "upcoming" && index === 0 && !past} />;
+          }) : <EmptyShows />}
         </div>
       </section>
 
@@ -127,14 +130,14 @@ export function EventList({ items, now }: { items: EventItem[]; now: number }) {
   );
 }
 
-function EventCard({ item, past }: { item: EventItem; past: boolean }) {
+function EventCard({ item, past, priority }: { item: EventItem; past: boolean; priority: boolean }) {
   const google = googleCalendarUrl(item);
 
   return (
-    <article className={`event-card show-card ${past ? "past-show" : ""}`}>
+    <article className={`event-card show-card ${past ? "past-show" : ""} ${priority ? "next-show" : ""}`}>
       <Link className="event-card-art show-card-art" href={`/fechas/${item.slug}`}>
         {item.flyerUrl ? <Image src={item.flyerUrl} alt={`Arte de ${item.name}`} fill sizes="(max-width: 760px) 100vw, 33vw" /> : <span>{item.universe}</span>}
-        <span className="demo-badge">{item.demo ? "EVENTO DEMO" : item.status}</span>
+        <span className="demo-badge">{priority ? "PRÓXIMA FECHA" : item.demo ? "EVENTO DEMO" : item.status}</span>
         <time>{formatDay(item.date)}<small>{formatMonth(item.date)}</small></time>
       </Link>
       <div>
