@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, MessageCircle, Share2 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { formatMxDate, formatMxTime } from "@/lib/dates";
 import { publicEnv } from "@/lib/env";
@@ -67,7 +68,17 @@ export function EventShareStudio({ event, compact = false }: { event: EventShare
 
   return (
     <div className={`event-share-studio ${compact ? "is-compact" : ""}`}>
-      <div>
+      {!compact ? (
+        <div className="event-share-preview" style={{ "--share-flyer": event.flyerUrl ? `url(${event.flyerUrl})` : undefined } as CSSProperties} aria-hidden="true">
+          <div className="event-share-preview-art" />
+          <div className="event-share-preview-copy">
+            <span>{headline}</span>
+            <strong>{event.name}</strong>
+            <small>{formatMxDate(event.date, { day: "2-digit", month: "short" })} · {event.city}</small>
+          </div>
+        </div>
+      ) : null}
+      <div className="event-share-copy">
         <span>{headline}</span>
         <strong>Share kit</strong>
         {!compact ? <p>Guarda una imagen vertical 9:15 con flyer, fecha y venue; perfecta para historias o para mandarla por WhatsApp.</p> : null}
@@ -138,9 +149,13 @@ async function createPoster(event: EventShareData, headline: string, shareUrl: s
   drawPill(ctx, 96, 184, 476, 62, `${formatMxDate(event.date, { weekday: "long", day: "2-digit", month: "long" })} · ${formatMxTime(event.date)} MX`, accent);
   drawPill(ctx, 594, 184, 390, 62, event.status.toUpperCase(), "rgba(255,255,255,.26)");
 
-  const titleLines = drawText(ctx, event.name.toUpperCase(), 96, 1412, 78, 888, "900", -.05, "#ffffff", .9, "left", 3);
-  const detailsY = Math.min(1646, 1412 + titleLines * 78 * .9 + 34);
-  drawText(ctx, `${event.venue} · ${event.city}`.toUpperCase(), 96, detailsY, 31, 888, "800", .08, "rgba(255,255,255,.78)", 1.2, "left", 2);
+  const title = fitText(ctx, event.name.toUpperCase(), 888, 238, 82, 50, "900", .9, 3);
+  const titleY = 1402 + Math.max(0, 238 - title.lines.length * title.size * .9) / 2;
+  drawText(ctx, title.text, 96, titleY, title.size, 888, "900", -.045, "#ffffff", .9, "left", 3);
+  drawSeparator(ctx, 96, 1646, 888, accent);
+  const details = `${event.venue} · ${event.city}`.toUpperCase();
+  const detailFit = fitText(ctx, details, 888, 62, 31, 22, "800", 1.12, 2);
+  drawText(ctx, detailFit.text, 96, 1672, detailFit.size, 888, "800", .06, "rgba(255,255,255,.78)", 1.12, "left", 2);
   drawText(ctx, "IAMJOSHWA WORLD", 96, 1730, 25, 520, "800", .18, "rgba(255,255,255,.68)");
   drawText(ctx, shareUrl.replace(/^https?:\/\//, ""), 552, 1730, 22, 432, "600", .02, "rgba(255,255,255,.58)", 1, "right");
 
@@ -195,17 +210,7 @@ function drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: num
   ctx.textAlign = align;
   ctx.textBaseline = "top";
   ctx.font = `${weight} ${size}px Arial, Helvetica, sans-serif`;
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let line = "";
-  for (const word of words) {
-    const next = line ? `${line} ${word}` : word;
-    if (ctx.measureText(next).width > maxWidth && line) {
-      lines.push(line);
-      line = word;
-    } else line = next;
-  }
-  if (line) lines.push(line);
+  const lines = text.includes("\n") ? text.split("\n") : wrapLines(ctx, text, maxWidth);
   const visible = lines.slice(0, maxLines);
   visible.forEach((item, index) => {
     if (spacing && item.length < 28) drawLetterSpaced(ctx, item, x, y + index * size * lineHeight, spacing * size, align);
@@ -224,11 +229,74 @@ function drawPill(ctx: CanvasRenderingContext2D, x: number, y: number, width: nu
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#ffffff";
-  ctx.font = "800 22px Arial, Helvetica, sans-serif";
+  const size = fitSingleLine(ctx, text, width - 42, 22, 15, "800");
+  ctx.font = `800 ${size}px Arial, Helvetica, sans-serif`;
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
   ctx.fillText(text, x + width / 2, y + height / 2 + 1, width - 42);
   ctx.restore();
+}
+
+function drawSeparator(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, color: string) {
+  ctx.save();
+  const gradient = ctx.createLinearGradient(x, y, x + width, y);
+  gradient.addColorStop(0, hexToRgba(color, .78));
+  gradient.addColorStop(.52, "rgba(255,255,255,.28)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + width, y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, maxHeight: number, startSize: number, minSize: number, weight: string, lineHeight: number, maxLines: number) {
+  for (let size = startSize; size >= minSize; size -= 2) {
+    ctx.font = `${weight} ${size}px Arial, Helvetica, sans-serif`;
+    const lines = wrapLines(ctx, text, maxWidth).slice(0, maxLines);
+    if (lines.length * size * lineHeight <= maxHeight && lines.every((line) => ctx.measureText(line).width <= maxWidth)) {
+      return { text: lines.join("\n"), lines, size };
+    }
+  }
+  ctx.font = `${weight} ${minSize}px Arial, Helvetica, sans-serif`;
+  const lines = wrapLines(ctx, text, maxWidth).slice(0, maxLines);
+  if (lines.length === maxLines) lines[maxLines - 1] = ellipsize(ctx, lines[maxLines - 1], maxWidth);
+  return { text: lines.join("\n"), lines, size: minSize };
+}
+
+function fitSingleLine(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, startSize: number, minSize: number, weight: string) {
+  for (let size = startSize; size >= minSize; size -= 1) {
+    ctx.font = `${weight} ${size}px Arial, Helvetica, sans-serif`;
+    if (ctx.measureText(text).width <= maxWidth) return size;
+  }
+  return minSize;
+}
+
+function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  const lines: string[] = [];
+  for (const paragraph of text.split("\n")) {
+    const words = paragraph.split(" ");
+    let line = "";
+    for (const word of words) {
+      const next = line ? `${line} ${word}` : word;
+      if (ctx.measureText(next).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = next;
+      }
+    }
+    if (line) lines.push(line);
+  }
+  return lines.length ? lines : [text];
+}
+
+function ellipsize(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+  let value = text;
+  while (value.length > 1 && ctx.measureText(`${value}…`).width > maxWidth) value = value.slice(0, -1);
+  return `${value.trim()}…`;
 }
 
 function drawLetterSpaced(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number, align: CanvasTextAlign) {
