@@ -27,7 +27,7 @@ import { contentRepository } from "@/lib/data";
 import { pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 
-const levels = [
+const fallbackLevels = [
   { number: "01", name: "Listener", points: 0, body: "Entrada al universo, perfil y preferencias.", color: "silver" },
   { number: "02", name: "Inner Circle", points: 100, body: "Primeros desbloqueos por actividad verificada.", color: "violet" },
   { number: "03", name: "Raver", points: 350, body: "Check-ins, sets y acceso a drops seleccionados.", color: "blue" },
@@ -44,20 +44,21 @@ export const generateMetadata = () => pageMetadata({
 });
 
 export default async function CommunityPage() {
-  const [socials, events, sets, releases, rewards, member] = await Promise.all([
+  const [socials, events, sets, releases, rewards, member, levels] = await Promise.all([
     contentRepository.getSocialLinks(),
     contentRepository.getEvents(),
     contentRepository.getSets(),
     contentRepository.getReleases(),
     contentRepository.getRewards(),
     getMemberSignal(),
+    getPassLevels(),
   ]);
   const instagram = socials.find((item) => item.platform?.toLowerCase() === "instagram" && (!item.project || item.project === "iamjoshwa"));
   const nextEvent = events.filter((item) => new Date(item.date).getTime() >= requestTime).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
   const latestSet = sets[0];
   const latestRelease = releases[0];
   const featuredReward = rewards[0];
-  const level = levelFor(member?.points || 0);
+  const level = levelFor(member?.points || 0, levels);
   const nextLevel = levels.find((item) => item.points > (member?.points || 0));
   const progress = nextLevel ? Math.min(100, Math.round(((member?.points || 0) / nextLevel.points) * 100)) : 100;
   const passName = member?.name || "JOSHY";
@@ -247,6 +248,23 @@ async function getMemberSignal() {
   };
 }
 
-function levelFor(points: number) {
-  return [...levels].reverse().find((item) => points >= item.points) || levels[0];
+function levelFor(points: number, levels = fallbackLevels) {
+  return [...levels].reverse().find((item) => points >= item.points) || levels[0] || fallbackLevels[0];
+}
+
+async function getPassLevels() {
+  const db = await createClient();
+  const fallback = fallbackLevels;
+  if (!db) return fallback;
+  const { data, error } = await db.from("fan_levels").select("id,name,min_points,position").order("position");
+  if (error || !data?.length) return fallback;
+  return data.map((item) => {
+    const base = fallback.find((level) => level.name === item.name) || fallback[Math.max(0, Number(item.position || 1) - 1)] || fallback[0];
+    return {
+      ...base,
+      number: String(item.position || item.id).padStart(2, "0"),
+      name: String(item.name),
+      points: Number(item.min_points || 0),
+    };
+  });
 }

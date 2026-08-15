@@ -73,10 +73,11 @@ export default async function EventDetail({ params }: Props) {
     },
     description: event.description,
     image: event.flyerUrl ? [event.flyerUrl] : [absoluteUrl(defaultOgImage)],
-    offers: event.ticketUrl
+    offers: event.ticketUrl || event.registrationUrl || event.ticketMode === "free"
       ? {
           "@type": "Offer",
-          url: event.ticketUrl,
+          url: event.ticketUrl || event.registrationUrl || absoluteUrl(`/fechas/${event.slug}`),
+          price: event.ticketMode === "free" ? "0" : undefined,
           priceCurrency: event.priceLabel.includes("USD") ? "USD" : "MXN",
           availability: event.status === "Sold out" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         }

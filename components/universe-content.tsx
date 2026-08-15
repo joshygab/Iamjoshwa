@@ -278,7 +278,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
             <p>{takeoverEvent.city} · {takeoverEvent.venue} · Set {takeoverEvent.setTime || formatMxTime(takeoverEvent.date)} MX</p>
           </div>
           <div className="live-command-actions">
-            {takeoverEvent.ticketUrl ? <a className="button primary" href={takeoverEvent.ticketUrl} target="_blank" rel="noreferrer"><Ticket /> Boletos</a> : <Link className="button primary" href={`/fechas/${takeoverEvent.slug}`}><Ticket /> Detalles</Link>}
+            {eventAccess(takeoverEvent).href ? <a className="button primary" href={eventAccess(takeoverEvent).href} target="_blank" rel="noreferrer"><Ticket /> {eventAccess(takeoverEvent).label}</a> : <Link className="button primary" href={`/fechas/${takeoverEvent.slug}`}><Ticket /> {eventAccess(takeoverEvent).label}</Link>}
             {takeoverEvent.mapUrl ? <a className="button secondary" href={takeoverEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : null}
             <Link className="button secondary" href="/checkin"><QrCode /> QR check-in</Link>
             <Link className="button secondary" href={`/fechas/${takeoverEvent.slug}`}><CalendarDays /> Info completa</Link>
@@ -419,7 +419,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
               />
               <div className="inline-actions">
                 <Link className="button primary" href={`/fechas/${event.slug}`}>Open show</Link>
-                {event.ticketUrl ? <a className="button secondary" href={event.ticketUrl} target="_blank" rel="noreferrer">Tickets</a> : null}
+                {eventAccess(event).href ? <a className="button secondary" href={eventAccess(event).href} target="_blank" rel="noreferrer">{eventAccess(event).label}</a> : null}
               </div>
             </div>
             <div className="poster-card premium-poster">
@@ -549,9 +549,17 @@ function SignalIcon({ type }: { type: HomeSignalCard["icon"] }) {
   return <Signal />;
 }
 
+function eventAccess(event: EventItem) {
+  if (event.ticketMode === "registration") return event.registrationUrl ? { label: "Registro", href: event.registrationUrl } : { label: "Registro pronto" };
+  if (event.ticketMode === "free") return { label: "Entrada gratuita" };
+  if (event.ticketMode === "none") return { label: "Detalles" };
+  return event.ticketUrl ? { label: "Boletos", href: event.ticketUrl } : { label: "Detalles" };
+}
+
 function EventTakeoverHero({ event, live, universe }: { event: EventItem; live: boolean; universe: Universe }) {
   const dateLabel = formatMxDate(event.date, { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
   const timeLabel = event.setTime || `${formatMxTime(event.date)} MX`;
+  const access = eventAccess(event);
 
   return (
     <div className="hero-content world-hero-content event-takeover-hero reveal is-visible">
@@ -579,13 +587,13 @@ function EventTakeoverHero({ event, live, universe }: { event: EventItem; live: 
           />
         </div>
         <div className="hero-actions event-takeover-actions">
-          {event.ticketUrl ? (
-            <a className="button primary hero-main-cta" href={event.ticketUrl} target="_blank" rel="noreferrer">
-              <Ticket /> Buy tickets
+          {access.href ? (
+            <a className="button primary hero-main-cta" href={access.href} target="_blank" rel="noreferrer">
+              <Ticket /> {access.label}
             </a>
           ) : (
             <Link className="button primary hero-main-cta" href={`/fechas/${event.slug}`}>
-              <Ticket /> Show details
+              <Ticket /> {access.label}
             </Link>
           )}
           {event.mapUrl ? (

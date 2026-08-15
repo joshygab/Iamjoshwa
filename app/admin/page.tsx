@@ -12,6 +12,7 @@ import {
   Palette,
   Sparkles,
   Ticket,
+  Trophy,
   Upload,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
@@ -101,6 +102,7 @@ export default async function AdminDashboard() {
     ["Cambiar portada", "/admin/configuracion", <Palette key="palette" />, "Edita hero, identidad visual y biografías."],
     ["Nuevo evento", "/admin/eventos/nuevo", <CalendarPlus key="calendar" />, "Crea fecha, flyer y link de boletos."],
     ["Nuevo set", "/admin/sets/nuevo", <Music2 key="music" />, "Publica portada, player y tracklist."],
+    ["Pass Levels", "/admin/pass-levels", <Trophy key="levels" />, "Ajusta XP por nivel del IAMJOSHWA Pass."],
     ["Booking", "/admin/booking", <Ticket key="ticket" />, "Revisa solicitudes de contratación."],
     ["Media pública", "/media", <ImagePlus key="image" />, "Mira cómo se ve la galería."],
   ];

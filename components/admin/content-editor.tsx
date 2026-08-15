@@ -105,9 +105,11 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           <Text name="lineup" label="Lineup, separado por comas" value={array(initial.lineup)} />
           <Text name="genres" label="Géneros, separados por comas" value={array(initial.genres)} />
           <Text name="age_restriction" label="Restricción de edad" value={initial.age_restriction} />
+          <EventAccessStudio initial={initial} />
           <NumberField name="price_amount" label="Precio" value={initial.price_amount} min="0" />
           <Text name="currency" label="Moneda ISO" value={initial.currency || "MXN"} />
           <Text name="ticket_url" label="Enlace de boletos" value={initial.ticket_url} type="url" />
+          <Text name="registration_url" label="Enlace de registro / formulario" value={initial.registration_url} type="url" />
           <Text name="promo_code" label="Código promocional" value={initial.promo_code} />
           <label>
             Estado del evento
@@ -294,6 +296,47 @@ function PublishingPreview({ module, values, issue }: { module: string; values: 
       <div>
         <strong>{project}</strong>
         <small>{path}</small>
+      </div>
+    </section>
+  );
+}
+
+function EventAccessStudio({ initial }: { initial: EditorValues }) {
+  const [mode, setMode] = useState(text(initial.ticket_mode, inferTicketMode(initial)));
+  const copy = {
+    tickets: ["Venta de boletos", "Mostrará Comprar boletos cuando exista link. Si no hay link, dirá Boletos pronto."],
+    registration: ["Registro con formulario", "Mostrará Registrarme y usará el enlace de registro/formulario."],
+    free: ["Entrada gratuita", "No mostrará Boletos pronto. El público verá Entrada gratuita."],
+    none: ["Sin acceso online", "Úsalo si el evento solo necesita detalles o está por confirmar."],
+  }[mode] || ["Acceso", "Define cómo debe verse el CTA público."];
+
+  return (
+    <section className="event-access-studio wide-field">
+      <div className="release-link-head">
+        <div>
+          <span>ACCESO DEL EVENTO</span>
+          <p>Controla si la fecha tiene boletos, registro, entrada gratis o solo información.</p>
+        </div>
+        <strong>{copy[0]}</strong>
+      </div>
+      <input type="hidden" name="ticket_mode" value={mode} />
+      <div className="set-source-options event-access-options">
+        {[
+          ["tickets", "Boletos", "Compra / preventa"],
+          ["registration", "Registro", "Formulario externo"],
+          ["free", "Gratis", "Sin venta"],
+          ["none", "Info", "Sin CTA online"],
+        ].map(([key, label, detail]) => (
+          <button className={mode === key ? "is-active" : ""} type="button" key={key} onClick={() => setMode(key)}>
+            <strong>{label}</strong>
+            <span>{detail}</span>
+          </button>
+        ))}
+      </div>
+      <div className="studio-preview-card">
+        <span>PREVIEW DEL CTA</span>
+        <strong>{copy[0]}</strong>
+        <p>{copy[1]}</p>
       </div>
     </section>
   );
@@ -701,6 +744,14 @@ function publicPath(module: string, slug: string) {
   if (module === "lanzamientos") return `/lanzamientos/${slug}`;
   if (module === "sets") return `/musica/${slug}`;
   return "/";
+}
+
+function inferTicketMode(initial: EditorValues) {
+  if (initial.ticket_mode) return text(initial.ticket_mode);
+  if (initial.registration_url || initial.event_status === "registration_open") return "registration";
+  if (Number(initial.price_amount) === 0) return "free";
+  if (initial.ticket_url) return "tickets";
+  return "tickets";
 }
 
 function initialSetSource(initial: EditorValues) {

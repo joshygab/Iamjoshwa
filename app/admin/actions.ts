@@ -49,6 +49,50 @@ export async function savePageSection(formData: FormData) {
 
 export async function archivePageSection(formData: FormData) { const { supabase, user } = await requireRole(["editor", "admin"]); const id = String(formData.get("id")); const { data: old } = await supabase.from("page_sections").select("*").eq("id", id).single(); await supabase.from("page_sections").update({ publication_status: "archived", updated_by: user.id }).eq("id", id); await audit(supabase, user.id, "archive", "page_sections", id, old, { publication_status: "archived" }); revalidatePath("/admin/portada"); revalidatePath("/"); }
 
+export async function deletePageSection(formData: FormData) {
+  const { supabase, user } = await requireRole(["admin"]);
+  const writeDb = createAdminClient();
+  const id = String(formData.get("id") || "");
+  if (!id) throw new Error("Bloque inválido");
+  const { data: old } = await supabase.from("page_sections").select("*").eq("id", id).maybeSingle();
+  if (!old) throw new Error("Bloque no encontrado");
+  await writeDb.from("audit_logs").insert({ actor_id: user.id, action: "delete", entity_type: "page_sections", entity_id: id, old_values: old });
+  await Promise.all([
+    writeDb.from("publication_schedule").delete().eq("entity_type", "page_sections").eq("entity_id", id),
+    writeDb.from("content_versions").delete().eq("entity_type", "page_sections").eq("entity_id", id),
+    writeDb.from("media_usage").delete().eq("entity_type", "page_sections").eq("entity_id", id),
+    writeDb.from("seo_metadata").delete().eq("entity_type", "page_sections").eq("entity_id", id),
+  ]);
+  const { error } = await writeDb.from("page_sections").delete().eq("id", id);
+  if (error) throw error;
+  revalidatePath("/admin/portada");
+  revalidatePath("/");
+}
+
+export async function saveFanLevel(formData: FormData) {
+  const { supabase, user } = await requireRole(["admin"]);
+  const writeDb = createAdminClient();
+  const id = Number(formData.get("id"));
+  const minPoints = Number(formData.get("minPoints"));
+  if (!Number.isInteger(id) || id < 1 || id > 99) throw new Error("Nivel inválido");
+  if (!Number.isInteger(minPoints) || minPoints < 0) throw new Error("Los puntos deben ser un número entero positivo");
+  if (id === 1 && minPoints !== 0) throw new Error("Listener debe iniciar en 0 puntos");
+  const { data: old } = await supabase.from("fan_levels").select("*").eq("id", id).maybeSingle();
+  if (!old) throw new Error("Nivel no encontrado");
+  const { data: duplicate } = await supabase.from("fan_levels").select("id").eq("min_points", minPoints).neq("id", id).maybeSingle();
+  if (duplicate) throw new Error("Ya existe otro nivel con esa misma cantidad de puntos");
+  const { data: levels } = await supabase.from("fan_levels").select("id,min_points,position").order("position");
+  const proposed = (levels || []).map((level) => level.id === id ? { ...level, min_points: minPoints } : level);
+  const invalidOrder = proposed.some((level, index) => index > 0 && Number(level.min_points) <= Number(proposed[index - 1].min_points));
+  if (invalidOrder) throw new Error("Cada nivel debe pedir más puntos que el nivel anterior");
+  const { error } = await writeDb.from("fan_levels").update({ min_points: minPoints }).eq("id", id);
+  if (error) throw error;
+  await audit(supabase, user.id, "update", "fan_levels", String(id), old, { min_points: minPoints });
+  revalidatePath("/admin/pass-levels");
+  revalidatePath("/comunidad");
+  revalidatePath("/perfil");
+}
+
 export async function saveNavigation(formData: FormData) { const { supabase, user } = await requireRole(["admin"]); const href = String(formData.get("href") || ""); if (!safeHref(href)) throw new Error("Enlace inválido"); const payload = { label: String(formData.get("label") || "").trim(), href, position: Number(formData.get("position") || 0), visible: formData.get("visible") === "on", project: formData.get("project") || null }; const { data, error } = await supabase.from("navigation_items").insert(payload).select("id").single(); if (error) throw error; await audit(supabase, user.id, "create", "navigation_items", data.id, null, payload); revalidatePath("/", "layout"); revalidatePath("/admin/configuracion"); }
 export async function saveSocialLink(formData: FormData) { const { supabase, user } = await requireRole(["admin"]); const id = String(formData.get("id") || ""); const url = String(formData.get("url") || ""); if (!/^https:\/\//i.test(url)) throw new Error("URL inválida"); const payload = { platform: String(formData.get("platform") || "other").toLowerCase().trim(), label: String(formData.get("label") || "").trim(), url, position: Number(formData.get("position") || 0), active: formData.get("active") === "on", project: formData.get("project") || null }; if (!payload.label) throw new Error("La etiqueta es obligatoria"); const { data: old } = id ? await supabase.from("social_links").select("*").eq("id", id).maybeSingle() : { data: null }; const query = id ? supabase.from("social_links").update(payload).eq("id", id) : supabase.from("social_links").insert(payload); const { data, error } = await query.select("id").single(); if (error) throw error; await audit(supabase, user.id, id ? "update" : "create", "social_links", data.id, old, payload); revalidatePath("/", "layout"); revalidatePath("/admin/configuracion"); revalidatePath("/admin/redes-sociales"); }
 export async function deleteSocialLink(formData: FormData) { const { supabase, user } = await requireRole(["admin"]); const id = String(formData.get("id") || ""); const { data: old } = await supabase.from("social_links").select("*").eq("id", id).maybeSingle(); if (!old) throw new Error("Red no encontrada"); const { error } = await supabase.from("social_links").delete().eq("id", id); if (error) throw error; await audit(supabase, user.id, "delete", "social_links", id, old, null); revalidatePath("/", "layout"); revalidatePath("/admin/configuracion"); revalidatePath("/admin/redes-sociales"); }

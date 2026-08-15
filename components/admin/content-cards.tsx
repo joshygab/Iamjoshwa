@@ -136,12 +136,15 @@ function visibilityMessage(module: string, row: CmsRow) {
 
 function readinessChecklist(module: string, row: CmsRow): ReadinessItem[] {
   if (module === "eventos") {
+    const accessMode = String(row.ticket_mode || (row.registration_url ? "registration" : Number(row.price_amount) === 0 ? "free" : "tickets"));
+    const accessReady = accessMode === "free" || accessMode === "none" || Boolean(row.ticket_url || row.registration_url);
+    const accessLabel = accessMode === "registration" ? "Registro" : accessMode === "free" ? "Entrada gratis" : accessMode === "none" ? "Sin venta online" : "Boletos";
     return [
       check(Boolean(row.slug), "Slug público", "Necesario para abrir /fechas/[slug].", "Agrega un slug antes de compartir."),
       check(Boolean(row.starts_at), "Fecha del evento", "El evento puede ordenarse y mostrar countdown.", "Agrega fecha y hora de inicio."),
       check(Boolean(row.image_url || row.flyer_asset_id), "Flyer", "La tarjeta se ve profesional con flyer.", "Asigna un flyer desde Media."),
       check(Boolean(row.venue && row.city), "Venue y ciudad", "Los fans y promotores entienden dónde será.", "Completa venue y ciudad."),
-      check(Boolean(row.ticket_url), "Boletos", "El CTA de compra está listo.", "Si aún no hay boletos, publica como anuncio o agrega waitlist.", "warning"),
+      check(accessReady, accessLabel, "El CTA público coincide con el tipo de entrada.", "Agrega link de boletos/registro o cambia a Gratis/Sin acceso online.", "warning"),
     ];
   }
   if (module === "sets") {

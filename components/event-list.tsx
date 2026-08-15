@@ -132,6 +132,7 @@ export function EventList({ items, now }: { items: EventItem[]; now: number }) {
 
 function EventCard({ item, past, priority }: { item: EventItem; past: boolean; priority: boolean }) {
   const google = googleCalendarUrl(item);
+  const access = eventAccess(item);
 
   return (
     <article className={`event-card show-card ${past ? "past-show" : ""} ${priority ? "next-show" : ""}`}>
@@ -160,13 +161,13 @@ function EventCard({ item, past, priority }: { item: EventItem; past: boolean; p
           </div>
         ) : null}
         <div className="show-actions">
-          {item.ticketUrl && !past ? (
-            <a className="button primary" href={item.ticketUrl} target="_blank" rel="noreferrer">
-              <Ticket /> Boletos
+          {access.href && !past ? (
+            <a className="button primary" href={access.href} target="_blank" rel="noreferrer">
+              <Ticket /> {access.label}
             </a>
           ) : (
             <button className="button primary" disabled>
-              <Ticket /> {past ? "Finalizado" : "Boletos pronto"}
+              <Ticket /> {past ? "Finalizado" : access.label}
             </button>
           )}
           {!past ? (
@@ -186,6 +187,13 @@ function EventCard({ item, past, priority }: { item: EventItem; past: boolean; p
       </div>
     </article>
   );
+}
+
+function eventAccess(item: EventItem) {
+  if (item.ticketMode === "registration") return item.registrationUrl ? { label: "Registro", href: item.registrationUrl } : { label: "Registro pronto" };
+  if (item.ticketMode === "free") return { label: "Gratis" };
+  if (item.ticketMode === "none") return { label: "Detalles" };
+  return item.ticketUrl ? { label: "Boletos", href: item.ticketUrl } : { label: "Boletos pronto" };
 }
 
 function EmptyShows() {

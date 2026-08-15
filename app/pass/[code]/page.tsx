@@ -37,10 +37,12 @@ export default async function PublicPassPage({ params }: Props) {
   const profile = await getPublicPass(code);
   if (!profile) notFound();
 
-  const points = await getPublicPoints(profile.id);
-  const level = getLevelFromPoints(points);
-  const levelConfig = getLevelConfig(level.label);
-  const levelNumber = getLevelNumber(level.label);
+  const status = await getPublicStatus(profile.id);
+  const points = status.points;
+  const fallbackLevel = getLevelFromPoints(points);
+  const levelName = status.levelName || fallbackLevel.label;
+  const levelConfig = getLevelConfig(levelName);
+  const levelNumber = status.levelId || getLevelNumber(levelName);
   const memberNumber = formatMember(profile.member_number);
   const displayName = getDisplayName(profile);
   const project = profile.favorite_project === "afterluv" ? "afterluv" : "iamjoshwa";
@@ -128,13 +130,13 @@ async function getPublicPass(rawCode: string) {
   }
 }
 
-async function getPublicPoints(userId: string) {
+async function getPublicStatus(userId: string) {
   try {
     const db = createAdminClient();
-    const { data } = await db.from("fan_status").select("points").eq("user_id", userId).maybeSingle();
-    return Number(data?.points || 0);
+    const { data } = await db.from("fan_status").select("points,level_id,level_name").eq("user_id", userId).maybeSingle();
+    return { points: Number(data?.points || 0), levelId: Number(data?.level_id || 0), levelName: data?.level_name ? String(data.level_name) : "" };
   } catch {
-    return 0;
+    return { points: 0, levelId: 0, levelName: "" };
   }
 }
 

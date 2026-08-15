@@ -4004,6 +4004,199 @@ html[data-pwa="standalone"] .site-header {
   }
 }
 
+/* Admin Pass Levels + event access studio */
+.pass-level-admin-head h1 {
+  max-width: 860px;
+}
+
+.pass-level-admin-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.pass-level-admin-summary article,
+.pass-level-admin-card,
+.pass-level-admin-note {
+  border: 1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--pass-level-color, var(--accent)) 18%, transparent), transparent 18rem),
+    linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  box-shadow: 0 28px 100px rgba(0,0,0,.28);
+  backdrop-filter: blur(18px);
+}
+
+.pass-level-admin-summary article {
+  min-height: 132px;
+  border-radius: 26px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pass-level-admin-summary svg {
+  width: 26px;
+  color: var(--accent);
+}
+
+.pass-level-admin-summary span,
+.pass-level-admin-card small,
+.pass-level-admin-note span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.pass-level-admin-summary strong {
+  font: 850 42px/.9 var(--font-display);
+  letter-spacing: -.05em;
+}
+
+.pass-level-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pass-level-admin-card {
+  --pass-level-color: var(--accent);
+  --pass-level-soft: rgba(188,92,255,.14);
+  position: relative;
+  overflow: hidden;
+  min-height: 390px;
+  border-radius: 32px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  isolation: isolate;
+  transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+}
+
+.pass-level-admin-card:before {
+  content: "";
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 74%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--pass-level-soft);
+  filter: blur(34px);
+  opacity: .9;
+  z-index: -1;
+}
+
+.pass-level-admin-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--pass-level-color) 46%, rgba(255,255,255,.14));
+  box-shadow: 0 34px 120px rgba(0,0,0,.36), 0 0 52px color-mix(in srgb, var(--pass-level-color) 18%, transparent);
+}
+
+.pass-level-admin-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pass-level-admin-card-top svg {
+  width: 32px;
+  height: 32px;
+  color: var(--pass-level-color);
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--pass-level-color) 52%, transparent));
+}
+
+.pass-level-admin-card-top span {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 8px 10px;
+  color: rgba(255,255,255,.68);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.pass-level-admin-card h2 {
+  margin: 0 0 8px;
+  font: 850 clamp(38px, 5vw, 64px)/.86 var(--font-display);
+  letter-spacing: -.06em;
+}
+
+.pass-level-admin-card p {
+  margin: 0;
+  color: rgba(255,255,255,.68);
+  line-height: 1.45;
+}
+
+.pass-level-admin-card label {
+  margin-top: auto;
+}
+
+.pass-level-admin-card input {
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+
+.pass-level-admin-card input[readonly] {
+  opacity: .64;
+  cursor: not-allowed;
+}
+
+.pass-level-admin-meter {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.pass-level-admin-meter span {
+  display: block;
+  width: var(--level-intensity, 20%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pass-level-color), white);
+  box-shadow: 0 0 22px var(--pass-level-color);
+}
+
+.pass-level-admin-note {
+  margin-top: 18px;
+}
+
+.event-access-studio {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 26px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 92% 10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 18rem),
+    rgba(255,255,255,.035);
+}
+
+.event-access-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media(max-width:1100px) {
+  .pass-level-admin-grid,
+  .pass-level-admin-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media(max-width:760px) {
+  .pass-level-admin-grid,
+  .pass-level-admin-summary,
+  .event-access-options {
+    grid-template-columns: 1fr;
+  }
+
+  .pass-level-admin-card {
+    min-height: 320px;
+    border-radius: 24px;
+  }
+}
+
 @media(prefers-reduced-motion:reduce) {
   .community-pro-pass,
   .community-pro-pass:hover,

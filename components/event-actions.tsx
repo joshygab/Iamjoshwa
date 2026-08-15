@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured, publicEnv } from "@/lib/env";
 import { TrackedLink } from "./tracked-link";
+import type { EventTicketMode } from "@/types/content";
 
 type Data = {
   id: string;
@@ -13,7 +14,9 @@ type Data = {
   date: string;
   venue: string;
   city: string;
+  ticketMode?: EventTicketMode;
   ticketUrl?: string;
+  registrationUrl?: string;
   mapUrl?: string;
   status: string;
   demo?: boolean;
@@ -68,17 +71,18 @@ export function EventActions({ event }: { event: Data }) {
   }
 
   const waitlist = event.status === "Lista de espera" || event.status === "Sold out";
+  const access = eventAccess(event);
 
   return (
     <>
       <div className="event-actions">
-        {event.ticketUrl ? (
-          <TrackedLink className="button primary sticky-ticket" href={event.ticketUrl} target="_blank" rel="noreferrer" action="ticket_click" entityType="events" entityId={event.id} label={event.name}>
-            <Ticket /> Comprar boletos
+        {access.href ? (
+          <TrackedLink className="button primary sticky-ticket" href={access.href} target="_blank" rel="noreferrer" action={access.action} entityType="events" entityId={event.id} label={event.name}>
+            <Ticket /> {access.label}
           </TrackedLink>
         ) : (
           <button className="button primary" disabled>
-            <Ticket /> {waitlist ? "Waitlist queued" : "Tickets incoming"}
+            <Ticket /> {access.label || (waitlist ? "Waitlist queued" : "Tickets incoming")}
           </button>
         )}
         <button className="button secondary" onClick={going} disabled={!isSupabaseConfigured || event.demo}>
@@ -105,6 +109,18 @@ export function EventActions({ event }: { event: Data }) {
       {state ? <p className="success-alert" role="status">{state}</p> : null}
     </>
   );
+}
+
+function eventAccess(event: Data): { label: string; href?: string; action: "ticket_click" | "registration_click" } {
+  const mode = event.ticketMode || (event.registrationUrl ? "registration" : event.ticketUrl ? "tickets" : "tickets");
+  if (mode === "registration") {
+    return event.registrationUrl
+      ? { label: "Registrarme", href: event.registrationUrl, action: "registration_click" }
+      : { label: "Registro pronto", action: "registration_click" };
+  }
+  if (mode === "free") return { label: "Entrada gratuita", action: "ticket_click" };
+  if (mode === "none") return { label: "Detalles del evento", action: "ticket_click" };
+  return event.ticketUrl ? { label: "Comprar boletos", href: event.ticketUrl, action: "ticket_click" } : { label: "Tickets incoming", action: "ticket_click" };
 }
 
 function calendarDate(value: string) {
