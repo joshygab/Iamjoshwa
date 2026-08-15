@@ -1,5 +1,6 @@
 import { archiveSiteSection, saveSiteSection } from "../actions";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatMxInputDateTime } from "@/lib/dates";
 
 const statuses = ["draft", "published", "hidden", "coming_soon", "members_only", "scheduled", "archived"];
 
@@ -49,8 +50,8 @@ function SectionForm({ item, levels, compact = false }: { item?: Record<string, 
         <label>Badge<input name="badge" defaultValue={String(item?.badge || "")} /></label>
         <label>CTA<input name="ctaLabel" defaultValue={String(item?.cta_label || "")} /></label>
         <label>CTA URL<input name="ctaHref" defaultValue={String(item?.cta_href || "")} /></label>
-        <label>Publish at<input name="publishAt" type="datetime-local" /></label>
-        <label>Unpublish at<input name="unpublishAt" type="datetime-local" /></label>
+        <label>Publish at<input name="publishAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.publish_at || ""))} /></label>
+        <label>Unpublish at<input name="unpublishAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.unpublish_at || ""))} /></label>
         <label>Nivel mínimo<select name="minPassLevel" defaultValue={String(item?.min_pass_level || "")}><option value="">Sin nivel</option>{levels.map((level) => <option value={level.id} key={level.id}>{level.name}</option>)}</select></label>
         <div className="checkbox-grid">
           <label><input name="showInNavbar" type="checkbox" defaultChecked={Boolean(item?.show_in_navbar)} /> Navbar</label>

@@ -15,6 +15,7 @@ import {
   Upload,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatMxDateTime } from "@/lib/dates";
 
 export default async function AdminDashboard() {
   const { supabase } = await requireRole(["editor", "admin"]);
@@ -209,13 +210,13 @@ export default async function AdminDashboard() {
         <article>
           <span>PRÓXIMO EVENTO</span>
           <h2>{events.data?.[0]?.name || "Sin evento programado"}</h2>
-          <p>{events.data?.[0]?.starts_at ? new Date(events.data[0].starts_at).toLocaleString("es-MX") : "Crea el siguiente evento desde el CMS."}</p>
+          <p>{events.data?.[0]?.starts_at ? `${formatMxDateTime(events.data[0].starts_at)} MX` : "Crea el siguiente evento desde el CMS."}</p>
           <Link className="text-link" href="/admin/eventos">Administrar eventos</Link>
         </article>
         <article>
           <span>PRÓXIMO LANZAMIENTO</span>
           <h2>{releases.data?.[0]?.name || "Sin lanzamiento programado"}</h2>
-          <p>{releases.data?.[0]?.releases_at ? new Date(releases.data[0].releases_at).toLocaleString("es-MX") : "Programa música desde Lanzamientos."}</p>
+          <p>{releases.data?.[0]?.releases_at ? `${formatMxDateTime(releases.data[0].releases_at)} MX` : "Programa música desde Lanzamientos."}</p>
           <Link className="text-link" href="/admin/lanzamientos">Administrar lanzamientos</Link>
         </article>
         <article>

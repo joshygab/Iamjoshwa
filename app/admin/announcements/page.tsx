@@ -1,5 +1,6 @@
 import { saveAnnouncement } from "../actions";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatMxDateTime, formatMxInputDateTime } from "@/lib/dates";
 
 export default async function AnnouncementsAdmin() {
   const { supabase } = await requireRole(["editor", "admin"]);
@@ -9,7 +10,7 @@ export default async function AnnouncementsAdmin() {
       <header className="admin-hero"><div><span className="section-kicker">SIGNAL BAR</span><h1>Announcement</h1><p>Crea mensajes globales programados: show, release, Vault, tickets o mantenimiento suave.</p></div></header>
       <section className="control-room-grid">
         <div className="settings-card control-room-form"><AnnouncementForm /></div>
-        <div className="settings-card">{(data || []).map((item) => <article className="cms-control-row" key={item.id}><div><strong>{item.eyebrow || "NEW SIGNAL"} · {item.title}</strong><small>{item.starts_at ? new Date(item.starts_at).toLocaleString("es-MX") : "Sin inicio"} → {item.ends_at ? new Date(item.ends_at).toLocaleString("es-MX") : "Sin fin"}</small></div><span data-status={item.status}>{item.status}</span><AnnouncementForm item={item} compact /></article>)}</div>
+        <div className="settings-card">{(data || []).map((item) => <article className="cms-control-row" key={item.id}><div><strong>{item.eyebrow || "NEW SIGNAL"} · {item.title}</strong><small>{item.starts_at ? `${formatMxDateTime(item.starts_at)} MX` : "Sin inicio"} → {item.ends_at ? `${formatMxDateTime(item.ends_at)} MX` : "Sin fin"}</small></div><span data-status={item.status}>{item.status}</span><AnnouncementForm item={item} compact /></article>)}</div>
       </section>
     </>
   );
@@ -29,8 +30,8 @@ function AnnouncementForm({ item, compact = false }: { item?: Record<string, unk
         <label>Universo<select name="project" defaultValue={String(item?.project || "")}><option value="">Ambos</option><option value="iamjoshwa">IAMJOSHWA</option><option value="afterluv">AFTERLUV</option></select></label>
         <label>Audience<select name="audience" defaultValue={String(item?.audience || "all")}><option value="all">All</option><option value="visitors">Visitors</option><option value="members">Members</option><option value="pass">Josh Pass</option><option value="admins">Admins</option></select></label>
         <label>Status<select name="status" defaultValue={String(item?.status || "draft")}><option value="draft">Draft</option><option value="published">Published</option><option value="hidden">Hidden</option><option value="scheduled">Scheduled</option><option value="archived">Archived</option></select></label>
-        <label>Show from<input name="startsAt" type="datetime-local" /></label>
-        <label>Hide after<input name="endsAt" type="datetime-local" /></label>
+        <label>Show from<input name="startsAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.starts_at || ""))} /></label>
+        <label>Hide after<input name="endsAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.ends_at || ""))} /></label>
         <label>Orden<input name="position" type="number" defaultValue={String(item?.position || 0)} /></label>
         <button className="button primary">Guardar announcement</button>
       </form>

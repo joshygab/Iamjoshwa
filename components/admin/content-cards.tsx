@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AlertTriangle, Archive, CheckCircle2, Eye, Pencil, Rocket } from "lucide-react";
 import { updatePublicationStatus } from "@/app/admin/module-actions";
+import { formatMxDateTime } from "@/lib/dates";
 import { DeleteContentButton } from "./delete-content-button";
 import { PublicLinkActions } from "./public-link-actions";
 
@@ -63,7 +64,7 @@ export function AdminContentCards({ module, rows }: { module: string; rows: CmsR
               <div>
                 <span>{project}</span>
                 <h2>{title}</h2>
-                <p>{date ? new Date(date).toLocaleString("es-MX") : "Sin fecha configurada"}</p>
+                <p>{date ? `${formatMxDateTime(date)} MX` : "Sin fecha configurada"}</p>
               </div>
               <div className={`visibility-pill ${visibility.visible ? "is-visible" : "is-hidden"}`}>
                 <strong>{visibility.visible ? `Visible en ${project}` : "Oculto"}</strong>

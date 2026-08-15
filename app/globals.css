@@ -6246,3 +6246,28 @@ html.motion-ready body:after {
     animation: none!important;
   }
 }
+
+/* Persistent mobile dock: siempre visible aunque la página siga scrolleando */
+@media(max-width:900px) {
+  body {
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav.premium-bottom-nav {
+    position: fixed!important;
+    display: grid!important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    z-index: 90;
+    transform: translate3d(0,0,0);
+    will-change: transform;
+    isolation: isolate;
+    contain: layout paint style;
+  }
+
+  .global-now-playing {
+    z-index: 88;
+  }
+}

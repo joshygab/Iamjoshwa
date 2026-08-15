@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DeleteContentButton } from "./delete-content-button";
+import { formatMxInputDateTime } from "@/lib/dates";
 
 type EditorValues = Record<string, unknown> & { id?: string };
 type Asset = { id: string; display_name: string; mime_type: string; byte_size?: number | null; public_url?: string };
@@ -600,9 +601,7 @@ function text(value: unknown, fallback = "") {
 }
 
 function dateTime(value: unknown) {
-  if (!value) return "";
-  const date = new Date(String(value));
-  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 16);
+  return formatMxInputDateTime(value == null ? null : String(value));
 }
 
 function array(value: unknown) {

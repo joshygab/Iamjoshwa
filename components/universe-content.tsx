@@ -9,7 +9,7 @@ import { Countdown } from "./countdown";
 import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
-import { dateToTime } from "@/lib/dates";
+import { dateToTime, formatMxTime } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
 import { createLabelGetter } from "@/lib/cms/labels";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -270,7 +270,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
           <div>
             <p className="section-kicker">LIVE TONIGHT</p>
             <h2>{liveEvent.name}</h2>
-            <p>{liveEvent.city} · {liveEvent.venue} · {new Date(liveEvent.date).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</p>
+            <p>{liveEvent.city} · {liveEvent.venue} · {formatMxTime(liveEvent.date)} MX</p>
           </div>
           <div className="live-command-actions">
             {liveEvent.mapUrl ? <a className="button primary" href={liveEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : <Link className="button primary" href={`/fechas/${liveEvent.slug}`}><MapPin /> Info rápida</Link>}

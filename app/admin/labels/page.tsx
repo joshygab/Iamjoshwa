@@ -1,5 +1,6 @@
 import { resetContentLabel, saveContentLabel } from "../actions";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatMxDateTime } from "@/lib/dates";
 
 export default async function LabelsAdmin() {
   const { supabase } = await requireRole(["editor", "admin"]);
@@ -18,7 +19,7 @@ export default async function LabelsAdmin() {
           {[...groups.entries()].map(([group, items]) => <section key={group}><h2>{group.toUpperCase()}</h2>{(items || []).map((item) => <article key={item.id} className="cms-label-row"><LabelForm item={item} /><form action={resetContentLabel}><input type="hidden" name="id" value={item.id} /><button className="compact-secondary-button">Reset to default</button></form></article>)}</section>)}
         </div>
       </section>
-      <section className="settings-card revision-feed"><span>VERSION HISTORY</span>{(revisions || []).map((revision) => <p key={`${revision.field_key}-${revision.created_at}`}><strong>{revision.field_key}</strong> · {new Date(revision.created_at).toLocaleString("es-MX")}</p>)}</section>
+      <section className="settings-card revision-feed"><span>VERSION HISTORY</span>{(revisions || []).map((revision) => <p key={`${revision.field_key}-${revision.created_at}`}><strong>{revision.field_key}</strong> · {formatMxDateTime(revision.created_at)} MX</p>)}</section>
     </>
   );
 }

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { contentRepository } from "@/lib/data";
 import { Countdown } from "@/components/countdown";
 import { EventActions } from "@/components/event-actions";
+import { formatMxDate } from "@/lib/dates";
 import { absoluteUrl, defaultOgImage, jsonLd, safeDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const event = await contentRepository.getEventBySlug(slug);
   if (!event) return { title: "Evento no encontrado" };
   const artist = event.universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA";
-  const date = new Date(event.date).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Mexico_City" });
+  const date = formatMxDate(event.date, { day: "numeric", month: "long", year: "numeric" });
   const description = safeDescription(event.description, `${artist} en ${event.city} · ${event.venue} · ${date}.`);
   const image = event.flyerUrl || defaultOgImage;
 
@@ -109,7 +110,7 @@ export default async function EventDetail({ params }: Props) {
             completedTitle={event.name}
           />
           <dl>
-            <div><dt>Fecha</dt><dd>{new Date(event.date).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "America/Mexico_City" })}</dd></div>
+            <div><dt>Fecha</dt><dd>{formatMxDate(event.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</dd></div>
             <div><dt>Venue</dt><dd>{event.venue}<br />{event.address}</dd></div>
             <div><dt>Horarios</dt><dd>Puertas {event.doors} · Set {event.setTime}</dd></div>
             <div><dt>Lineup</dt><dd>{event.lineup.join(" · ") || "Por anunciar"}</dd></div>

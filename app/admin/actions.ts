@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mexicoLocalDateTimeToIso } from "@/lib/dates";
 
 const projects = new Set(["iamjoshwa", "afterluv"]);
 const hex = /^#[0-9a-f]{6}$/i;
@@ -36,13 +37,13 @@ export async function savePageSection(formData: FormData) {
   const id = String(formData.get("id") || ""); const mediaAssetId = optionalUuid(formData.get("mediaAssetId")); const content = { title: String(formData.get("title") || ""), subtitle: String(formData.get("subtitle") || ""), body: String(formData.get("body") || ""), cta_label: String(formData.get("ctaLabel") || ""), cta_href: String(formData.get("ctaHref") || ""), media_asset_id: mediaAssetId };
   if (content.cta_href && !safeHref(content.cta_href)) throw new Error("Enlace CTA inválido");
   if (mediaAssetId) { const { data: asset } = await supabase.from("media_assets").select("id,mime_type,bucket,archived_at").eq("id",mediaAssetId).maybeSingle(); if (!asset || asset.bucket!=="public-media" || asset.archived_at || (!asset.mime_type.startsWith("image/")&&!asset.mime_type.startsWith("video/"))) throw new Error("Recurso multimedia inválido"); }
-  const publishAt = String(formData.get("publishAt")||""); if(status==="scheduled"&&(!publishAt||Number.isNaN(new Date(publishAt).getTime())))throw new Error("Selecciona una fecha válida para programar");
+  const publishAt = String(formData.get("publishAt")||""); const publishAtIso = publishAt ? mexicoLocalDateTimeToIso(publishAt) : ""; if(status==="scheduled"&&(!publishAtIso||Number.isNaN(new Date(publishAtIso).getTime())))throw new Error("Selecciona una fecha válida para programar");
   const payload = { page_key: "home", project: projectOf(formData), block_type: String(formData.get("blockType")), variant: String(formData.get("variant") || "default"), content, position: Number(formData.get("position") || 0), publication_status: status==="scheduled"?"draft":status, updated_by: user.id, published_at: status === "published" ? new Date().toISOString() : null };
   const { data: old } = id ? await supabase.from("page_sections").select("*").eq("id", id).maybeSingle() : { data: null };
   const query = id ? writeDb.from("page_sections").update(payload).eq("id", id) : writeDb.from("page_sections").insert({ ...payload, created_by: user.id });
   const { data, error } = await query.select("id").single(); if (error) throw error; await audit(supabase, user.id, id ? "update" : "create", "page_sections", data.id, old, payload);
   await writeDb.from("publication_schedule").delete().eq("entity_type","page_sections").eq("entity_id",data.id).is("executed_at",null);
-  if(status==="scheduled")await writeDb.from("publication_schedule").insert({entity_type:"page_sections",entity_id:data.id,action:"publish",execute_at:new Date(publishAt).toISOString(),created_by:user.id});
+  if(status==="scheduled")await writeDb.from("publication_schedule").insert({entity_type:"page_sections",entity_id:data.id,action:"publish",execute_at:publishAtIso,created_by:user.id});
   revalidatePath("/admin/portada"); revalidatePath("/");
 }
 
@@ -257,7 +258,7 @@ export async function saveAppPreset(formData: FormData) {
 function contrast(a: string, b: string) { const luminance = (color: string) => { const channels = [1, 3, 5].map((index) => parseInt(color.slice(index, index + 2), 16) / 255).map((value) => value <= .03928 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4); return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722; }; const [bright, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (bright + .05) / (dark + .05); }
 function optionalUuid(value: FormDataEntryValue | null) { const candidate = String(value || ""); return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(candidate) ? candidate : null; }
 function optionalInt(value: FormDataEntryValue | null) { const number = Number(value || ""); return Number.isInteger(number) && number > 0 ? number : null; }
-function optionalDate(value: FormDataEntryValue | null) { const raw = String(value || ""); if (!raw) return null; const date = new Date(raw); if (Number.isNaN(date.getTime())) throw new Error("Fecha inválida"); return date.toISOString(); }
+function optionalDate(value: FormDataEntryValue | null) { const raw = String(value || ""); if (!raw) return null; const iso = mexicoLocalDateTimeToIso(raw); const date = new Date(iso); if (Number.isNaN(date.getTime())) throw new Error("Fecha inválida"); return iso; }
 function optionalHref(value: FormDataEntryValue | null) { const href = String(value || "").trim(); if (!href) return null; if (!safeHref(href)) throw new Error("URL inválida"); return href; }
 function key(value: string) { const result = value.trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "_").replace(/^_+|_+$/g, ""); if (!result) throw new Error("Key inválida"); return result; }
 function slug(value: string) { const result = value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); if (!result) throw new Error("Slug inválido"); return result; }

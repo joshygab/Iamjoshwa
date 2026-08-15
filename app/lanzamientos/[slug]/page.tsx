@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarDays, ExternalLink, Music2, Share2, Sparkles } from 
 import { Countdown } from "@/components/countdown";
 import { TrackedLink } from "@/components/tracked-link";
 import { contentRepository } from "@/lib/data";
+import { formatMxDateTime } from "@/lib/dates";
 import { absoluteUrl, defaultOgImage, jsonLd, safeDescription } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -81,7 +82,7 @@ export default async function ReleaseDetailPage({ params }: Props) {
           <h1>{release.title}</h1>
           <p>{release.story || "La historia oficial de este lanzamiento se puede editar desde el admin."}</p>
           <div className="release-detail-meta">
-            <span><CalendarDays /> {new Date(release.releaseAt).toLocaleString("es-MX")}</span>
+            <span><CalendarDays /> {formatMxDateTime(release.releaseAt)} MX</span>
             <span><Music2 /> {future ? "Pre-save activo" : "Disponible ahora"}</span>
           </div>
           {future ? (

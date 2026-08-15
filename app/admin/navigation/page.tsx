@@ -1,5 +1,6 @@
 import { saveNavigationItem } from "../actions";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatMxInputDateTime } from "@/lib/dates";
 
 const statuses = ["draft", "published", "hidden", "coming_soon", "members_only", "scheduled", "archived"];
 
@@ -38,8 +39,8 @@ function NavForm({ item, sections, compact = false }: { item?: Record<string, un
         <label>Orden<input name="position" type="number" defaultValue={String(item?.position || 0)} /></label>
         <label>Icono<input name="icon" defaultValue={String(item?.icon || "")} /></label>
         <label>Badge<input name="badge" defaultValue={String(item?.badge || "")} /></label>
-        <label>Publish at<input name="publishAt" type="datetime-local" /></label>
-        <label>Unpublish at<input name="unpublishAt" type="datetime-local" /></label>
+        <label>Publish at<input name="publishAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.publish_at || ""))} /></label>
+        <label>Unpublish at<input name="unpublishAt" type="datetime-local" defaultValue={formatMxInputDateTime(String(item?.unpublish_at || ""))} /></label>
         <div className="checkbox-grid">
           <label><input name="visible" type="checkbox" defaultChecked={item ? Boolean(item.visible) : true} /> Visible</label>
           <label><input name="showInNavbar" type="checkbox" defaultChecked={item ? Boolean(item.show_in_navbar) : true} /> Navbar</label>
