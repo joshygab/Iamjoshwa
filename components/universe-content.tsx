@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarDays, Camera, Disc3, Gift, Headphones, LockKeyhole, MapPin, Play, QrCode, Radio, Signal, Sparkles, Ticket, Zap } from "lucide-react";
 import { Countdown } from "./countdown";
+import { EventShareStudio } from "./event-share-studio";
 import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
@@ -283,6 +284,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
             <Link className="button secondary" href="/checkin"><QrCode /> QR check-in</Link>
             <Link className="button secondary" href={`/fechas/${takeoverEvent.slug}`}><CalendarDays /> Info completa</Link>
           </div>
+          <EventShareStudio event={takeoverEvent} compact />
         </section>
       ) : recentPastEvent ? (
         <section className="section post-event-panel reveal">

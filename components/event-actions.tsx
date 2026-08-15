@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured, publicEnv } from "@/lib/env";
 import { TrackedLink } from "./tracked-link";
+import { EventShareStudio } from "./event-share-studio";
 import type { EventTicketMode } from "@/types/content";
 
 type Data = {
@@ -20,6 +21,8 @@ type Data = {
   mapUrl?: string;
   status: string;
   demo?: boolean;
+  flyerUrl?: string;
+  universe?: "iamjoshwa" | "afterluv";
 };
 
 export function EventActions({ event }: { event: Data }) {
@@ -106,6 +109,7 @@ export function EventActions({ event }: { event: Data }) {
           <Copy />
         </button>
       </div>
+      <EventShareStudio event={event} />
       {state ? <p className="success-alert" role="status">{state}</p> : null}
     </>
   );
