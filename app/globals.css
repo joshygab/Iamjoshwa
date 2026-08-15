@@ -4210,8 +4210,8 @@ html[data-pwa="standalone"] .site-header {
   backdrop-filter: blur(18px);
   padding: 20px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, auto);
+  gap: 22px;
   align-items: center;
   overflow: hidden;
 }
@@ -4244,8 +4244,8 @@ html[data-pwa="standalone"] .site-header {
 }
 
 .event-share-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
   justify-content: flex-end;
   gap: 10px;
 }
@@ -4253,6 +4253,8 @@ html[data-pwa="standalone"] .site-header {
 .event-share-actions .button {
   min-height: 46px;
   border-radius: 16px;
+  min-width: 0;
+  padding-inline: 16px;
 }
 
 .event-share-studio > small {
@@ -4264,10 +4266,16 @@ html[data-pwa="standalone"] .site-header {
   grid-column: 1 / -1;
   margin-top: 16px;
   padding: 16px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .event-share-studio.is-compact strong {
   font-size: clamp(26px, 3.4vw, 36px);
+}
+
+.event-share-studio.is-compact .event-share-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: stretch;
 }
 
 .event-detail,
@@ -4322,11 +4330,12 @@ html[data-pwa="standalone"] .site-header {
   }
 
   .event-share-actions {
+    grid-template-columns: 1fr;
     justify-content: stretch;
   }
 
   .event-share-actions .button {
-    flex: 1 1 180px;
+    width: 100%;
   }
 }
 
@@ -4404,7 +4413,8 @@ html[data-pwa="standalone"] .site-header {
   .event-share-studio {
     margin-top: 12px;
     border-radius: 22px;
-    padding: 16px;
+    padding: 18px;
+    gap: 16px;
   }
 
   .event-share-studio strong {
@@ -4418,11 +4428,12 @@ html[data-pwa="standalone"] .site-header {
   .event-share-actions {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 10px;
   }
 
   .event-share-actions .button {
     width: 100%;
+    min-height: 52px;
   }
 
   .live-command-actions {

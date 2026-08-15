@@ -70,7 +70,7 @@ export function EventShareStudio({ event, compact = false }: { event: EventShare
       <div>
         <span>{headline}</span>
         <strong>Share kit</strong>
-        {!compact ? <p>Guarda una imagen vertical con flyer, fecha y venue; perfecta para historias o para mandarla por WhatsApp.</p> : null}
+        {!compact ? <p>Guarda una imagen vertical 9:15 con flyer, fecha y venue; perfecta para historias o para mandarla por WhatsApp.</p> : null}
       </div>
       <div className="event-share-actions">
         <button className="button secondary" type="button" onClick={sharePoster}>
@@ -91,51 +91,58 @@ export function EventShareStudio({ event, compact = false }: { event: EventShare
 async function createPoster(event: EventShareData, headline: string, shareUrl: string) {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
-  canvas.height = 1350;
+  canvas.height = 1800;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas unavailable");
 
   const accent = event.universe === "afterluv" ? "#ff2b3f" : "#bd35ff";
   const secondary = event.universe === "afterluv" ? "#f4f4f5" : "#6f7dff";
 
-  const bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+  const bg = ctx.createLinearGradient(0, 0, 1080, 1800);
   bg.addColorStop(0, "#050505");
   bg.addColorStop(.48, event.universe === "afterluv" ? "#190508" : "#11051d");
   bg.addColorStop(1, "#050505");
   ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, 1080, 1350);
+  ctx.fillRect(0, 0, 1080, 1800);
 
-  drawGlow(ctx, 860, 160, 390, accent, .34);
-  drawGlow(ctx, 160, 1140, 360, secondary, .18);
-  drawNoise(ctx, 1080, 1350);
+  drawGlow(ctx, 870, 160, 430, accent, .32);
+  drawGlow(ctx, 160, 1540, 440, secondary, .16);
+  drawNoise(ctx, 1080, 1800);
 
   ctx.save();
-  roundRect(ctx, 90, 230, 900, 760, 64);
+  roundRect(ctx, 96, 300, 888, 1040, 72);
   ctx.clip();
   const image = event.flyerUrl ? await loadImage(event.flyerUrl).catch(() => null) : null;
-  if (image) drawCover(ctx, image, 90, 230, 900, 760);
+  if (image) drawCover(ctx, image, 96, 300, 888, 1040);
   else {
-    const fallback = ctx.createLinearGradient(90, 230, 990, 990);
+    const fallback = ctx.createLinearGradient(96, 300, 984, 1340);
     fallback.addColorStop(0, accent);
     fallback.addColorStop(1, "#08080b");
     ctx.fillStyle = fallback;
-    ctx.fillRect(90, 230, 900, 760);
+    ctx.fillRect(96, 300, 888, 1040);
   }
-  ctx.fillStyle = "rgba(0,0,0,.36)";
-  ctx.fillRect(90, 230, 900, 760);
+  const flyerOverlay = ctx.createLinearGradient(96, 300, 96, 1340);
+  flyerOverlay.addColorStop(0, "rgba(0,0,0,.1)");
+  flyerOverlay.addColorStop(.62, "rgba(0,0,0,.06)");
+  flyerOverlay.addColorStop(1, "rgba(0,0,0,.42)");
+  ctx.fillStyle = flyerOverlay;
+  ctx.fillRect(96, 300, 888, 1040);
   ctx.restore();
 
   ctx.strokeStyle = hexToRgba(accent, .7);
   ctx.lineWidth = 3;
-  roundRect(ctx, 90, 230, 900, 760, 64);
+  roundRect(ctx, 96, 300, 888, 1040, 72);
   ctx.stroke();
 
-  drawText(ctx, headline, 90, 118, 42, 900, "700", .12, "#ffffff");
-  drawText(ctx, event.name.toUpperCase(), 90, 1056, 86, 900, "900", -.055, "#ffffff", .86);
-  drawText(ctx, `${formatMxDate(event.date, { weekday: "long", day: "2-digit", month: "long" })} · ${formatMxTime(event.date)} MX`, 94, 1160, 34, 880, "700", .02, accent);
-  drawText(ctx, `${event.venue} · ${event.city}`.toUpperCase(), 94, 1214, 30, 880, "700", .1, "rgba(255,255,255,.76)");
-  drawText(ctx, "IAMJOSHWA WORLD", 94, 1288, 25, 520, "800", .18, "rgba(255,255,255,.68)");
-  drawText(ctx, shareUrl.replace(/^https?:\/\//, ""), 562, 1288, 22, 426, "600", .02, "rgba(255,255,255,.58)", 1, "right");
+  drawText(ctx, headline, 96, 96, 42, 888, "800", .12, "#ffffff", 1.08, "left", 2);
+  drawPill(ctx, 96, 184, 476, 62, `${formatMxDate(event.date, { weekday: "long", day: "2-digit", month: "long" })} · ${formatMxTime(event.date)} MX`, accent);
+  drawPill(ctx, 594, 184, 390, 62, event.status.toUpperCase(), "rgba(255,255,255,.26)");
+
+  const titleLines = drawText(ctx, event.name.toUpperCase(), 96, 1412, 78, 888, "900", -.05, "#ffffff", .9, "left", 3);
+  const detailsY = Math.min(1646, 1412 + titleLines * 78 * .9 + 34);
+  drawText(ctx, `${event.venue} · ${event.city}`.toUpperCase(), 96, detailsY, 31, 888, "800", .08, "rgba(255,255,255,.78)", 1.2, "left", 2);
+  drawText(ctx, "IAMJOSHWA WORLD", 96, 1730, 25, 520, "800", .18, "rgba(255,255,255,.68)");
+  drawText(ctx, shareUrl.replace(/^https?:\/\//, ""), 552, 1730, 22, 432, "600", .02, "rgba(255,255,255,.58)", 1, "right");
 
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Poster unavailable")), "image/png", .96);
@@ -182,7 +189,7 @@ function drawNoise(ctx: CanvasRenderingContext2D, width: number, height: number)
   ctx.restore();
 }
 
-function drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, maxWidth: number, weight = "700", spacing = 0, color = "#fff", lineHeight = 1.05, align: CanvasTextAlign = "left") {
+function drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, maxWidth: number, weight = "700", spacing = 0, color = "#fff", lineHeight = 1.05, align: CanvasTextAlign = "left", maxLines = 3) {
   ctx.save();
   ctx.fillStyle = color;
   ctx.textAlign = align;
@@ -199,10 +206,28 @@ function drawText(ctx: CanvasRenderingContext2D, text: string, x: number, y: num
     } else line = next;
   }
   if (line) lines.push(line);
-  lines.slice(0, 3).forEach((item, index) => {
+  const visible = lines.slice(0, maxLines);
+  visible.forEach((item, index) => {
     if (spacing && item.length < 28) drawLetterSpaced(ctx, item, x, y + index * size * lineHeight, spacing * size, align);
     else ctx.fillText(item, x, y + index * size * lineHeight, maxWidth);
   });
+  ctx.restore();
+  return visible.length;
+}
+
+function drawPill(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, text: string, color: string) {
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,.42)";
+  ctx.strokeStyle = color.startsWith("#") ? hexToRgba(color, .48) : color;
+  ctx.lineWidth = 2;
+  roundRect(ctx, x, y, width, height, height / 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 22px Arial, Helvetica, sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillText(text, x + width / 2, y + height / 2 + 1, width - 42);
   ctx.restore();
 }
 
