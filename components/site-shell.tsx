@@ -29,12 +29,13 @@ const fallbackNav: NavigationItem[] = [
 export function SiteShell({ children, navigation = [], announcements = [], publicSettings = {} }: { children: React.ReactNode; navigation?: NavigationItem[]; announcements?: AnnouncementItem[]; publicSettings?: PublicSettings }) {
   const [open, setOpen] = useState(false);
   const [pass, setPass] = useState<{ name: string; points: number } | null>(null);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { universe } = useUniverse();
   const nav = (navigation.length ? navigation : fallbackNav).filter((item) => !item.project || item.project === universe).sort((a, b) => a.position - b.position);
   const headerNav = nav.filter((item) => item.showInNavbar !== false);
   const footerNav = nav.filter((item) => item.showInFooter);
-  const bottomNav = headerNav.filter((item) => item.showOnMobile !== false).slice(0, 5);
+  const bottomNav = mobileDockItems(headerNav.filter((item) => item.showOnMobile !== false));
   const announcement = systemEnabled(publicSettings, "hide_announcements") ? null : announcements.find((item) => !item.project || item.project === universe) || null;
   const maintenance = systemEnabled(publicSettings, "maintenance_mode");
   const active = (href: string) => (href === "/" ? pathname === href : pathname.startsWith(href));
@@ -61,6 +62,13 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 18);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
   }, []);
 
   if (pathname.startsWith("/admin")) return <>{children}</>;
@@ -90,7 +98,7 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
           {announcement.ctaHref ? <Link href={announcement.ctaHref}>{announcement.ctaLabel || "Open"}</Link> : null}
         </aside>
       ) : null}
-      <header className="topbar">
+      <header className={`topbar ${scrolled ? "is-compact" : ""}`}>
         <Link className="wordmark" href="/" aria-label="IAMJOSHWA, inicio">
           IAMJOSHWA<span>®</span>
         </Link>
@@ -132,8 +140,8 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
         <p>© {new Date().getFullYear()} IAMJOSHWA. Sitio oficial.</p>
       </footer>
       <nav className="bottom-nav premium-bottom-nav" aria-label="Accesos rápidos">
-        {(bottomNav.length ? bottomNav : fallbackNav.slice(0, 5)).map((item) => (
-          <Link href={item.href} key={item.href} aria-current={active(item.href) ? "page" : undefined}>
+        {(bottomNav.length ? bottomNav : mobileDockItems(fallbackNav)).map((item) => (
+          <Link href={item.href} key={item.href} aria-current={active(item.href) ? "page" : undefined} data-dock-item={dockKey(item)}>
             <NavIcon item={item} />
             <span>{item.label}</span>
           </Link>
@@ -141,6 +149,34 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
       </nav>
     </>
   );
+}
+
+function mobileDockItems(items: NavigationItem[]) {
+  const find = (tests: Array<(item: NavigationItem) => boolean>, fallback: NavigationItem) => {
+    const item = items.find((candidate) => tests.some((test) => test(candidate))) || fallback;
+    return { ...item };
+  };
+  const home = find([((item) => item.href === "/")], fallbackNav[0]);
+  const shows = find([((item) => item.href.startsWith("/fechas")), ((item) => /fecha|show/i.test(item.label))], fallbackNav[1]);
+  const music = find([((item) => item.href.startsWith("/musica")), ((item) => /m[uú]sica|music|listen/i.test(item.label))], fallbackNav[2]);
+  const community = find([((item) => item.href.startsWith("/comunidad")), ((item) => /comunidad|pass|community/i.test(item.label))], fallbackNav[7]);
+  const booking = find([((item) => item.href.startsWith("/booking")), ((item) => /booking|book/i.test(item.label))], { label: "Booking", href: "/booking", position: 999, project: null, showInNavbar: true, showInFooter: true, showOnDesktop: true, showOnMobile: true });
+  return [
+    { ...home, label: "Inicio" },
+    { ...shows, label: "Fechas" },
+    { ...music, label: "Listen" },
+    { ...community, label: "Pass" },
+    { ...booking, label: "Booking" },
+  ];
+}
+
+function dockKey(item: NavigationItem) {
+  const key = `${item.href} ${item.label}`.toLowerCase();
+  if (key.includes("/musica") || key.includes("listen") || key.includes("music")) return "listen";
+  if (key.includes("/fechas") || key.includes("fecha") || key.includes("show")) return "shows";
+  if (key.includes("/comunidad") || key.includes("pass")) return "pass";
+  if (key.includes("/booking") || key.includes("book")) return "booking";
+  return "home";
 }
 
 function NavIcon({ item }: { item: NavigationItem }) {
