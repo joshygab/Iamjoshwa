@@ -9,7 +9,7 @@ import { Countdown } from "./countdown";
 import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
-import { dateToTime, formatMxTime } from "@/lib/dates";
+import { dateToTime, formatMxDate, formatMxTime } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/client";
 import { createLabelGetter } from "@/lib/cms/labels";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -101,7 +101,8 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
   const event = scopedEvents.find((item) => new Date(item.date).getTime() >= now) || scopedEvents[0];
   const eventIsFeatured = Boolean(event && isVisible(managed, "next_event"));
-  const liveEvent = event && isLiveWindow(event.date, now) ? event : null;
+  const takeoverEvent = event && isEventTakeoverWindow(event, now) ? event : null;
+  const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent.date, now) ? takeoverEvent : null;
   const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item.date, now)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
@@ -236,46 +237,51 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   return (
     <>
       {isVisible(managed, "hero") ? (
-        <section className="hero cinematic-hero world-hero" style={heroStyle}>
+        <section className={`hero cinematic-hero world-hero ${takeoverEvent ? "has-event-takeover" : ""}`} style={heroStyle}>
           {heroIsVideo ? <video className="hero-video" src={heroMediaUrl} autoPlay muted loop playsInline preload="metadata" aria-hidden="true" /> : null}
           <div className="cinema-depth" />
           <div className="orb orb-one" />
           <div className="orb orb-two" />
           <div className="hero-grid" />
-          <div className="hero-content world-hero-content reveal is-visible">
-            {artist.logoUrl ? <Image className="hero-logo" src={artist.logoUrl} alt={`${artist.displayName} logo`} width={420} height={160} priority /> : null}
-            <p className="eyebrow">{liveEvent ? "LIVE TONIGHT" : universe === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA WORLD"}</p>
-            <h1>{title}</h1>
-            <p className="hero-tagline">{tagline}</p>
-            <div className="hero-actions">
-              <Link className="button primary hero-main-cta" href="/musica">
-                <Play /> Listen
-              </Link>
-              <Link className="button secondary" href="/booking">
-                {label("booking.cta", "Book Now")}
-              </Link>
+          {takeoverEvent ? (
+            <EventTakeoverHero event={takeoverEvent} live={Boolean(liveEvent)} universe={universe} />
+          ) : (
+            <div className="hero-content world-hero-content reveal is-visible">
+              {artist.logoUrl ? <Image className="hero-logo" src={artist.logoUrl} alt={`${artist.displayName} logo`} width={420} height={160} priority /> : null}
+              <p className="eyebrow">{universe === "afterluv" ? "AFTERLUV SIGNAL" : "IAMJOSHWA WORLD"}</p>
+              <h1>{title}</h1>
+              <p className="hero-tagline">{tagline}</p>
+              <div className="hero-actions">
+                <Link className="button primary hero-main-cta" href="/musica">
+                  <Play /> Listen
+                </Link>
+                <Link className="button secondary" href="/booking">
+                  {label("booking.cta", "Book Now")}
+                </Link>
+              </div>
+              <div className="hero-signal-row" aria-label="Señales principales del sitio">
+                <span>CDMX</span>
+                <span>{universe === "afterluv" ? "RAVE / HARD / TRANCE" : "HOUSE / LATIN / CLUB"}</span>
+                <span>NO AUTOPLAY</span>
+              </div>
             </div>
-            <div className="hero-signal-row" aria-label="Señales principales del sitio">
-              <span>CDMX</span>
-              <span>{universe === "afterluv" ? "RAVE / HARD / TRANCE" : "HOUSE / LATIN / CLUB"}</span>
-              <span>NO AUTOPLAY</span>
-            </div>
-          </div>
+          )}
           <div className="scroll-note">Scroll<span /></div>
         </section>
       ) : null}
 
-      {liveEvent ? (
-        <section className="section live-tonight-panel reveal is-visible">
+      {takeoverEvent ? (
+        <section className="section live-tonight-panel event-command-panel reveal is-visible">
           <div>
-            <p className="section-kicker">LIVE TONIGHT</p>
-            <h2>{liveEvent.name}</h2>
-            <p>{liveEvent.city} · {liveEvent.venue} · {formatMxTime(liveEvent.date)} MX</p>
+            <p className="section-kicker">{liveEvent ? "SIGNAL LIVE" : "LIVE TONIGHT"}</p>
+            <h2>{takeoverEvent.name}</h2>
+            <p>{takeoverEvent.city} · {takeoverEvent.venue} · Set {takeoverEvent.setTime || formatMxTime(takeoverEvent.date)} MX</p>
           </div>
           <div className="live-command-actions">
-            {liveEvent.mapUrl ? <a className="button primary" href={liveEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : <Link className="button primary" href={`/fechas/${liveEvent.slug}`}><MapPin /> Info rápida</Link>}
+            {takeoverEvent.ticketUrl ? <a className="button primary" href={takeoverEvent.ticketUrl} target="_blank" rel="noreferrer"><Ticket /> Boletos</a> : <Link className="button primary" href={`/fechas/${takeoverEvent.slug}`}><Ticket /> Detalles</Link>}
+            {takeoverEvent.mapUrl ? <a className="button secondary" href={takeoverEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : null}
             <Link className="button secondary" href="/checkin"><QrCode /> QR check-in</Link>
-            <Link className="button secondary" href={`/fechas/${liveEvent.slug}`}><Ticket /> Boletos / detalles</Link>
+            <Link className="button secondary" href={`/fechas/${takeoverEvent.slug}`}><CalendarDays /> Info completa</Link>
           </div>
         </section>
       ) : recentPastEvent ? (
@@ -543,8 +549,87 @@ function SignalIcon({ type }: { type: HomeSignalCard["icon"] }) {
   return <Signal />;
 }
 
+function EventTakeoverHero({ event, live, universe }: { event: EventItem; live: boolean; universe: Universe }) {
+  const dateLabel = formatMxDate(event.date, { weekday: "short", day: "2-digit", month: "short" }).toUpperCase();
+  const timeLabel = event.setTime || `${formatMxTime(event.date)} MX`;
+
+  return (
+    <div className="hero-content world-hero-content event-takeover-hero reveal is-visible">
+      <div className="event-takeover-copy">
+        <div className="event-live-ribbon" aria-label={live ? "Evento en vivo" : "Evento esta noche"}>
+          <span className="event-live-dot" />
+          <strong>{live ? "SIGNAL LIVE" : "LIVE TONIGHT"}</strong>
+          <small>{dateLabel} · {timeLabel}</small>
+        </div>
+        <p className="eyebrow">{universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "IAMJOSHWA PRESENTS"}</p>
+        <h1>{event.name}</h1>
+        <p className="hero-tagline">{event.venue} · {event.city}. Toda la señal de hoy apunta a esta noche.</p>
+        <div className="event-takeover-countdown">
+          <Countdown
+            targetDate={event.date}
+            type={event.universe === "afterluv" ? "afterluv" : "show"}
+            label={live ? "ON STAGE SIGNAL" : "STARTS IN"}
+            title={`${event.city} · ${event.venue}`}
+            compact
+            source="home_event_takeover"
+            contentId={event.id}
+            contentType="show"
+            completedLabel="SIGNAL LIVE"
+            completedTitle={event.name}
+          />
+        </div>
+        <div className="hero-actions event-takeover-actions">
+          {event.ticketUrl ? (
+            <a className="button primary hero-main-cta" href={event.ticketUrl} target="_blank" rel="noreferrer">
+              <Ticket /> Buy tickets
+            </a>
+          ) : (
+            <Link className="button primary hero-main-cta" href={`/fechas/${event.slug}`}>
+              <Ticket /> Show details
+            </Link>
+          )}
+          {event.mapUrl ? (
+            <a className="button secondary" href={event.mapUrl} target="_blank" rel="noreferrer">
+              <MapPin /> Open map
+            </a>
+          ) : null}
+          <Link className="button secondary" href={`/fechas/${event.slug}`}>
+            <CalendarDays /> Full info
+          </Link>
+        </div>
+        <div className="hero-signal-row event-signal-row" aria-label="Información rápida del evento">
+          <span>{event.status}</span>
+          <span>{event.age}</span>
+          <span>{event.priceLabel}</span>
+          <span>{event.genres.slice(0, 2).join(" / ") || "CLUB SIGNAL"}</span>
+        </div>
+      </div>
+      <Link className="event-takeover-flyer" href={`/fechas/${event.slug}`} aria-label={`Abrir evento ${event.name}`}>
+        {event.flyerUrl ? (
+          <Image src={event.flyerUrl} alt={`Flyer de ${event.name}`} fill priority sizes="(max-width: 760px) 78vw, 28vw" />
+        ) : (
+          <span>{event.universe.toUpperCase()}</span>
+        )}
+        <div>
+          <strong>{live ? "LIVE" : "TONIGHT"}</strong>
+          <small>{event.city} · {timeLabel}</small>
+        </div>
+      </Link>
+    </div>
+  );
+}
+
 function isVisible(sections: PageSectionItem[], type: string) {
   return !sections.length || sections.some((item) => item.blockType === type);
+}
+
+function isEventTakeoverWindow(event: EventItem, now: number) {
+  if (event.status === "Cancelado" || event.status === "Finalizado") return false;
+  const time = dateToTime(event.date);
+  if (!time) return false;
+  const startsIn = time - now;
+  const endedAgo = now - time;
+  return startsIn <= 24 * 60 * 60 * 1000 && endedAgo <= 8 * 60 * 60 * 1000;
 }
 
 function isLiveWindow(value: string, now: number) {
