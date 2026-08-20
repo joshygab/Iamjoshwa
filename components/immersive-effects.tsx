@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 export function ImmersiveEffects() {
   const pathname = usePathname();
+  const routeLabel = routeSignal(pathname);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -21,6 +22,7 @@ export function ImmersiveEffects() {
     const root = document.documentElement;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     root.classList.toggle("motion-ready", !reduced);
+    root.classList.toggle("has-fine-pointer", window.matchMedia("(pointer: fine)").matches);
     if (reduced) return;
 
     const observed = new WeakSet<Element>();
@@ -52,7 +54,23 @@ export function ImmersiveEffects() {
     }
 
     function updateScrollMotion() {
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
       root.style.setProperty("--scroll-y", `${Math.min(1, window.scrollY / Math.max(1, window.innerHeight))}`);
+      root.style.setProperty("--scroll-progress", `${progress}`);
+    }
+
+    function tap(event: PointerEvent) {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const interactive = target.closest("a,button,[role='button'],input,select,textarea,summary");
+      if (!interactive) return;
+      const ripple = document.createElement("span");
+      ripple.className = "tap-ripple";
+      ripple.style.left = `${event.clientX}px`;
+      ripple.style.top = `${event.clientY}px`;
+      document.body.appendChild(ripple);
+      window.setTimeout(() => ripple.remove(), 620);
     }
 
     const observer = new IntersectionObserver(
@@ -94,7 +112,9 @@ export function ImmersiveEffects() {
     updateScrollMotion();
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerdown", tap, { passive: true });
     window.addEventListener("scroll", updateScrollMotion, { passive: true });
+    window.addEventListener("resize", updateScrollMotion, { passive: true });
 
     return () => {
       root.classList.remove("motion-ready");
@@ -102,13 +122,17 @@ export function ImmersiveEffects() {
       observer.disconnect();
       mutationObserver.disconnect();
       window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", tap);
       window.removeEventListener("scroll", updateScrollMotion);
+      window.removeEventListener("resize", updateScrollMotion);
     };
   }, []);
 
   return (
     <>
+      <div className="premium-scroll-progress" aria-hidden="true"><span /></div>
       <div className="premium-page-transition" aria-hidden="true" />
+      <div className="route-signal-label" aria-hidden="true">{routeLabel}</div>
       <div className="premium-ambient-field" aria-hidden="true">
         <span />
         <span />
@@ -117,4 +141,17 @@ export function ImmersiveEffects() {
       <div className="cursor-glow" aria-hidden="true" />
     </>
   );
+}
+
+function routeSignal(pathname: string) {
+  if (pathname === "/") return "IAMJOSHWA WORLD";
+  if (pathname.startsWith("/fechas")) return "SHOW SIGNAL";
+  if (pathname.startsWith("/musica")) return "NOW PLAYING";
+  if (pathname.startsWith("/lanzamientos")) return "RELEASE MODE";
+  if (pathname.startsWith("/the-vault")) return "VAULT ACCESS";
+  if (pathname.startsWith("/comunidad") || pathname.startsWith("/perfil") || pathname.startsWith("/pass")) return "INNER CIRCLE";
+  if (pathname.startsWith("/booking")) return "BOOKING SIGNAL";
+  if (pathname.startsWith("/epk")) return "MEDIA KIT";
+  if (pathname.startsWith("/checkin")) return "PASS CHECK-IN";
+  return "OFFICIAL SIGNAL";
 }

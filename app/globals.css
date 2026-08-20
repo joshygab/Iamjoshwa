@@ -7396,6 +7396,283 @@ html.motion-ready body:after {
   }
 }
 
+/* Premium Experience System: progreso, rutas, loading y microinteracciones */
+.premium-scroll-progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 130;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+}
+
+.premium-scroll-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(var(--scroll-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--accent), #fff, var(--accent2));
+  box-shadow: 0 0 24px var(--glow);
+  will-change: transform;
+}
+
+.route-signal-label {
+  position: fixed;
+  left: clamp(18px, 3vw, 36px);
+  bottom: clamp(118px, 12vh, 152px);
+  z-index: 36;
+  max-width: min(72vw, 360px);
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background:
+    radial-gradient(circle at 16% 50%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 9rem),
+    rgba(5,5,5,.42);
+  color: rgba(255,255,255,.66);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  backdrop-filter: blur(18px) saturate(1.1);
+  opacity: .76;
+  transform: translate3d(0,0,0);
+}
+
+html.route-entering .route-signal-label {
+  animation: routeSignalIn .56s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.tap-ripple {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 220;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  pointer-events: none;
+  transform: translate3d(-50%,-50%,0) scale(.2);
+  background: radial-gradient(circle, rgba(255,255,255,.72), color-mix(in srgb, var(--accent) 55%, transparent) 36%, transparent 68%);
+  filter: blur(.2px);
+  mix-blend-mode: screen;
+  animation: premiumTapRipple .58s ease-out forwards;
+}
+
+html.has-fine-pointer .cursor-glow {
+  opacity: .3;
+  transition: width .26s ease, height .26s ease, opacity .26s ease;
+}
+
+html.has-fine-pointer:has(a:hover,button:hover,[role="button"]:hover,summary:hover) .cursor-glow {
+  width: 28rem;
+  height: 28rem;
+  opacity: .38;
+}
+
+.signal-loading-screen {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(24px, 5vw, 72px);
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 30rem),
+    radial-gradient(circle at 80% 82%, rgba(255,255,255,.08), transparent 24rem),
+    #050505;
+}
+
+.signal-loading-screen section {
+  width: min(100%, 720px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: clamp(28px, 5vw, 52px);
+  padding: clamp(26px, 6vw, 62px);
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.018)),
+    rgba(0,0,0,.35);
+  box-shadow: 0 34px 140px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.08);
+  overflow: hidden;
+}
+
+.signal-loading-screen span {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.signal-loading-screen h1 {
+  margin: 18px 0 26px;
+  font: 900 clamp(54px, 12vw, 122px)/.78 var(--font-display);
+  letter-spacing: -.08em;
+}
+
+.signal-loading-orb {
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 26px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 36% 30%, #fff, var(--accent) 32%, transparent 68%);
+  box-shadow: 0 0 54px var(--glow);
+  animation: signalLoadingPulse 1.38s ease-in-out infinite;
+}
+
+.signal-loading-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+
+.signal-loading-grid i {
+  display: block;
+  height: 78px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 22px;
+  background:
+    linear-gradient(100deg, rgba(255,255,255,.04), rgba(255,255,255,.12), rgba(255,255,255,.04));
+  background-size: 220% 100%;
+  animation: signalSkeleton 1.5s linear infinite;
+}
+
+.signal-loading-grid i:nth-child(2) {
+  animation-delay: -.18s;
+}
+
+.signal-loading-grid i:nth-child(3) {
+  animation-delay: -.36s;
+}
+
+html.motion-ready .topbar,
+html.motion-ready .premium-bottom-nav,
+html.motion-ready .global-now-playing,
+html.motion-ready .signal-announcement-bar {
+  will-change: transform, opacity;
+}
+
+html.motion-ready .desktop-nav a,
+html.motion-ready .footer-nav a,
+html.motion-ready .mobile-menu a {
+  transition: transform .22s cubic-bezier(.2,.8,.2,1), color .22s ease, background .22s ease, border-color .22s ease;
+}
+
+html.motion-ready .desktop-nav a:hover,
+html.motion-ready .desktop-nav a:focus-visible,
+html.motion-ready .footer-nav a:hover,
+html.motion-ready .footer-nav a:focus-visible,
+html.motion-ready .mobile-menu a:hover,
+html.motion-ready .mobile-menu a:focus-visible {
+  transform: translate3d(0,-1px,0);
+}
+
+html.motion-ready .section-heading,
+html.motion-ready .page-hero,
+html.motion-ready .event-detail,
+html.motion-ready .booking-layout,
+html.motion-ready .epk-intro,
+html.motion-ready .profile-grid {
+  transform: translate3d(0,0,0);
+}
+
+@keyframes routeSignalIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(.98);
+    filter: blur(8px);
+  }
+  to {
+    opacity: .76;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes premiumTapRipple {
+  to {
+    opacity: 0;
+    transform: translate3d(-50%,-50%,0) scale(9);
+  }
+}
+
+@keyframes signalLoadingPulse {
+  0%, 100% {
+    transform: scale(.92);
+    opacity: .72;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes signalSkeleton {
+  from { background-position: 220% 0; }
+  to { background-position: -120% 0; }
+}
+
+@media(max-width:760px) {
+  .premium-scroll-progress {
+    top: max(0px, env(safe-area-inset-top));
+    height: 2px;
+  }
+
+  .route-signal-label {
+    left: 50%;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    max-width: calc(100vw - 28px);
+    transform: translate3d(-50%,0,0);
+    opacity: .58;
+    font-size: 8px;
+    padding: 7px 10px;
+  }
+
+  html.route-entering .route-signal-label {
+    animation: routeSignalInMobile .46s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .signal-loading-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signal-loading-grid i {
+    height: 54px;
+    border-radius: 18px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .premium-scroll-progress span {
+    transition: none!important;
+  }
+
+  .route-signal-label,
+  .tap-ripple {
+    display: none!important;
+  }
+
+  .signal-loading-orb,
+  .signal-loading-grid i {
+    animation: none!important;
+  }
+}
+
+@keyframes routeSignalInMobile {
+  from {
+    opacity: 0;
+    transform: translate3d(-50%, 8px, 0) scale(.98);
+    filter: blur(8px);
+  }
+  to {
+    opacity: .58;
+    transform: translate3d(-50%, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
 /* Persistent mobile dock: siempre visible aunque la página siga scrolleando */
 @media(max-width:900px) {
   body {
