@@ -94,6 +94,7 @@ export function ContentEditor({ module, initial = {}, assets = [] }: Props) {
           <Text name="slug" label="Slug" value={initial.slug} pattern="[a-z0-9-]+" />
           <MediaSelect name="flyer_asset_id" label="Flyer" value={initial.flyer_asset_id} assets={assets} />
           <DateTime name="starts_at" label="Inicio" value={initial.starts_at} required />
+          <DateTime name="ends_at" label="Finaliza" value={initial.ends_at} />
           <DateTime name="doors_at" label="Apertura" value={initial.doors_at} />
           <DateTime name="set_starts_at" label="Horario del set" value={initial.set_starts_at} />
           <Text name="venue" label="Venue" value={initial.venue} />

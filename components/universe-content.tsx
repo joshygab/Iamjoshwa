@@ -76,6 +76,9 @@ const missions = [
   ["04", "Book / Share", "Promotores encuentran EPK, contacto y booking en segundos.", "/booking"],
 ] as const;
 
+const EVENT_TAKEOVER_LEAD_MS = 8 * 60 * 60 * 1000;
+const DEFAULT_EVENT_DURATION_MS = 6 * 60 * 60 * 1000;
+
 type HomeSignalCard = {
   id: string;
   kicker: string;
@@ -100,11 +103,11 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedSets = useMemo(() => sets.filter((item) => item.universe === universe), [sets, universe]);
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
   const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
-  const event = scopedEvents.find((item) => new Date(item.date).getTime() >= now) || scopedEvents[0];
+  const takeoverEvent = scopedEvents.find((item) => isEventTakeoverWindow(item, now)) || null;
+  const event = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now) || takeoverEvent || scopedEvents[0];
   const eventIsFeatured = Boolean(event && isVisible(managed, "next_event"));
-  const takeoverEvent = event && isEventTakeoverWindow(event, now) ? event : null;
-  const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent.date, now) ? takeoverEvent : null;
-  const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item.date, now)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+  const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent, now) ? takeoverEvent : null;
+  const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item, now)).sort((a, b) => getEventEndTime(b) - getEventEndTime(a))[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
   const nextSignal = useMemo(() => {
@@ -123,7 +126,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       .sort((a, b) => a.time - b.time)[0];
   }, [eventIsFeatured, now, scopedEvents, scopedReleases, scopedRewards, universe]);
   const signalFeed = useMemo<HomeSignalCard[]>(() => {
-    const nextEvent = scopedEvents.find((item) => new Date(item.date).getTime() >= now);
+    const nextEvent = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now);
     const vaultReward = scopedRewards[0];
     return [
       {
@@ -633,27 +636,41 @@ function isVisible(sections: PageSectionItem[], type: string) {
   return !sections.length || sections.some((item) => item.blockType === type);
 }
 
+function isInactiveEvent(event: EventItem) {
+  return event.status === "Cancelado" || event.status === "Finalizado";
+}
+
+function getEventStartTime(event: EventItem) {
+  return dateToTime(event.date) || 0;
+}
+
+function getEventEndTime(event: EventItem) {
+  const start = getEventStartTime(event);
+  if (!start) return 0;
+  const configuredEnd = event.endDate ? dateToTime(event.endDate) : 0;
+  return configuredEnd && configuredEnd > start ? configuredEnd : start + DEFAULT_EVENT_DURATION_MS;
+}
+
 function isEventTakeoverWindow(event: EventItem, now: number) {
-  if (event.status === "Cancelado" || event.status === "Finalizado") return false;
-  const time = dateToTime(event.date);
-  if (!time) return false;
-  const startsIn = time - now;
-  const endedAgo = now - time;
-  return startsIn <= 24 * 60 * 60 * 1000 && endedAgo <= 8 * 60 * 60 * 1000;
+  if (isInactiveEvent(event)) return false;
+  const start = getEventStartTime(event);
+  const end = getEventEndTime(event);
+  if (!start || !end) return false;
+  return now >= start - EVENT_TAKEOVER_LEAD_MS && now < end;
 }
 
-function isLiveWindow(value: string, now: number) {
-  const time = dateToTime(value);
-  if (!time) return false;
-  const startsIn = time - now;
-  const endedAgo = now - time;
-  return startsIn <= 18 * 60 * 60 * 1000 && endedAgo <= 8 * 60 * 60 * 1000;
+function isLiveWindow(event: EventItem, now: number) {
+  const start = getEventStartTime(event);
+  const end = getEventEndTime(event);
+  if (!start || !end) return false;
+  return now >= start && now < end;
 }
 
-function isRecentPastEvent(value: string, now: number) {
-  const time = dateToTime(value);
-  if (!time || time > now) return false;
-  return now - time <= 5 * 24 * 60 * 60 * 1000;
+function isRecentPastEvent(event: EventItem, now: number) {
+  if (isInactiveEvent(event)) return false;
+  const end = getEventEndTime(event);
+  if (!end || end > now) return false;
+  return now - end <= 5 * 24 * 60 * 60 * 1000;
 }
 
 function EmptySection({ kicker, title, body, ctaHref, ctaLabel }: { kicker?: string; title: string; body: string; ctaHref?: string; ctaLabel?: string }) {

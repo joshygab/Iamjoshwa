@@ -119,6 +119,188 @@ html[data-pwa="standalone"] body {
   overscroll-behavior-y: none;
 }
 
+.checkin-code-studio {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.checkin-code-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 28px;
+  padding: clamp(24px, 4vw, 42px);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(185,56,255,.28), transparent 26rem),
+    radial-gradient(circle at 12% 90%, rgba(255,45,140,.18), transparent 22rem),
+    linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018));
+  box-shadow: 0 28px 90px rgba(0,0,0,.36);
+}
+
+.checkin-code-hero::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    linear-gradient(115deg, transparent 0 42%, rgba(255,255,255,.13) 49%, transparent 56% 100%);
+  transform: translateX(-35%) rotate(4deg);
+  animation: premiumSheen 7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.checkin-code-hero h2 {
+  position: relative;
+  margin: 18px 0 12px;
+  max-width: 650px;
+  font: 800 clamp(42px, 6vw, 86px)/.86 var(--font-display);
+  letter-spacing: -.06em;
+}
+
+.checkin-code-hero p {
+  position: relative;
+  max-width: 560px;
+  color: rgba(255,255,255,.68);
+  line-height: 1.65;
+}
+
+.checkin-code-preview {
+  position: relative;
+  width: min(100%, 520px);
+  margin-top: clamp(24px, 4vw, 46px);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 28px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,.13), transparent 12rem),
+    rgba(5,5,5,.54);
+  font: 900 clamp(40px, 8vw, 86px)/.82 var(--font-display);
+  letter-spacing: .04em;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 38px rgba(185,56,255,.55);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 70px rgba(185,56,255,.14);
+}
+
+.checkin-code-form {
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.022)),
+    rgba(10,8,12,.72);
+}
+
+.checkin-code-form input,
+.checkin-code-form select,
+.checkin-qr-details select {
+  border-radius: 16px;
+}
+
+.settings-card select {
+  background: #09080b;
+  border: 1px solid var(--line);
+  color: white;
+  padding: 14px;
+}
+
+.manual-code-list {
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: 22px;
+  background: rgba(255,255,255,.032);
+}
+
+.manual-code-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.manual-code-list article > div {
+  display: grid;
+  gap: 6px;
+}
+
+.manual-code-list small {
+  color: var(--muted);
+}
+
+.checkin-qr-details {
+  border-radius: 26px;
+}
+
+.checkin-qr-details summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.checkin-page {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(185,56,255,.22), transparent 28rem),
+    radial-gradient(circle at 85% 80%, rgba(255,45,140,.12), transparent 24rem),
+    #050505;
+}
+
+.checkin-card {
+  overflow: hidden;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(185,56,255,.16), transparent 17rem),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.024));
+  box-shadow: 0 34px 120px rgba(0,0,0,.45);
+}
+
+.checkin-code-entry input {
+  min-height: 72px;
+  border-radius: 22px;
+  text-align: center;
+  font: 900 clamp(30px, 9vw, 54px)/1 var(--font-display);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background:
+    radial-gradient(circle at 50% 0, rgba(185,56,255,.18), transparent 12rem),
+    #08070a;
+}
+
+@media (max-width: 760px) {
+  .checkin-code-studio {
+    grid-template-columns: 1fr;
+  }
+
+  .checkin-code-hero,
+  .checkin-code-form,
+  .manual-code-list,
+  .checkin-qr-details,
+  .checkin-card {
+    border-radius: 24px;
+  }
+
+  .manual-code-list article {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@keyframes premiumSheen {
+  0%, 55% {
+    transform: translateX(-55%) rotate(4deg);
+    opacity: 0;
+  }
+  70% {
+    opacity: .65;
+  }
+  100% {
+    transform: translateX(55%) rotate(4deg);
+    opacity: 0;
+  }
+}
+
 html[data-pwa="standalone"] .site-header {
   padding-top: max(env(safe-area-inset-top), 0px);
 }

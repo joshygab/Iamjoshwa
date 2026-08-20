@@ -13,6 +13,7 @@ type Data = {
   slug: string;
   name: string;
   date: string;
+  endDate?: string;
   venue: string;
   city: string;
   ticketMode?: EventTicketMode;
@@ -27,7 +28,7 @@ type Data = {
 
 export function EventActions({ event }: { event: Data }) {
   const [state, setState] = useState("");
-  const end = new Date(new Date(event.date).getTime() + 2 * 60 * 60 * 1000).toISOString();
+  const end = event.endDate || new Date(new Date(event.date).getTime() + 6 * 60 * 60 * 1000).toISOString();
   const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${calendarDate(event.date)}/${calendarDate(end)}&location=${encodeURIComponent(`${event.venue}, ${event.city}`)}`;
   const shareUrl = `${publicEnv.NEXT_PUBLIC_SITE_URL}/fechas/${event.slug}`;
 

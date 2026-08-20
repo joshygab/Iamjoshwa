@@ -56,6 +56,7 @@ export default async function EventDetail({ params }: Props) {
     "@type": "MusicEvent",
     name: event.name,
     startDate: event.date,
+    endDate: event.endDate,
     eventStatus: schemaStatus(event.status),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     url: absoluteUrl(`/fechas/${event.slug}`),
@@ -113,7 +114,7 @@ export default async function EventDetail({ params }: Props) {
           <dl>
             <div><dt>Fecha</dt><dd>{formatMxDate(event.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</dd></div>
             <div><dt>Venue</dt><dd>{event.venue}<br />{event.address}</dd></div>
-            <div><dt>Horarios</dt><dd>Puertas {event.doors} · Set {event.setTime}</dd></div>
+            <div><dt>Horarios</dt><dd>Puertas {event.doors} · Set {event.setTime}{event.endDate ? ` · Fin ${new Date(event.endDate).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", timeZone: "America/Mexico_City" })}` : ""}</dd></div>
             <div><dt>Lineup</dt><dd>{event.lineup.join(" · ") || "Por anunciar"}</dd></div>
             <div><dt>Acceso</dt><dd>{event.age} · {event.priceLabel}</dd></div>
             {event.promoCode && <div><dt>Código</dt><dd>{event.promoCode}</dd></div>}
