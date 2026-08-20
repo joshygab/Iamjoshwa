@@ -107,6 +107,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const event = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now) || takeoverEvent || scopedEvents[0];
   const eventIsFeatured = Boolean(event && isVisible(managed, "next_event"));
   const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent, now) ? takeoverEvent : null;
+  const hasTakeoverEvent = Boolean(takeoverEvent);
   const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item, now)).sort((a, b) => getEventEndTime(b) - getEventEndTime(a))[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
@@ -141,13 +142,13 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       },
       {
         id: "next-event",
-        kicker: liveEvent ? "LIVE TONIGHT" : "NEXT EVENT",
+        kicker: liveEvent ? "SIGNAL LIVE" : hasTakeoverEvent ? "LIVE TONIGHT" : "NEXT EVENT",
         title: nextEvent?.name || "NEXT SIGNAL — COMING SOON",
         body: nextEvent ? `${nextEvent.city} · ${nextEvent.venue}` : "Cuando publiques una fecha, esta tarjeta se convierte en entrada rápida al show.",
         href: nextEvent ? `/fechas/${nextEvent.slug}` : "/fechas",
         action: nextEvent ? "Open show" : "Ver shows",
         icon: "show",
-        state: liveEvent ? "live" : nextEvent ? "active" : "soon",
+        state: liveEvent || hasTakeoverEvent ? "live" : nextEvent ? "active" : "soon",
       },
       {
         id: "latest-drop",
@@ -190,7 +191,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         state: vaultReward ? "active" : "locked",
       },
     ];
-  }, [liveEvent, now, release, scopedEvents, scopedRewards, set, signal, universe]);
+  }, [hasTakeoverEvent, liveEvent, now, release, scopedEvents, scopedRewards, set, signal, universe]);
 
   const title = String(hero.title || artist.displayName);
   const tagline = String(hero.subtitle || artist.tagline);
@@ -275,16 +276,22 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       ) : null}
 
       {takeoverEvent ? (
-        <section className="section live-tonight-panel event-command-panel reveal is-visible">
+        <section className="section live-tonight-panel event-command-panel reveal is-visible" data-mode={liveEvent ? "live" : "tonight"}>
           <div>
             <p className="section-kicker">{liveEvent ? "SIGNAL LIVE" : "LIVE TONIGHT"}</p>
             <h2>{takeoverEvent.name}</h2>
             <p>{takeoverEvent.city} · {takeoverEvent.venue} · Set {takeoverEvent.setTime || formatMxTime(takeoverEvent.date)} MX</p>
+            <div className="event-command-metrics" aria-label="Resumen rápido del evento">
+              <span><strong>{liveEvent ? "LIVE" : "TONIGHT"}</strong><small>Estado</small></span>
+              <span><strong>{takeoverEvent.city}</strong><small>Ciudad</small></span>
+              <span><strong>{takeoverEvent.setTime || formatMxTime(takeoverEvent.date)}</strong><small>Set MX</small></span>
+              <span><strong>{takeoverEvent.endDate ? formatMxTime(takeoverEvent.endDate) : "Fin TBC"}</strong><small>Finaliza</small></span>
+            </div>
           </div>
           <div className="live-command-actions">
             {eventAccess(takeoverEvent).href ? <a className="button primary" href={eventAccess(takeoverEvent).href} target="_blank" rel="noreferrer"><Ticket /> {eventAccess(takeoverEvent).label}</a> : <Link className="button primary" href={`/fechas/${takeoverEvent.slug}`}><Ticket /> {eventAccess(takeoverEvent).label}</Link>}
             {takeoverEvent.mapUrl ? <a className="button secondary" href={takeoverEvent.mapUrl} target="_blank" rel="noreferrer"><MapPin /> Mapa</a> : null}
-            <Link className="button secondary" href="/checkin"><QrCode /> QR check-in</Link>
+            <Link className="button secondary pass-live-command" href="/checkin"><QrCode /> Código check-in</Link>
             <Link className="button secondary" href={`/fechas/${takeoverEvent.slug}`}><CalendarDays /> Info completa</Link>
           </div>
           <EventShareStudio event={takeoverEvent} compact />
@@ -606,6 +613,9 @@ function EventTakeoverHero({ event, live, universe }: { event: EventItem; live: 
               <MapPin /> Open map
             </a>
           ) : null}
+          <Link className="button secondary pass-live-command" href="/checkin">
+            <QrCode /> Check-in code
+          </Link>
           <Link className="button secondary" href={`/fechas/${event.slug}`}>
             <CalendarDays /> Full info
           </Link>
