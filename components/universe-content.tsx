@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, CalendarDays, Camera, Disc3, Gift, Headphones, LockKeyhole, MapPin, Play, QrCode, Radio, Signal, Sparkles, Ticket, Zap } from "lucide-react";
 import { Countdown } from "./countdown";
 import { EventShareStudio } from "./event-share-studio";
-import type { CountdownType } from "./countdown";
 import { usePlayer } from "./player-provider";
 import { useUniverse } from "./universe-provider";
 import { dateToTime, formatMxDate, formatMxTime } from "@/lib/dates";
@@ -20,7 +19,7 @@ const fallback: Record<Universe, ArtistProfileItem> = {
   iamjoshwa: {
     project: "iamjoshwa",
     displayName: "IAMJOSHWA",
-    subtitle: "DJ & Producer — CDMX",
+    subtitle: "DJ & Producer",
     tagline: "Club culture, latin pulse and electronic nights from Mexico City.",
     shortBio: "",
     longBio: "",
@@ -58,17 +57,6 @@ type PersonalSignal = {
   wantsReleases: boolean;
 };
 
-type SignalCandidate = {
-  id: string;
-  href: string;
-  type: CountdownType;
-  label: string;
-  title: string;
-  subtitle: string;
-  targetDate: string;
-  time: number;
-};
-
 const missions = [
   ["01", "Listen to your first set", "Activa el player global y empieza tu historial musical.", "/musica"],
   ["02", "Complete your Pass", "Alias, ciudad, géneros y preferencias listas.", "/perfil"],
@@ -88,6 +76,9 @@ type HomeSignalCard = {
   action: string;
   icon: "listen" | "show" | "drop" | "pass" | "mission" | "vault";
   state: "live" | "active" | "soon" | "locked";
+  imageUrl?: string;
+  meta?: string;
+  primary?: boolean;
 };
 
 export function HomeContent({ events, sets, releases, rewards = [], artists = [], sections = [], labels = {}, now }: Props) {
@@ -102,96 +93,60 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedEvents = useMemo(() => events.filter((item) => item.universe === universe).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()), [events, universe]);
   const scopedSets = useMemo(() => sets.filter((item) => item.universe === universe), [sets, universe]);
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
-  const scopedRewards = useMemo(() => rewards.filter((item) => !item.project || item.project === universe), [rewards, universe]);
+  const rewardCount = useMemo(() => rewards.filter((item) => !item.project || item.project === universe).length, [rewards, universe]);
   const takeoverEvent = scopedEvents.find((item) => isEventTakeoverWindow(item, now)) || null;
   const event = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now) || takeoverEvent || scopedEvents[0];
-  const eventIsFeatured = Boolean(event && isVisible(managed, "next_event"));
   const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent, now) ? takeoverEvent : null;
   const hasTakeoverEvent = Boolean(takeoverEvent);
   const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item, now)).sort((a, b) => getEventEndTime(b) - getEventEndTime(a))[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
-  const nextSignal = useMemo(() => {
-    const candidates: SignalCandidate[] = [
-      ...(eventIsFeatured ? [] : scopedEvents.map((item) => ({ id: item.id, href: `/fechas/${item.slug}`, type: universe === "afterluv" ? "afterluv" : "show", label: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "NEXT SHOW", title: item.name, subtitle: `${item.city} · ${item.venue}`, targetDate: item.date, time: dateToTime(item.date) || 0 } satisfies SignalCandidate))),
-      ...scopedReleases.map((item) => ({ id: item.id, href: `/lanzamientos/${item.slug}`, type: item.universe === "afterluv" ? "afterluv" : "release", label: item.universe === "afterluv" ? "TRANSMISSION BEGINS IN" : "NEXT RELEASE", title: item.title, subtitle: item.type, targetDate: item.releaseAt, time: dateToTime(item.releaseAt) || 0 } satisfies SignalCandidate)),
-      ...scopedRewards.flatMap((item) => {
-        const rewardSignals: SignalCandidate[] = [];
-        if (item.unlockAt) rewardSignals.push({ id: item.id, href: "/the-vault", type: "vault", label: "VAULT UNLOCK", title: item.name, subtitle: "Unlocks in", targetDate: item.unlockAt, time: dateToTime(item.unlockAt) || 0 });
-        if (item.expiresAt) rewardSignals.push({ id: item.id, href: "/the-vault", type: "vault", label: "VAULT EXPIRATION", title: item.name, subtitle: "Expires in", targetDate: item.expiresAt, time: dateToTime(item.expiresAt) || 0 });
-        return rewardSignals;
-      }),
-    ];
-    return candidates
-      .filter((item) => item.time > now)
-      .sort((a, b) => a.time - b.time)[0];
-  }, [eventIsFeatured, now, scopedEvents, scopedReleases, scopedRewards, universe]);
   const signalFeed = useMemo<HomeSignalCard[]>(() => {
     const nextEvent = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now);
-    const vaultReward = scopedRewards[0];
+    const latestTransmission = set || release;
     return [
       {
         id: "now-playing",
-        kicker: "NOW PLAYING",
-        title: set?.title || "NEW SOUND INCOMING",
-        body: set ? `${set.category} · ${set.duration || "Set oficial"} · ${set.genres.slice(0, 3).join(" / ") || "Club signal"}` : "El siguiente set aparecerá aquí cuando esté publicado desde Admin.",
-        href: set ? `/musica/${set.slug}` : "/musica",
-        action: set ? "Listen" : "Abrir música",
-        icon: "listen",
-        state: set ? "active" : "soon",
+        kicker: "NOW",
+        title: latestTransmission?.title || "NEXT TRANSMISSION",
+        body: set
+          ? `${set.category} · ${set.duration || "Set oficial"} · ${set.genres.slice(0, 2).join(" / ") || "Club signal"}`
+          : release
+            ? `${release.type} · ${new Date(release.releaseAt).getTime() > now ? "Pre-save active" : "Available now"}`
+            : "New music incoming.",
+        href: set ? `/musica/${set.slug}` : release ? `/lanzamientos/${release.slug}` : "/musica",
+        action: latestTransmission ? "Play" : "Open archive",
+        icon: set ? "listen" : "drop",
+        state: latestTransmission ? "active" : "soon",
+        imageUrl: set?.coverUrl || release?.coverUrl,
+        meta: set ? "DJ SET" : release ? "RELEASE" : "ARCHIVE",
+        primary: true,
       },
       {
         id: "next-event",
-        kicker: liveEvent ? "SIGNAL LIVE" : hasTakeoverEvent ? "LIVE TONIGHT" : "NEXT EVENT",
-        title: nextEvent?.name || "NEXT SIGNAL — COMING SOON",
-        body: nextEvent ? `${nextEvent.city} · ${nextEvent.venue}` : "Cuando publiques una fecha, esta tarjeta se convierte en entrada rápida al show.",
+        kicker: liveEvent ? "SIGNAL LIVE" : hasTakeoverEvent ? "LIVE TONIGHT" : "NEXT",
+        title: nextEvent?.name || "NEXT TRANSMISSION",
+        body: nextEvent ? `${formatMxDate(nextEvent.date, { day: "2-digit", month: "short" }).toUpperCase()} · ${nextEvent.venue} · ${nextEvent.city}` : "Next show incoming.",
         href: nextEvent ? `/fechas/${nextEvent.slug}` : "/fechas",
-        action: nextEvent ? "Open show" : "Ver shows",
+        action: nextEvent ? "Get info" : "Shows",
         icon: "show",
         state: liveEvent || hasTakeoverEvent ? "live" : nextEvent ? "active" : "soon",
+        imageUrl: nextEvent?.flyerUrl,
+        meta: nextEvent ? "SHOW" : "SCHEDULE",
       },
       {
-        id: "latest-drop",
-        kicker: "LATEST DROP",
-        title: release?.title || "DROP LOADING",
-        body: release ? `${release.type} · ${new Date(release.releaseAt).getTime() > now ? "Pre-save activo" : "Escuchar ahora"}` : "Publica un lanzamiento con pre-save o plataformas para activar esta señal.",
-        href: release ? `/lanzamientos/${release.slug}` : "/lanzamientos",
-        action: release ? "Open drop" : "Ver releases",
-        icon: "drop",
-        state: release ? "active" : "soon",
-      },
-      {
-        id: "pass",
-        kicker: "JOSH PASS",
-        title: signal ? "Tu señal está personalizada" : "Create your access",
-        body: signal ? `${signal.favoriteProject.toUpperCase()} primero · ${signal.city || "Ciudad pendiente"}` : "Crea tu Pass para activar misiones, puntos, QR y The Vault.",
-        href: signal ? "/perfil" : "/acceso?next=%2Fperfil",
-        action: signal ? "Ver Pass" : "Crear Pass",
+        id: "world",
+        kicker: "WORLD",
+        title: "ENTER IAMJOSHWA WORLD",
+        body: "Pass, missions, Vault files, shows and secret drops in one digital universe.",
+        href: signal ? "/perfil" : "/comunidad",
+        action: "Enter world",
         icon: "pass",
-        state: signal ? "active" : "locked",
-      },
-      {
-        id: "mission",
-        kicker: "NEW MISSION",
-        title: set ? "Listen to your first set" : "Complete your Pass",
-        body: set ? "Abre el set destacado y empieza a mover tu actividad." : "Alias, ciudad, universo favorito y preferencias.",
-        href: set ? `/musica/${set.slug}` : "/perfil",
-        action: "Start mission",
-        icon: "mission",
         state: "active",
-      },
-      {
-        id: "vault",
-        kicker: universe === "afterluv" ? "AFTERLUV TRANSMISSION" : "THE VAULT",
-        title: vaultReward?.name || (universe === "afterluv" ? "CLASSIFIED RAVE SIGNAL" : "LOCKED DROP"),
-        body: vaultReward ? `${vaultReward.pointsCost} XP · recompensa disponible` : "Drops privados, códigos secretos y recompensas aparecerán aquí.",
-        href: "/the-vault",
-        action: "Enter Vault",
-        icon: "vault",
-        state: vaultReward ? "active" : "locked",
+        meta: "ECOSYSTEM",
       },
     ];
-  }, [hasTakeoverEvent, liveEvent, now, release, scopedEvents, scopedRewards, set, signal, universe]);
+  }, [hasTakeoverEvent, liveEvent, now, release, scopedEvents, set, signal]);
 
   const title = String(hero.title || artist.displayName);
   const tagline = String(hero.subtitle || artist.tagline);
@@ -263,11 +218,9 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
                 <Link className="button secondary" href="/booking">
                   {label("booking.cta", "Book Now")}
                 </Link>
-              </div>
-              <div className="hero-signal-row" aria-label="Señales principales del sitio">
-                <span>CDMX</span>
-                <span>{universe === "afterluv" ? "RAVE / HARD / TRANCE" : "HOUSE / LATIN / CLUB"}</span>
-                <span>NO AUTOPLAY</span>
+                <Link className="button secondary world-entry-cta" href="/comunidad">
+                  <Sparkles /> Enter World
+                </Link>
               </div>
             </div>
           )}
@@ -314,8 +267,8 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
       <section className="section home-signal-feed reveal">
         <div className="section-heading">
           <div>
-            <p className="section-kicker">SIGNAL FEED</p>
-            <h2>{label("home.signalFeed.title", "El pulso de IAMJOSHWA World.")}</h2>
+            <p className="section-kicker">LATEST TRANSMISSION</p>
+            <h2>{label("home.signalFeed.title", "Now, next and the entrance to IAMJOSHWA World.")}</h2>
           </div>
           <Link className="text-link" href={signal ? "/perfil" : "/acceso?next=%2Fperfil"}>
             {signal ? "Open my Pass" : "Create Pass"} <ArrowRight />
@@ -323,11 +276,17 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         </div>
         <div className="signal-feed-grid">
           {signalFeed.map((item) => (
-            <Link className="signal-feed-card" data-state={item.state} href={item.href} key={item.id}>
+            <Link className={`signal-feed-card ${item.primary ? "is-primary" : ""}`} data-state={item.state} href={item.href} key={item.id}>
+              {item.imageUrl ? (
+                <div className="signal-feed-art" aria-hidden="true">
+                  <Image src={item.imageUrl} alt="" fill sizes={item.primary ? "(max-width: 760px) 86vw, 34vw" : "(max-width: 760px) 78vw, 20vw"} />
+                </div>
+              ) : null}
               <div className="signal-feed-icon">
                 <SignalIcon type={item.icon} />
                 <span>{item.kicker}</span>
               </div>
+              {item.meta ? <em>{item.meta}</em> : null}
               <h3>{item.title}</h3>
               <p>{item.body}</p>
               <strong>{item.action}<ArrowRight /></strong>
@@ -335,82 +294,6 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
           ))}
         </div>
       </section>
-
-      <section className="quick-paths section reveal world-paths">
-        <p className="section-kicker">IAMJOSHWA WORLD</p>
-        <div className="path-grid immersive-paths">
-          <Link href="/musica">
-            <Headphones />
-            <div>
-              <h2>Listen</h2>
-              <p>Sets, releases, player global y dirección sonora.</p>
-            </div>
-            <ArrowRight />
-          </Link>
-          <Link href="/booking">
-            <Ticket />
-            <div>
-              <h2>Book Now</h2>
-              <p>Flujo serio para promotores: booking, EPK y contacto.</p>
-            </div>
-            <ArrowRight />
-          </Link>
-          <Link href="/acceso">
-            <Sparkles />
-            <div>
-              <h2>Pass</h2>
-              <p>Inner Circle, puntos, badges, QR y The Vault.</p>
-            </div>
-            <ArrowRight />
-          </Link>
-        </div>
-      </section>
-
-      {nextSignal ? (
-        <section className="section next-signal-panel reveal">
-          <div>
-              <p className="section-kicker">{nextSignal.type === "release" ? "LATEST SIGNAL" : nextSignal.type === "vault" ? "VAULT SIGNAL" : "NEXT SIGNAL"}</p>
-            <h2>{nextSignal.title}</h2>
-            <p>{nextSignal.subtitle}</p>
-          </div>
-          <div>
-            <Countdown
-              targetDate={nextSignal.targetDate}
-              type={nextSignal.type}
-              label={nextSignal.label}
-              compact
-              source="home_next_signal"
-              contentId={nextSignal.id}
-              contentType={nextSignal.type}
-              completedLabel="SIGNAL UPDATED"
-              completedTitle="Buscando la siguiente señal"
-            />
-            <Link className="button secondary" href={nextSignal.href}>
-              Open signal <ArrowRight />
-            </Link>
-          </div>
-        </section>
-      ) : null}
-
-      {signal ? (
-        <section className="section personalized-feed reveal">
-          <div>
-            <p className="section-kicker">YOUR SIGNAL</p>
-            <h2>Tu feed está listo.</h2>
-            <p>
-              {signal.city ? `${signal.city} · ` : ""}
-              {signal.favoriteProject.toUpperCase()} primero · {signal.wantsShows ? "Shows" : "Shows off"} / {signal.wantsSets ? "Sets" : "Sets off"} / {signal.wantsReleases ? "Releases" : "Releases off"}
-            </p>
-          </div>
-          {signal.favoriteProject !== universe ? (
-            <button className="button secondary" onClick={() => setUniverse(signal.favoriteProject)}>
-              Cambiar a {signal.favoriteProject.toUpperCase()}
-            </button>
-          ) : (
-            <Link className="button secondary" href="/perfil">Ver mi Pass</Link>
-          )}
-        </section>
-      ) : null}
 
       {isVisible(managed, "next_event") ? (
         event ? (
@@ -445,12 +328,124 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         )
       ) : null}
 
+      <section className="quick-paths section reveal world-paths">
+        <p className="section-kicker">IAMJOSHWA WORLD</p>
+        <div className="path-grid immersive-paths">
+          <Link href="/musica">
+            <Headphones />
+            <div>
+              <h2>Listen</h2>
+              <p>Sets, releases, player global y dirección sonora.</p>
+            </div>
+            <ArrowRight />
+          </Link>
+          <Link href="/the-vault">
+            <LockKeyhole />
+            <div>
+              <h2>The Vault</h2>
+              <p>Archivo secreto, drops, códigos y contenido desbloqueable.</p>
+            </div>
+            <ArrowRight />
+          </Link>
+          <Link href="/acceso">
+            <Sparkles />
+            <div>
+              <h2>Josh Pass</h2>
+              <p>Inner Circle, puntos, badges, QR y misiones.</p>
+            </div>
+            <ArrowRight />
+          </Link>
+          <Link href="/booking">
+            <Ticket />
+            <div>
+              <h2>Book / EPK</h2>
+              <p>Ruta directa para promotores, press kit y contrataciones.</p>
+            </div>
+            <ArrowRight />
+          </Link>
+        </div>
+      </section>
+
+      <section className="section home-pass-spotlight reveal">
+        <div className="home-pass-card" data-project={universe}>
+          <span>IAMJOSHWA PASS</span>
+          <strong>INNER<br />CIRCLE</strong>
+          <small>LEVEL 01 — LISTENER · QR ACCESS · THE VAULT</small>
+        </div>
+        <div>
+          <p className="section-kicker">PASS / QUESTS / VAULT</p>
+          <h2>El sitio no solo se visita. Se desbloquea.</h2>
+          <p>El Pass conecta perfil, puntos, badges, QR, misiones, referidos y contenido exclusivo. Ideal para convertir fans casuales en comunidad real.</p>
+          <div className="inline-actions">
+            <Link className="button primary" href="/acceso">Create Pass</Link>
+            <Link className="button secondary" href="/comunidad">Cómo funciona</Link>
+          </div>
+        </div>
+      </section>
+
+      {signal ? (
+        <section className="section personalized-feed reveal">
+          <div>
+            <p className="section-kicker">YOUR SIGNAL</p>
+            <h2>Tu feed está listo.</h2>
+            <p>
+              {signal.city ? `${signal.city} · ` : ""}
+              {signal.favoriteProject.toUpperCase()} primero · {signal.wantsShows ? "Shows" : "Shows off"} / {signal.wantsSets ? "Sets" : "Sets off"} / {signal.wantsReleases ? "Releases" : "Releases off"}
+            </p>
+          </div>
+          {signal.favoriteProject !== universe ? (
+            <button className="button secondary" onClick={() => setUniverse(signal.favoriteProject)}>
+              Cambiar a {signal.favoriteProject.toUpperCase()}
+            </button>
+          ) : (
+            <Link className="button secondary" href="/perfil">Ver mi Pass</Link>
+          )}
+        </section>
+      ) : null}
+
+      <section className="section home-missions reveal">
+        <div className="section-heading">
+          <div>
+            <p className="section-kicker">MISSIONS</p>
+            <h2>Primeras acciones.</h2>
+          </div>
+          <Link className="text-link" href="/perfil">Open Pass <ArrowRight /></Link>
+        </div>
+        <div className="mission-grid">
+          {missions.map(([number, titleValue, copy, href]) => (
+            <Link href={href} key={number}>
+              <span>{number}</span>
+              <strong>{titleValue}</strong>
+              <p>{copy}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="section home-vault-tease reveal">
+        <div>
+          <p className="section-kicker">{label("nav.vault", "THE VAULT")}</p>
+          <h2>{label("vault.locked", "Locked drops. Secret codes. Private signals.")}</h2>
+          <p>{rewardCount ? `${rewardCount} recompensas y archivos pueden vivir detrás de puntos, códigos o acceso manual.` : "Demos, edits, WAV previews, sets privados y recompensas pueden vivir detrás de puntos, códigos o acceso manual."}</p>
+          <Link className="button primary" href="/the-vault">Enter The Vault</Link>
+        </div>
+        <div className="locked-drop-grid" aria-label="Drops bloqueados de muestra visual">
+          {["DEMO", "EDIT", "AFTER"].map((item, index) => (
+            <article key={item}>
+              <LockKeyhole />
+              <strong>{item}</strong>
+              <span>{index === 0 ? "CODE REQUIRED" : index === 1 ? "POINTS REQUIRED" : "AFTERLUV ONLY"}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
       {isVisible(managed, "featured_set") ? (
-        <section className="section cards-section reveal">
+        <section className="section cards-section reveal music-archive-section">
           <div className="section-heading">
             <div>
-              <p className="section-kicker">NOW PLAYING</p>
-              <h2>Sound in motion</h2>
+              <p className="section-kicker">MUSIC ARCHIVE</p>
+              <h2>Official releases and DJ sets.</h2>
             </div>
             <Link className="text-link" href="/musica">Open music <ArrowRight /></Link>
           </div>
@@ -487,58 +482,22 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         </section>
       ) : null}
 
-      <section className="section home-pass-spotlight reveal">
-        <div className="home-pass-card" data-project={universe}>
-          <span>IAMJOSHWA PASS</span>
-          <strong>INNER<br />CIRCLE</strong>
-          <small>LEVEL 01 — LISTENER · QR ACCESS · THE VAULT</small>
-        </div>
-        <div>
-          <p className="section-kicker">PASS / QUESTS / VAULT</p>
-          <h2>El sitio no solo se visita. Se desbloquea.</h2>
-          <p>El Pass conecta perfil, puntos, badges, QR, misiones, referidos y contenido exclusivo. Ideal para convertir fans casuales en comunidad real.</p>
-          <div className="inline-actions">
-            <Link className="button primary" href="/acceso">Create Pass</Link>
-            <Link className="button secondary" href="/comunidad">Cómo funciona</Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="section home-missions reveal">
-        <div className="section-heading">
-          <div>
-            <p className="section-kicker">MISSIONS</p>
-            <h2>Primeras acciones.</h2>
-          </div>
-          <Link className="text-link" href="/perfil">Open Pass <ArrowRight /></Link>
-        </div>
-        <div className="mission-grid">
-          {missions.map(([number, titleValue, copy, href]) => (
-            <Link href={href} key={number}>
-              <span>{number}</span>
-              <strong>{titleValue}</strong>
-              <p>{copy}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="section home-vault-tease reveal">
-        <div>
-          <p className="section-kicker">{label("nav.vault", "THE VAULT")}</p>
-          <h2>{label("vault.locked", "Locked drops. Secret codes. Private signals.")}</h2>
-          <p>Demos, edits, WAV previews, sets privados y recompensas pueden vivir detrás de puntos, códigos o acceso manual.</p>
-          <Link className="button primary" href="/the-vault">Enter The Vault</Link>
-        </div>
-        <div className="locked-drop-grid" aria-label="Drops bloqueados de muestra visual">
-          {["DEMO", "EDIT", "AFTER"].map((item, index) => (
-            <article key={item}>
-              <LockKeyhole />
-              <strong>{item}</strong>
-              <span>{index === 0 ? "CODE REQUIRED" : index === 1 ? "POINTS REQUIRED" : "AFTERLUV ONLY"}</span>
-            </article>
-          ))}
-        </div>
+      <section className="section home-pro-links reveal" aria-label="Comunidad, EPK y booking">
+        <Link href="/comunidad">
+          <span>COMMUNITY / SOCIAL</span>
+          <strong>Enter the Inner Circle</strong>
+          <small>Pass, rewards, social links and fan activity.</small>
+        </Link>
+        <Link href="/epk">
+          <span>EPK</span>
+          <strong>Press kit for promoters</strong>
+          <small>Bio, photos, music links, riders and assets.</small>
+        </Link>
+        <Link href="/booking">
+          <span>BOOKING</span>
+          <strong>Professional contact flow</strong>
+          <small>Request a date, send event details and access EPK.</small>
+        </Link>
       </section>
 
       <section className="newsletter section cinematic-contact reveal" id="community-email">
