@@ -39,6 +39,7 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
   const announcement = systemEnabled(publicSettings, "hide_announcements") ? null : announcements.find((item) => !item.project || item.project === universe) || null;
   const maintenance = systemEnabled(publicSettings, "maintenance_mode");
   const active = (href: string) => (href === "/" ? pathname === href : pathname.startsWith(href));
+  const worldMode = appModeLabel(pathname);
   const close = () => setOpen(false);
 
   useEffect(() => {
@@ -98,6 +99,11 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
           {announcement.ctaHref ? <Link href={announcement.ctaHref}>{announcement.ctaLabel || "Open"}</Link> : null}
         </aside>
       ) : null}
+      <aside className="world-status-panel" aria-label="Estado actual de IAMJOSHWA World">
+        <span>WORLD STATUS</span>
+        <strong>{worldMode}</strong>
+        <small>{universe === "afterluv" ? "AFTERLUV" : "IAMJOSHWA"} · ONLINE</small>
+      </aside>
       <header className={`topbar ${scrolled ? "is-compact" : ""}`}>
         <Link className="wordmark" href="/" aria-label="IAMJOSHWA, inicio">
           IAMJOSHWA<span>®</span>
@@ -149,6 +155,19 @@ export function SiteShell({ children, navigation = [], announcements = [], publi
       </nav>
     </>
   );
+}
+
+function appModeLabel(pathname: string) {
+  if (pathname === "/") return "MAIN SIGNAL";
+  if (pathname.startsWith("/fechas")) return "SHOW MODE";
+  if (pathname.startsWith("/musica")) return "LISTEN MODE";
+  if (pathname.startsWith("/lanzamientos")) return "RELEASE MODE";
+  if (pathname.startsWith("/the-vault")) return "VAULT MODE";
+  if (pathname.startsWith("/comunidad") || pathname.startsWith("/perfil") || pathname.startsWith("/pass")) return "PASS MODE";
+  if (pathname.startsWith("/booking")) return "BOOKING MODE";
+  if (pathname.startsWith("/epk")) return "EPK MODE";
+  if (pathname.startsWith("/checkin")) return "CHECK-IN MODE";
+  return "WORLD MODE";
 }
 
 function mobileDockItems(items: NavigationItem[]) {
