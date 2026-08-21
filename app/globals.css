@@ -9214,3 +9214,472 @@ html.motion-ready .feature-cards article:hover {
     transform: none;
   }
 }
+
+/* Mobile Premium Experience — app feel, menos amontonamiento y mejor tactilidad */
+@media(max-width:760px) {
+  :root {
+    --mobile-side: clamp(14px, 4.4vw, 20px);
+    --mobile-radius: 26px;
+    --mobile-card-radius: 24px;
+    --mobile-dock-height: 82px;
+  }
+
+  html {
+    scroll-padding-top: 86px;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 50% -8%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 24rem),
+      radial-gradient(circle at 92% 32%, rgba(255,255,255,.055), transparent 18rem),
+      linear-gradient(180deg, #050505, #08070a 46%, #050505);
+  }
+
+  main#contenido {
+    overflow: clip;
+  }
+
+  .topbar {
+    left: 10px;
+    right: 10px;
+    top: max(8px, env(safe-area-inset-top));
+    height: 58px;
+    border: 1px solid rgba(255,255,255,.105);
+    border-radius: 999px;
+    padding: 0 10px 0 14px;
+    box-shadow: 0 18px 72px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.1);
+  }
+
+  .topbar.is-compact {
+    height: 52px;
+    transform: translate3d(0,-2px,0) scale(.985);
+  }
+
+  .topbar .wordmark {
+    max-width: 34vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar > .universe-switch {
+    min-width: 0;
+    max-width: 132px;
+    border-color: rgba(255,255,255,.1);
+    background: rgba(0,0,0,.24);
+  }
+
+  .universe-switch button {
+    min-height: 32px;
+    padding: 0 8px;
+  }
+
+  .menu-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .mobile-menu {
+    inset: calc(70px + env(safe-area-inset-top)) 10px auto;
+    border: 1px solid rgba(255,255,255,.11);
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at 88% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 15rem),
+      rgba(7,6,10,.94);
+    box-shadow: 0 30px 120px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.08);
+    backdrop-filter: blur(24px) saturate(1.12);
+    padding: 16px;
+  }
+
+  .mobile-menu a {
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    border-radius: 18px;
+    padding: 0 14px;
+    font-size: 26px;
+  }
+
+  .mobile-menu a[aria-current="page"] {
+    background: rgba(255,255,255,.08);
+  }
+
+  .hero,
+  .cinematic-hero {
+    min-height: 94svh;
+    padding: calc(102px + env(safe-area-inset-top)) var(--mobile-side) 82px;
+  }
+
+  .hero-content,
+  .world-hero-content {
+    width: 100%;
+  }
+
+  .hero h1,
+  .cinematic-hero h1 {
+    max-width: 8ch;
+    font-size: clamp(70px, 22vw, 112px);
+    line-height: .78;
+  }
+
+  .hero-tagline {
+    max-width: 31ch;
+    color: rgba(255,255,255,.82);
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .hero-actions,
+  .inline-actions,
+  .download-row,
+  .event-actions,
+  .show-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .hero-actions .button,
+  .inline-actions .button,
+  .download-row .button,
+  .event-actions .button,
+  .show-actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .button,
+  .text-link,
+  .icon-button {
+    min-height: 54px;
+    border-radius: 18px;
+  }
+
+  .button:active,
+  .text-link:active,
+  .icon-button:active,
+  .path-grid > a:active,
+  .signal-feed-card:active,
+  .set-card:active,
+  .release-card:active,
+  .event-card:active,
+  .list-card:active {
+    transform: translate3d(0,1px,0) scale(.985)!important;
+  }
+
+  .section,
+  .quick-paths.section,
+  .home-signal-feed,
+  .shows-section,
+  .cards-section,
+  .newsletter.section {
+    padding: 54px var(--mobile-side);
+  }
+
+  .section-heading {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .section-kicker,
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: .18em;
+  }
+
+  .section-heading h2,
+  .split-feature h2,
+  .newsletter h2,
+  .epk h2,
+  .booking-layout h2,
+  .level-progress-card h2,
+  .qr-command-card h2,
+  .badge-vault h2,
+  .points-timeline h2 {
+    font-size: clamp(38px, 11.5vw, 60px);
+    line-height: .88;
+  }
+
+  .page-hero {
+    margin: 0 var(--mobile-side) 18px;
+    min-height: 50svh;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 0 0 30px 30px;
+    padding: calc(116px + env(safe-area-inset-top)) 18px 34px;
+    overflow: hidden;
+  }
+
+  .page-hero h1 {
+    font-size: clamp(52px, 17vw, 86px);
+    line-height: .82;
+  }
+
+  .path-grid,
+  .immersive-paths,
+  .feature-cards article,
+  .list-card,
+  .signal-feed-card,
+  .set-card,
+  .release-card,
+  .event-card,
+  .premium-wallet-card,
+  .level-progress-card,
+  .qr-command-card,
+  .pass-upload-card,
+  .badge-vault,
+  .points-timeline,
+  .premium-activity > div,
+  .home-pro-links a,
+  .home-pass-spotlight,
+  .home-vault-tease,
+  .newsletter,
+  .booking-form,
+  .auth-card,
+  .settings-card {
+    border-radius: var(--mobile-card-radius);
+    box-shadow:
+      0 22px 80px rgba(0,0,0,.34),
+      inset 0 1px rgba(255,255,255,.08);
+  }
+
+  .list-grid,
+  .feature-cards,
+  .event-grid,
+  .profile-grid,
+  .admin-stats,
+  .pass-command-grid,
+  .pass-showcase-grid,
+  .profile-activity,
+  .home-pro-links {
+    gap: 12px;
+  }
+
+  .home-signal-feed .signal-feed-grid,
+  .music-library,
+  .release-grid,
+  .vault-drop-grid,
+  .locked-drop-grid,
+  .community-feed-grid,
+  .community-mission-grid {
+    display: flex!important;
+    grid-template-columns: none!important;
+    gap: 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--mobile-side);
+    margin-inline: calc(var(--mobile-side) * -1);
+    padding: 2px var(--mobile-side) 14px;
+    scrollbar-width: none;
+    mask-image: linear-gradient(90deg, transparent, black 5%, black 92%, transparent);
+  }
+
+  .home-signal-feed .signal-feed-grid::-webkit-scrollbar,
+  .music-library::-webkit-scrollbar,
+  .release-grid::-webkit-scrollbar,
+  .vault-drop-grid::-webkit-scrollbar,
+  .locked-drop-grid::-webkit-scrollbar,
+  .community-feed-grid::-webkit-scrollbar,
+  .community-mission-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .community-feed-grid > *,
+  .community-mission-grid > *,
+  .home-signal-feed .signal-feed-card,
+  .music-library .set-card,
+  .release-grid .release-card {
+    flex: 0 0 min(86vw, 380px);
+    scroll-snap-align: start;
+  }
+
+  .set-cover,
+  .release-cover,
+  .event-card-art {
+    min-height: 0;
+    aspect-ratio: 1 / 1.02;
+  }
+
+  .set-copy,
+  .release-card > div:last-child,
+  .event-card > div {
+    padding: 18px;
+  }
+
+  .set-copy h2,
+  .release-card h2,
+  .event-card h2,
+  .list-card h2 {
+    font-size: clamp(34px, 10vw, 52px);
+    line-height: .88;
+  }
+
+  .tag-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-right: calc(var(--mobile-side) * -1);
+    padding-right: var(--mobile-side);
+    scrollbar-width: none;
+  }
+
+  .tag-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tag-row span {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgba(255,255,255,.045);
+  }
+
+  .field-grid,
+  .booking-layout,
+  .epk-intro,
+  .press-grid,
+  .event-detail,
+  .pass-console,
+  .pass-command-grid,
+  .pass-showcase-grid {
+    grid-template-columns: 1fr!important;
+  }
+
+  input,
+  select,
+  textarea,
+  .booking-form input,
+  .booking-form select,
+  .booking-form textarea,
+  .auth-form input,
+  .settings-card input,
+  .settings-card textarea {
+    min-height: 52px;
+    border-radius: 16px;
+    font-size: 16px;
+  }
+
+  textarea {
+    min-height: 124px;
+  }
+
+  .premium-bottom-nav {
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(7px, env(safe-area-inset-bottom));
+    height: 78px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 28px;
+    background:
+      radial-gradient(circle at 50% 0, color-mix(in srgb, var(--accent) 16%, transparent), transparent 15rem),
+      rgba(13,9,18,.84);
+    backdrop-filter: blur(24px) saturate(1.2);
+  }
+
+  .premium-bottom-nav a {
+    min-width: 0;
+    border-radius: 22px;
+    gap: 5px;
+  }
+
+  .premium-bottom-nav svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .premium-bottom-nav a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+  }
+
+  .premium-bottom-nav a[aria-current="page"]:not([data-dock-item="listen"]) {
+    background: rgba(255,255,255,.075);
+  }
+
+  .premium-bottom-nav a[data-dock-item="listen"] {
+    min-height: 80px;
+    transform: translate3d(0,-18px,0);
+    border-radius: 26px;
+  }
+
+  .global-now-playing {
+    left: 10px;
+    right: 10px;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    width: auto;
+    min-height: 78px;
+    grid-template-columns: 54px minmax(0,1fr) auto;
+    border-radius: 24px;
+    padding: 11px;
+    gap: 10px;
+  }
+
+  .global-now-playing .compact-player-meta strong {
+    font-size: 20px;
+  }
+
+  .global-now-playing .compact-player-meta small {
+    display: none;
+  }
+
+  .compact-player-volume {
+    display: none;
+  }
+
+  .global-now-playing .compact-player-controls {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .global-now-playing .compact-player-controls button,
+  .global-now-playing .compact-player-controls a {
+    width: 100%;
+    height: 42px;
+    border-radius: 16px;
+  }
+
+  .global-now-playing.expanded {
+    left: 8px;
+    right: 8px;
+    bottom: calc(94px + env(safe-area-inset-bottom));
+    max-height: min(76svh, 620px);
+    border-radius: 28px;
+  }
+}
+
+@media(max-width:390px) {
+  .topbar .wordmark {
+    max-width: 29vw;
+    font-size: 16px;
+  }
+
+  .topbar > .universe-switch {
+    max-width: 112px;
+  }
+
+  .universe-switch button {
+    font-size: 7px;
+    padding-inline: 6px;
+  }
+
+  .premium-bottom-nav {
+    height: 74px;
+  }
+
+  .premium-bottom-nav a[data-dock-item="listen"] {
+    min-height: 74px;
+    transform: translate3d(0,-15px,0);
+  }
+
+  .global-now-playing {
+    grid-template-columns: 48px minmax(0,1fr);
+  }
+}
