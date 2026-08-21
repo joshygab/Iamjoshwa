@@ -74,11 +74,14 @@ export default async function ProfilePage() {
   const unlockedBadges = badges || [];
   const lockedSlots = Math.max(0, 6 - unlockedBadges.length);
   const favoriteProject = profile?.favorite_project === "afterluv" ? "afterluv" : "iamjoshwa";
+  const showsAttended = attendance?.length || 0;
+  const vaultUnlocked = redemptions?.length || 0;
   const nextEvent = events
     .filter((event) => event.universe === favoriteProject && new Date(event.date).getTime() >= requestTime)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
   const latestDrop = releases.filter((release) => release.universe === favoriteProject)[0];
   const vaultDrop = rewards.find((reward) => !reward.project || reward.project === favoriteProject);
+  const nextUnlockLabel = vaultDrop ? `${vaultDrop.name} · ${vaultDrop.pointsCost} puntos` : nextEvent ? `Check-in · ${nextEvent.name}` : latestDrop ? `Drop · ${latestDrop.title}` : nextLevel ? `Nivel · ${nextLevel}` : "Legend status";
   const passLevelStyle = {
     "--pass-level-color": levelConfig.color,
     "--pass-level-soft": levelConfig.softColor,
@@ -148,6 +151,11 @@ export default async function ProfilePage() {
               <span key={badge}>{badge}</span>
             ))}
           </div>
+          <div className="pass-wallet-vitals" aria-label="Resumen del Josh Pass">
+            <span><strong>{showsAttended}</strong><small>Shows</small></span>
+            <span><strong>{unlockedBadges.length}</strong><small>Badges</small></span>
+            <span><strong>{vaultUnlocked}</strong><small>Vault</small></span>
+          </div>
         </div>
 
         <div className="pass-status-panel">
@@ -174,6 +182,13 @@ export default async function ProfilePage() {
               <span className="section-kicker">PROGRESO DE XP</span>
               <h2>{nextLevel ? `${pointsToNext.toLocaleString("es-MX")} XP para ${nextLevel}` : "Nivel máximo desbloqueado"}</h2>
               <p>{nextLevel ? `Vas al ${progress}% del camino. Cada acción verificada suma desde funciones seguras del servidor.` : "Ya estás en la cima del Inner Circle."}</p>
+            </div>
+            <div className="pass-next-unlock-card">
+              <Sparkles />
+              <div>
+                <span>NEXT UNLOCK</span>
+                <strong>{nextUnlockLabel}</strong>
+              </div>
             </div>
             <div className="level-progress-track" aria-label={`Progreso ${progress}%`}>
               <span style={{ width: `${progress}%` }} />
@@ -286,15 +301,17 @@ export default async function ProfilePage() {
           </div>
           <div className="badge-grid">
             {unlockedBadges.map((item, index) => (
-              <div className="badge-token unlocked" key={`${relationName(item.badges)}-${index}`}>
+              <div className="badge-token unlocked" data-rarity={index === 0 ? "rare" : index % 3 === 0 ? "ultra" : "common"} key={`${relationName(item.badges)}-${index}`}>
                 <ShieldCheck />
+                <small>{index === 0 ? "RARE" : index % 3 === 0 ? "ULTRA" : "COMMON"}</small>
                 <strong>{relationName(item.badges)}</strong>
                 <span>{formatDate(item.awarded_at)}</span>
               </div>
             ))}
             {Array.from({ length: lockedSlots }).map((_, index) => (
-              <div className="badge-token locked" key={`locked-${index}`}>
+              <div className="badge-token locked" data-rarity="secret" key={`locked-${index}`}>
                 <Trophy />
+                <small>SECRET</small>
                 <strong>Badge bloqueado</strong>
                 <span>Completa acciones para desbloquearlo</span>
               </div>
