@@ -64,7 +64,7 @@ const missions = [
   ["04", "Book / Share", "Promotores encuentran EPK, contacto y booking en segundos.", "/booking"],
 ] as const;
 
-const EVENT_TAKEOVER_LEAD_MS = 8 * 60 * 60 * 1000;
+const EVENT_TAKEOVER_LEAD_MS = 6 * 60 * 60 * 1000;
 const DEFAULT_EVENT_DURATION_MS = 6 * 60 * 60 * 1000;
 
 type HomeSignalCard = {
@@ -86,6 +86,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const { play } = usePlayer();
   const label = createLabelGetter(labels);
   const [signal, setSignal] = useState<PersonalSignal | null>(null);
+  const [currentTime, setCurrentTime] = useState(() => normalizeNow(now));
   const artist = artists.find((item) => item.project === universe) || fallback[universe];
   const managed = sections.filter((item) => !item.project || item.project === universe);
   const hero = managed.find((item) => item.blockType === "hero")?.content || {};
@@ -94,15 +95,15 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
   const scopedSets = useMemo(() => sets.filter((item) => item.universe === universe), [sets, universe]);
   const scopedReleases = useMemo(() => releases.filter((item) => item.universe === universe), [releases, universe]);
   const rewardCount = useMemo(() => rewards.filter((item) => !item.project || item.project === universe).length, [rewards, universe]);
-  const takeoverEvent = scopedEvents.find((item) => isEventTakeoverWindow(item, now)) || null;
-  const event = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now) || takeoverEvent || scopedEvents[0];
-  const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent, now) ? takeoverEvent : null;
+  const takeoverEvent = scopedEvents.find((item) => isEventTakeoverWindow(item, currentTime)) || null;
+  const event = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > currentTime) || takeoverEvent || scopedEvents[0];
+  const liveEvent = takeoverEvent && isLiveWindow(takeoverEvent, currentTime) ? takeoverEvent : null;
   const hasTakeoverEvent = Boolean(takeoverEvent);
-  const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item, now)).sort((a, b) => getEventEndTime(b) - getEventEndTime(a))[0];
+  const recentPastEvent = scopedEvents.filter((item) => isRecentPastEvent(item, currentTime)).sort((a, b) => getEventEndTime(b) - getEventEndTime(a))[0];
   const release = scopedReleases[0];
   const set = scopedSets[0];
   const signalFeed = useMemo<HomeSignalCard[]>(() => {
-    const nextEvent = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > now);
+    const nextEvent = scopedEvents.find((item) => !isInactiveEvent(item) && getEventEndTime(item) > currentTime);
     const latestTransmission = set || release;
     return [
       {
@@ -112,7 +113,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         body: set
           ? `${set.category} · ${set.duration || "Set oficial"} · ${set.genres.slice(0, 2).join(" / ") || "Club signal"}`
           : release
-            ? `${release.type} · ${new Date(release.releaseAt).getTime() > now ? "Pre-save active" : "Available now"}`
+            ? `${release.type} · ${new Date(release.releaseAt).getTime() > currentTime ? "Pre-save active" : "Available now"}`
             : "New music incoming.",
         href: set ? `/musica/${set.slug}` : release ? `/lanzamientos/${release.slug}` : "/musica",
         action: latestTransmission ? "Play" : "Open archive",
@@ -146,7 +147,7 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
         meta: "ECOSYSTEM",
       },
     ];
-  }, [hasTakeoverEvent, liveEvent, now, release, scopedEvents, set, signal]);
+  }, [currentTime, hasTakeoverEvent, liveEvent, release, scopedEvents, set, signal]);
 
   const title = String(hero.title || artist.displayName);
   const tagline = String(hero.subtitle || artist.tagline);
@@ -156,6 +157,16 @@ export function HomeContent({ events, sets, releases, rewards = [], artists = []
     "--hero-bg": !heroIsVideo && heroMediaUrl ? `url(${heroMediaUrl})` : artist.heroDesktopUrl ? `url(${artist.heroDesktopUrl})` : undefined,
     "--hero-mobile-bg": artist.heroMobileUrl ? `url(${artist.heroMobileUrl})` : undefined,
   } as CSSProperties;
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60_000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -607,6 +618,10 @@ function isVisible(sections: PageSectionItem[], type: string) {
 
 function isInactiveEvent(event: EventItem) {
   return event.status === "Cancelado" || event.status === "Finalizado";
+}
+
+function normalizeNow(value: number) {
+  return Number.isFinite(value) && value > 0 ? value : Date.now();
 }
 
 function getEventStartTime(event: EventItem) {

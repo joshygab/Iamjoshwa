@@ -2,11 +2,13 @@ import { HomeContent } from "@/components/universe-content";
 import { contentRepository } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/env";
 
-const requestTime = Date.now();
-
 export const metadata = { alternates: { canonical: "/" } };
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function HomePage() {
+  // eslint-disable-next-line react-hooks/purity -- The home needs request-time evaluation for the Live Tonight event window.
+  const requestTime = Date.now();
   const [events, sets, releases, rewards, artists, sections, labels] = await Promise.all([
     contentRepository.getEvents(),
     contentRepository.getSets(),
